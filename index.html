@@ -4,11 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- 引入 Bootstrap 美化样式（CDN 方式，无需本地文件） -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <title>Telegram北京修车超级机器人管理后台</title>
   <style>
-    /* 自定义样式，让页面更美观 */
     body {
       background-color: #f8f9fa;
       font-family: "微软雅黑", sans-serif;
@@ -68,6 +66,15 @@
       background-color: #2980b9;
     }
 
+    .btn-warning {
+      background-color: #f39c12;
+      border: none;
+    }
+
+    .btn-warning:hover {
+      background-color: #e67e22;
+    }
+
     .btn-danger {
       background-color: #e74c3c;
       border: none;
@@ -82,6 +89,28 @@
       color: #999;
       padding: 30px 0;
       font-size: 14px;
+    }
+
+    /* 底部提示栏样式 */
+    .bottom-alert {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #d9edf7;
+      color: #31708f;
+      padding: 8px 20px;
+      font-size: 14px;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+      z-index: 9999;
+    }
+
+    .bottom-alert .close-btn {
+      float: right;
+      cursor: pointer;
+      margin-left: 20px;
+      color: #31708f;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -159,9 +188,14 @@
     </div>
   </div>
 
+  <!-- 底部提示栏 -->
+  <div class="bottom-alert" id="bottomAlert">
+    提示：老师添加功能已开放！后续可在此写弹窗表单逻辑
+    <span class="close-btn" onclick="closeBottomAlert()">×</span>
+  </div>
+
   <!-- 引入前端交互逻辑 -->
   <script src="script.js"></script>
-  <!-- 引入 Bootstrap JS（用于弹窗等交互，可选，若不需要复杂弹窗可删除） -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

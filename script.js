@@ -12,13 +12,11 @@ document.addEventListener('DOMContentLoaded', function () {
 // 加载所有数据（用户、老师、关键词、禁言词）
 async function loadRealData() {
   try {
-    // 依次请求四类数据
     const users = await fetchData('users', 'get');
     const teachers = await fetchData('teachers', 'get');
     const keywords = await fetchData('keywords', 'get');
     const bannedKeywords = await fetchData('banned_keywords', 'get');
 
-    // 渲染到页面
     renderUsers(users);
     renderTeachers(teachers);
     renderKeywords(keywords);
@@ -33,17 +31,13 @@ async function loadRealData() {
 
 // 绑定按钮点击事件
 function setupEventListeners() {
-  // 用户管理
   document.getElementById('add-user-btn')?.addEventListener('click', openUserModal);
-  // 老师管理
   document.getElementById('add-teacher-btn')?.addEventListener('click', openTeacherModal);
-  // 关键词管理
   document.getElementById('add-keyword-btn')?.addEventListener('click', openKeywordModal);
-  // 禁言词管理
   document.getElementById('add-banned-btn')?.addEventListener('click', openBannedKeywordModal);
 }
 
-// 通用数据请求函数（与 Cloudflare Worker 交互）
+// 通用数据请求函数
 async function fetchData(table, action, data = null) {
   try {
     const requestData = { action, table };
@@ -56,7 +50,7 @@ async function fetchData(table, action, data = null) {
         "Admin-Key": ADMIN_KEY
       },
       body: JSON.stringify(requestData),
-      timeout: 10000 // 设置超时，避免长时间等待
+      timeout: 10000
     });
 
     if (!response.ok) {
@@ -72,7 +66,7 @@ async function fetchData(table, action, data = null) {
   }
 }
 
-// 提示弹窗函数（替代 alert，更美观）
+// 提示弹窗函数
 function showAlert(message, type = 'info') {
   const alertDiv = document.createElement('div');
   alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
@@ -83,14 +77,13 @@ function showAlert(message, type = 'info') {
   `;
   document.body.appendChild(alertDiv);
 
-  // 3秒后自动关闭（也可点击右上角关闭）
   setTimeout(() => {
     const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
     bsAlert.close();
   }, 3000);
 }
 
-// 渲染用户数据到页面
+// 渲染用户数据
 function renderUsers(users) {
   const container = document.getElementById('users-container');
   if (!container) return;
@@ -118,7 +111,7 @@ function renderUsers(users) {
   `).join('');
 }
 
-// 渲染老师数据到页面
+// 渲染老师数据（新增表格渲染、支持编辑）
 function renderTeachers(teachers) {
   const container = document.getElementById('teachers-container');
   if (!container) return;
@@ -132,6 +125,7 @@ function renderTeachers(teachers) {
     return;
   }
 
+  // 渲染老师表格
   container.innerHTML = `
     <table class="table table-striped table-hover">
       <thead>
@@ -168,7 +162,7 @@ function renderTeachers(teachers) {
   `;
 }
 
-// 渲染关键词数据到页面
+// 渲染关键词数据
 function renderKeywords(keywords) {
   const container = document.getElementById('keywords-container');
   if (!container) return;
@@ -208,11 +202,10 @@ function renderKeywords(keywords) {
           </tr>
         `).join('')}
       </tbody>
-    </table>
-  `;
+    `;
 }
 
-// 渲染禁言词数据到页面
+// 渲染禁言词数据
 function renderBannedKeywords(keywords) {
   const container = document.getElementById('banned-keywords-container');
   if (!container) return;
@@ -244,33 +237,32 @@ function renderBannedKeywords(keywords) {
           </tr>
         `).join('')}
       </tbody>
-    </table>
-  `;
+    `;
 }
 
-// 以下为“添加/编辑”弹窗逻辑（示例，可根据实际需求完善）
+// 弹窗逻辑（示例，可扩展为真实表单）
 function openUserModal() {
-  showAlert('用户添加功能已开放！后续可在此写弹窗表单逻辑', 'info');
-  // 若需要真实弹窗，可参考 Bootstrap 模态框写法：
-  // https://getbootstrap.com/docs/5.3/components/modal/
+  showAlert('用户添加功能已开放！可在此写弹窗表单逻辑', 'info');
 }
 
 function openTeacherModal() {
-  showAlert('老师添加功能已开放！后续可在此写弹窗表单逻辑', 'info');
+  showAlert('老师添加功能已开放！可在此写弹窗表单逻辑', 'info');
 }
 
 function openKeywordModal() {
-  showAlert('关键词添加功能已开放！后续可在此写弹窗表单逻辑', 'info');
+  showAlert('关键词添加功能已开放！可在此写弹窗表单逻辑', 'info');
 }
 
 function openBannedKeywordModal() {
-  showAlert('禁言词添加功能已开放！后续可在此写弹窗表单逻辑', 'info');
+  showAlert('禁言词添加功能已开放！可在此写弹窗表单逻辑', 'info');
 }
 
-// 编辑/删除函数（示例，可扩展真实逻辑）
+// 编辑函数（示例，可扩展为真实编辑逻辑）
 function editUser(user) {
   console.log('编辑用户:', user);
   showAlert(`正在编辑用户：${user.username || user.user_id}`, 'info');
+  // 若需要真实弹窗，参考 Bootstrap 模态框：
+  // https://getbootstrap.com/docs/5.3/components/modal/
 }
 
 function editTeacher(teacher) {
@@ -285,16 +277,5 @@ function editKeyword(keyword) {
 
 function deleteBannedKeyword(id) {
   if (confirm('确定删除该禁言词吗？')) {
-    // 调用 fetchData 执行删除逻辑（示例）
     fetchData('banned_keywords', 'delete', { id }).then(() => {
-      showAlert('禁言词删除成功', 'success');
-      loadRealData(); // 重新加载数据
-    });
-  }
-}
-
-// 全局暴露函数，让 HTML 里的 onclick 能调用
-window.editUser = editUser;
-window.editTeacher = editTeacher;
-window.editKeyword = editKeyword;
-window.deleteBannedKeyword = deleteBannedKeyword;
+      showAlert('禁言词删除成功',

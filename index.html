@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram北京修车超级机器人管理后台</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <h1>Telegram北京修车超级机器人管理后台</h1>
+            </div>
+            <div class="last-update">
+                <span>最后更新: <span id="last-update-time">正在加载...</span></span>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧菜单 -->
+            <nav class="sidebar">
+                <div class="admin-info">
+                    <div class="avatar">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="info">
+                        <strong>管理员</strong>
+                        <span>最高权限</span>
+                    </div>
+                </div>
+
+                <ul class="menu">
+                    <li class="menu-item active" data-section="dashboard">
+                        <i class="fas fa-home"></i>
+                        <span>仪表盘</span>
+                    </li>
+                    <li class="menu-item" data-section="users">
+                        <i class="fas fa-users"></i>
+                        <span>用户管理</span>
+                    </li>
+                    <li class="menu-item" data-section="teachers">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <span>老师管理</span>
+                    </li>
+                    <li class="menu-item" data-section="keywords">
+                        <i class="fas fa-key"></i>
+                        <span>关键词管理</span>
+                    </li>
+                    <li class="menu-item" data-section="banned">
+                        <i class="fas fa-ban"></i>
+                        <span>禁言词管理</span>
+                    </li>
+                    <li class="menu-item" data-section="actions">
+                        <i class="fas fa-bolt"></i>
+                        <span>即时操作</span>
+                    </li>
+                    <li class="menu-item" data-section="logs">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>系统日志</span>
+                    </li>
+                </ul>
+
+                <div class="system-status">
+                    <div class="status-item">
+                        <i class="fas fa-database"></i>
+                        <span>数据库状态: <span class="status-indicator" id="db-status">检查中...</span></span>
+                    </div>
+                    <div class="status-item">
+                        <i class="fas fa-cloud"></i>
+                        <span>Worker状态: <span class="status-indicator" id="worker-status">检查中...</span></span>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- 右侧内容区域 -->
+            <div class="content-area">
+                <!-- 仪表盘 -->
+                <section id="dashboard" class="content-section active">
+                    <h2><i class="fas fa-home"></i> 系统概览</h2>
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>用户总数</h3>
+                                <p id="total-users">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>老师总数</h3>
+                                <p id="total-teachers">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>关键词数量</h3>
+                                <p id="total-keywords">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-ban"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>禁言词数量</h3>
+                                <p id="total-banned">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <h3>快捷操作</h3>
+                        <div class="actions-grid">
+                            <button class="action-btn" id="send-teacher-btn">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>发送随机老师</span>
+                            </button>
+                            <button class="action-btn" id="test-db-btn">
+                                <i class="fas fa-database"></i>
+                                <span>测试数据库</span>
+                            </button>
+                            <button class="action-btn" id="test-worker-btn">
+                                <i class="fas fa-bolt"></i>
+                                <span>测试Worker</span>
+                            </button>
+                            <button class="action-btn" id="refresh-btn">
+                                <i class="fas fa-sync"></i>
+                                <span>刷新数据</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 用户管理 -->
+                <section id="users" class="content-section">
+                    <h2><i class="fas fa-users"></i> 用户管理</h2>
+                    <div class="section-controls">
+                        <div class="search-box">
+                            <input type="text" id="user-search" placeholder="搜索用户...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <button class="action-btn" id="adjust-points-btn">
+                            <i class="fas fa-coins"></i>
+                            <span>调整积分</span>
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="users-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户名</th>
+                                    <th>积分</th>
+                                    <th>最后签到</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 用户数据将通过JS填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 老师管理 -->
+                <section id="teachers" class="content-section">
+                    <h2><i class="fas fa-chalkboard-teacher"></i> 老师管理</h2>
+                    <div class="section-controls">
+                        <select id="teacher-filter">
+                            <option value="all">全部状态</option>
+                            <option value="pending">待审核</option>
+                            <option value="approved">已批准</option>
+                            <option value="rejected">已拒绝</option>
+                        </select>
+                        <button class="action-btn" id="add-teacher-btn">
+                            <i class="fas fa-plus"></i>
+                            <span>添加老师</span>
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="teachers-table">
+                            <thead>
+                                <tr>
+                                    <th>花名</th>
+                                    <th>年龄</th>
+                                    <th>地区</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 老师数据将通过JS填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 关键词管理 -->
+                <section id="keywords" class="content-section">
+                    <h2><i class="fas fa-key"></i> 关键词管理</h2>
+                    <div class="section-controls">
+                        <div class="search-box">
+                            <input type="text" id="keyword-search" placeholder="搜索关键词...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <button class="action-btn" id="add-keyword-btn">
+                            <i class="fas fa-plus"></i>
+                            <span>添加关键词</span>
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="keywords-table">
+                            <thead>
+                                <tr>
+                                    <th>关键词</th>
+                                    <th>回复内容</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 关键词数据将通过JS填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 禁言词管理 -->
+                <section id="banned" class="content-section">
+                    <h2><i class="fas fa-ban"></i> 禁言词管理</h2>
+                    <div class="section-controls">
+                        <div class="search-box">
+                            <input type="text" id="banned-search" placeholder="搜索禁言词...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <button class="action-btn" id="add-banned-btn">
+                            <i class="fas fa-plus"></i>
+                            <span>添加禁言词</span>
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="banned-table">
+                            <thead>
+                                <tr>
+                                    <th>禁言词</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 禁言词数据将通过JS填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 即时操作 -->
+                <section id="actions" class="content-section">
+                    <h2><i class="fas fa-bolt"></i> 即时操作</h2>
+                    <div class="actions-container">
+                        <div class="action-card">
+                            <h3>发送随机老师</h3>
+                            <p>立即发送随机老师到所有频道和群组</p>
+                            <button class="action-btn full-width" id="trigger-teacher-btn">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>立即发送</span>
+                            </button>
+                        </div>
+                        
+                        <div class="action-card">
+                            <h3>数据库测试</h3>
+                            <p>测试数据库连接状态</p>
+                            <button class="action-btn full-width" id="test-db-connection-btn">
+                                <i class="fas fa-database"></i>
+                                <span>测试连接</span>
+                            </button>
+                        </div>
+                        
+                        <div class="action-card">
+                            <h3>批量操作</h3>
+                            <p>批量更新用户积分</p>
+                            <div class="form-group">
+                                <label for="points-change">积分调整值:</label>
+                                <input type="number" id="points-change" value="10">
+                            </div>
+                            <button class="action-btn full-width" id="batch-points-btn">
+                                <i class="fas fa-users"></i>
+                                <span>批量调整</span>
+                            </button>
+                        </div>
+                        
+                        <div class="action-card">
+                            <h3>系统维护</h3>
+                            <p>清除所有缓存数据</p>
+                            <button class="action-btn full-width warning" id="clear-cache-btn">
+                                <i class="fas fa-trash"></i>
+                                <span>清除缓存</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 系统日志 -->
+                <section id="logs" class="content-section">
+                    <h2><i class="fas fa-clipboard-list"></i> 系统日志</h2>
+                    <div class="logs-controls">
+                        <select id="log-level">
+                            <option value="all">全部日志</option>
+                            <option value="info">信息</option>
+                            <option value="warning">警告</option>
+                            <option value="error">错误</option>
+                        </select>
+                        <button class="action-btn" id="refresh-logs-btn">
+                            <i class="fas fa-sync"></i>
+                            <span>刷新日志</span>
+                        </button>
+                        <button class="action-btn warning" id="clear-logs-btn">
+                            <i class="fas fa-trash"></i>
+                            <span>清除日志</span>
+                        </button>
+                    </div>
+                    <div class="logs-container">
+                        <ul id="logs-list">
+                            <!-- 日志将通过JS填充 -->
+                        </ul>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>Telegram北京修车超级机器人管理后台 &copy; 2023 | 系统版本: 1.0.0</p>
+        </footer>
+    </div>
+
+    <!-- 模态框容器 -->
+    <div id="modal-container"></div>
+
+    <!-- JavaScript 文件 -->
+    <script src="supabase.js"></script>
+    <script src="cloudflare.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

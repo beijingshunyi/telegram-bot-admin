@@ -1,490 +1,257 @@
-// 全局变量
-let supabase;
-let SUPABASE_URL = "https://tekuxjnnwtqmygibvwux.supabase.co";
-let SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRla3V4am5ud3RxbXlnaWJ2d3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzNDUzNjAsImV4cCI6MjA3MDkyMTM2MH0.RGmuF44husXoJP8y4U1Gx7HqQJ6MsYZVl6_vHtG-KJY";
-let WORKER_URL = "https://telegram-bot.jbk123jbk.workers.dev";
-let ADMIN_API_KEY = "9712202273aA.";
-let BOT_TOKEN = "8341196303:AAFbT_px8I12_q2b7AI_c00N3nHzFwLb4pg";
-let ADMIN_ID = "8392100400";
-
-// 初始化Supabase
-function initSupabase() {
-    if (supabase) return;
+// 模拟数据存储（实际项目中会替换为真实API）
+const DataStore = {
+    // 用户数据
+    users: [
+        { id: 1, username: 'user1', registerTime: '2023-01-01', status: '正常' },
+        { id: 2, username: 'user2', registerTime: '2023-01-02', status: '正常' },
+        { id: 3, username: 'user3', registerTime: '2023-01-03', status: '封禁' }
+    ],
     
-    // 从本地存储加载设置
-    const savedSettings = localStorage.getItem('botAdminSettings');
-    if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        SUPABASE_URL = settings.supabaseUrl || SUPABASE_URL;
-        SUPABASE_KEY = settings.supabaseKey || SUPABASE_KEY;
-        WORKER_URL = settings.workerUrl || WORKER_URL;
-        ADMIN_API_KEY = settings.adminKey || ADMIN_API_KEY;
-        BOT_TOKEN = settings.botToken || BOT_TOKEN;
-        ADMIN_ID = settings.adminId || ADMIN_ID;
-    }
+    // 教师数据
+    teachers: [
+        { id: 1, name: '张老师', subject: '数学' },
+        { id: 2, name: '李老师', subject: '英语' }
+    ],
     
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-}
-
-// 保存设置到本地存储
-function saveSettingsToLocalStorage() {
-    const settings = {
-        supabaseUrl: SUPABASE_URL,
-        supabaseKey: SUPABASE_KEY,
-        workerUrl: WORKER_URL,
-        adminKey: ADMIN_API_KEY,
-        botToken: BOT_TOKEN,
-        adminId: ADMIN_ID
-    };
-    localStorage.setItem('botAdminSettings', JSON.stringify(settings));
-}
-
-// 更新设置
-function updateSettings(settings) {
-    if (settings.supabaseUrl) SUPABASE_URL = settings.supabaseUrl;
-    if (settings.supabaseKey) SUPABASE_KEY = settings.supabaseKey;
-    if (settings.workerUrl) WORKER_URL = settings.workerUrl;
-    if (settings.adminKey) ADMIN_API_KEY = settings.adminKey;
-    if (settings.botToken) BOT_TOKEN = settings.botToken;
-    if (settings.adminId) ADMIN_ID = settings.adminId;
+    // 关键词数据
+    keywords: [
+        { keyword: '你好', response: '您好！有什么可以帮助您的吗？' },
+        { keyword: '课程', response: '我们提供多种优质课程，欢迎咨询。' }
+    ],
     
-    // 重新初始化Supabase
-    supabase = null;
-    initSupabase();
+    // 封禁列表
+    banned: [
+        { userId: 3, banTime: '2023-01-10' }
+    ],
     
-    // 保存到本地存储
-    saveSettingsToLocalStorage();
-}
-
-// 获取设置
-function getSettings() {
-    return {
-        supabaseUrl: SUPABASE_URL,
-        supabaseKey: SUPABASE_KEY,
-        workerUrl: WORKER_URL,
-        adminKey: ADMIN_API_KEY,
-        botToken: BOT_TOKEN,
-        adminId: ADMIN_ID
-    };
-}
-
-// API请求通用函数
-async function apiRequest(endpoint, method = 'GET', data = null) {
-    try {
-        const url = `${WORKER_URL}${endpoint}`;
-        const options = {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Admin-Key': ADMIN_API_KEY
-            }
-        };
-        
-        if (data) {
-            options.body = JSON.stringify(data);
-        }
-        
-        const response = await fetch(url, options);
-        const result = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(result.error || 'API请求失败');
-        }
-        
-        return result;
-    } catch (error) {
-        console.error('API请求错误:', error);
-        throw error;
-    }
-}
-
-// 用户相关API
-const UserAPI = {
-    // 获取所有用户
-    async getAll(page = 1, pageSize = 20, search = '') {
-        initSupabase();
-        
-        let query = supabase
-            .from('users')
-            .select('*', { count: 'exact' })
-            .range((page - 1) * pageSize, page * pageSize - 1);
-        
-        if (search) {
-            query = query.or(`display_name.ilike.%${search}%,username.ilike.%${search}%,user_id.ilike.%${search}%`);
-        }
-        
-        const { data, error, count } = await query;
-        
-        if (error) throw error;
-        
-        return {
-            users: data || [],
-            total: count || 0,
-            page,
-            pageSize,
-            totalPages: Math.ceil((count || 0) / pageSize)
-        };
+    // 用户相关方法
+    getUsers: function() {
+        return [...this.users];
     },
     
-    // 获取单个用户
-    async getById(userId) {
-        initSupabase();
-        
-        const { data, error } = await supabase
-            .from('users')
-            .select('*')
-            .eq('user_id', userId)
-            .single();
-        
-        if (error) throw error;
-        return data;
+    getUserById: function(id) {
+        return this.users.find(user => user.id === id);
     },
     
-    // 更新用户
-    async update(user) {
-        initSupabase();
-        
-        const { data, error } = await supabase
-            .from('users')
-            .upsert(user)
-            .eq('user_id', user.user_id)
-            .select();
-        
-        if (error) throw error;
-        return data[0];
+    searchUsers: function(keyword) {
+        return this.users.filter(user => 
+            user.username.includes(keyword) || 
+            user.id.toString().includes(keyword)
+        );
     },
     
-    // 删除用户
-    async delete(userId) {
-        initSupabase();
-        
-        const { error } = await supabase
-            .from('users')
-            .delete()
-            .eq('user_id', userId);
-        
-        if (error) throw error;
+    banUser: function(id) {
+        const user = this.getUserById(id);
+        if (user) {
+            user.status = '封禁';
+            this.banned.push({
+                userId: id,
+                banTime: new Date().toLocaleDateString()
+            });
+            return true;
+        }
+        return false;
+    },
+    
+    unbanUser: function(id) {
+        const user = this.getUserById(id);
+        if (user) {
+            user.status = '正常';
+            this.banned = this.banned.filter(item => item.userId !== id);
+            return true;
+        }
+        return false;
+    },
+    
+    // 教师相关方法
+    getTeachers: function() {
+        return [...this.teachers];
+    },
+    
+    addTeacher: function(teacher) {
+        const newId = this.teachers.length > 0 
+            ? Math.max(...this.teachers.map(t => t.id)) + 1 
+            : 1;
+        const newTeacher = { id: newId, ...teacher };
+        this.teachers.push(newTeacher);
+        return newTeacher;
+    },
+    
+    updateTeacher: function(updatedTeacher) {
+        const index = this.teachers.findIndex(t => t.id === updatedTeacher.id);
+        if (index !== -1) {
+            this.teachers[index] = updatedTeacher;
+            return true;
+        }
+        return false;
+    },
+    
+    deleteTeacher: function(id) {
+        const initialLength = this.teachers.length;
+        this.teachers = this.teachers.filter(t => t.id !== id);
+        return this.teachers.length < initialLength;
+    },
+    
+    // 关键词相关方法
+    getKeywords: function() {
+        return [...this.keywords];
+    },
+    
+    addKeyword: function(keyword, response) {
+        this.keywords.push({ keyword, response });
         return true;
     },
     
-    // 获取今日签到人数
-    async getTodaySigns() {
-        initSupabase();
-        const today = new Date().toISOString().split('T')[0];
-        
-        const { count, error } = await supabase
-            .from('users')
-            .select('*', { count: 'exact', head: true })
-            .eq('last_sign_date', today);
-        
-        if (error) throw error;
-        return count || 0;
+    updateKeyword: function(oldKeyword, newKeyword, newResponse) {
+        const index = this.keywords.findIndex(k => k.keyword === oldKeyword);
+        if (index !== -1) {
+            this.keywords[index] = { keyword: newKeyword, response: newResponse };
+            return true;
+        }
+        return false;
     },
     
-    // 获取积分排名前10的用户
-    async getTopUsers(limit = 10) {
-        initSupabase();
-        
-        const { data, error } = await supabase
-            .from('users')
-            .select('*')
-            .order('points', { ascending: false })
-            .limit(limit);
-        
-        if (error) throw error;
-        return data || [];
+    deleteKeyword: function(keyword) {
+        const initialLength = this.keywords.length;
+        this.keywords = this.keywords.filter(k => k.keyword !== keyword);
+        return this.keywords.length < initialLength;
     },
     
-    // 获取最近新增用户
-    async getRecentUsers(limit = 5) {
-        initSupabase();
+    // 封禁相关方法
+    getBannedUsers: function() {
+        return [...this.banned];
+    },
+    
+    addBannedUser: function(userId) {
+        // 检查用户是否存在
+        const userExists = this.users.some(u => u.id === userId);
+        if (!userExists) return false;
         
-        const { data, error } = await supabase
-            .from('users')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(limit);
+        // 检查是否已封禁
+        const alreadyBanned = this.banned.some(b => b.userId === userId);
+        if (alreadyBanned) return false;
         
-        if (error) throw error;
-        return data || [];
-    }
-};
-
-// 老师相关API
-const TeacherAPI = {
-    // 获取所有老师
-    async getAll(page = 1, pageSize = 20, search = '') {
-        initSupabase();
+        this.banned.push({
+            userId,
+            banTime: new Date().toLocaleDateString()
+        });
         
-        let query = supabase
-            .from('teachers')
-            .select('*', { count: 'exact' })
-            .range((page - 1) * pageSize, page * pageSize - 1);
-        
-        if (search) {
-            query = query.or(`nickname.ilike.%${search}%,region.ilike.%${search}%,service_type.ilike.%${search}%`);
+        // 更新用户状态
+        const user = this.getUserById(userId);
+        if (user) {
+            user.status = '封禁';
         }
         
-        const { data, error, count } = await query;
-        
-        if (error) throw error;
-        
-        return {
-            teachers: data || [],
-            total: count || 0,
-            page,
-            pageSize,
-            totalPages: Math.ceil((count || 0) / pageSize)
-        };
-    },
-    
-    // 获取单个老师
-    async getById(id) {
-        initSupabase();
-        
-        const { data, error } = await supabase
-            .from('teachers')
-            .select('*')
-            .eq('id', id)
-            .single();
-        
-        if (error) throw error;
-        return data;
-    },
-    
-    // 创建老师
-    async create(teacher) {
-        initSupabase();
-        
-        const { data, error } = await supabase
-            .from('teachers')
-            .insert([teacher])
-            .select();
-        
-        if (error) throw error;
-        return data[0];
-    },
-    
-    // 更新老师
-    async update(teacher) {
-        initSupabase();
-        
-        const { data, error } = await supabase
-            .from('teachers')
-            .upsert(teacher)
-            .eq('id', teacher.id)
-            .select();
-        
-        if (error) throw error;
-        return data[0];
-    },
-    
-    // 删除老师
-    async delete(id) {
-        initSupabase();
-        
-        const { error } = await supabase
-            .from('teachers')
-            .delete()
-            .eq('id', id);
-        
-        if (error) throw error;
         return true;
     },
     
-    // 发送随机老师推荐
-    async sendRandom() {
-        return apiRequest('/send-random-teacher', 'GET');
-    }
-};
-
-// 关键词相关API
-const KeywordAPI = {
-    // 获取所有关键词
-    async getAll(page = 1, pageSize = 20, search = '') {
-        initSupabase();
+    removeBannedUser: function(userId) {
+        const initialLength = this.banned.length;
+        this.banned = this.banned.filter(b => b.userId !== userId);
         
-        let query = supabase
-            .from('keywords')
-            .select('*', { count: 'exact' })
-            .range((page - 1) * pageSize, page * pageSize - 1);
-        
-        if (search) {
-            query = query.or(`keyword.ilike.%${search}%,response.ilike.%${search}%`);
+        // 更新用户状态
+        const user = this.getUserById(userId);
+        if (user) {
+            user.status = '正常';
         }
         
-        const { data, error, count } = await query;
-        
-        if (error) throw error;
-        
-        return {
-            keywords: data || [],
-            total: count || 0,
-            page,
-            pageSize,
-            totalPages: Math.ceil((count || 0) / pageSize)
-        };
-    },
-    
-    // 获取单个关键词
-    async getById(id) {
-        initSupabase();
-        
-        const { data, error } = await supabase
-            .from('keywords')
-            .select('*')
-            .eq('id', id)
-            .single();
-        
-        if (error) throw error;
-        return data;
-    },
-    
-    // 创建关键词
-    async create(keyword) {
-        initSupabase();
-        
-        const { data, error } = await supabase
-            .from('keywords')
-            .insert([keyword])
-            .select();
-        
-        if (error) throw error;
-        return data[0];
-    },
-    
-    // 更新关键词
-    async update(keyword) {
-        initSupabase();
-        
-        const { data, error } = await supabase
-            .from('keywords')
-            .upsert(keyword)
-            .eq('id', keyword.id)
-            .select();
-        
-        if (error) throw error;
-        return data[0];
-    },
-    
-    // 删除关键词
-    async delete(id) {
-        initSupabase();
-        
-        const { error } = await supabase
-            .from('keywords')
-            .delete()
-            .eq('id', id);
-        
-        if (error) throw error;
-        return true;
+        return this.banned.length < initialLength;
     }
 };
 
-// 禁言词相关API
-const BannedKeywordAPI = {
-    // 获取所有禁言词
-    async getAll(page = 1, pageSize = 20, search = '') {
-        initSupabase();
-        
-        let query = supabase
-            .from('banned_keywords')
-            .select('*', { count: 'exact' })
-            .range((page - 1) * pageSize, page * pageSize - 1);
-        
-        if (search) {
-            query = query.ilike('keyword', `%${search}%`);
-        }
-        
-        const { data, error, count } = await query;
-        
-        if (error) throw error;
-        
-        return {
-            banned: data || [],
-            total: count || 0,
-            page,
-            pageSize,
-            totalPages: Math.ceil((count || 0) / pageSize)
-        };
+// 暴露接口方法（模拟API调用）
+const API = {
+    // 用户接口
+    getUsers: () => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.getUsers()), 300);
+        });
     },
     
-    // 获取单个禁言词
-    async getById(id) {
-        initSupabase();
-        
-        const { data, error } = await supabase
-            .from('banned_keywords')
-            .select('*')
-            .eq('id', id)
-            .single();
-        
-        if (error) throw error;
-        return data;
+    searchUsers: (keyword) => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.searchUsers(keyword)), 300);
+        });
     },
     
-    // 创建禁言词
-    async create(keyword) {
-        initSupabase();
-        
-        const { data, error } = await supabase
-            .from('banned_keywords')
-            .insert([keyword])
-            .select();
-        
-        if (error) throw error;
-        return data[0];
+    banUser: (id) => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.banUser(id)), 300);
+        });
     },
     
-    // 更新禁言词
-    async update(keyword) {
-        initSupabase();
-        
-        const { data, error } = await supabase
-            .from('banned_keywords')
-            .upsert(keyword)
-            .eq('id', keyword.id)
-            .select();
-        
-        if (error) throw error;
-        return data[0];
+    unbanUser: (id) => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.unbanUser(id)), 300);
+        });
     },
     
-    // 删除禁言词
-    async delete(id) {
-        initSupabase();
-        
-        const { error } = await supabase
-            .from('banned_keywords')
-            .delete()
-            .eq('id', id);
-        
-        if (error) throw error;
-        return true;
+    // 教师接口
+    getTeachers: () => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.getTeachers()), 300);
+        });
+    },
+    
+    addTeacher: (teacher) => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.addTeacher(teacher)), 300);
+        });
+    },
+    
+    updateTeacher: (teacher) => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.updateTeacher(teacher)), 300);
+        });
+    },
+    
+    deleteTeacher: (id) => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.deleteTeacher(id)), 300);
+        });
+    },
+    
+    // 关键词接口
+    getKeywords: () => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.getKeywords()), 300);
+        });
+    },
+    
+    addKeyword: (keyword, response) => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.addKeyword(keyword, response)), 300);
+        });
+    },
+    
+    updateKeyword: (oldKeyword, newKeyword, newResponse) => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.updateKeyword(oldKeyword, newKeyword, newResponse)), 300);
+        });
+    },
+    
+    deleteKeyword: (keyword) => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.deleteKeyword(keyword)), 300);
+        });
+    },
+    
+    // 封禁接口
+    getBannedUsers: () => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.getBannedUsers()), 300);
+        });
+    },
+    
+    addBannedUser: (userId) => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.addBannedUser(userId)), 300);
+        });
+    },
+    
+    removeBannedUser: (userId) => {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(DataStore.removeBannedUser(userId)), 300);
+        });
     }
-};
-
-// 数据库操作API
-const DatabaseAPI = {
-    // 测试数据库连接
-    async testConnection() {
-        return apiRequest('/test-db', 'GET');
-    },
-    
-    // 清空所有数据
-    async clearAllData() {
-        return apiRequest('/clear-all-data', 'POST');
-    }
-};
-
-// 导出API
-window.API = {
-    initSupabase,
-    updateSettings,
-    getSettings,
-    User: UserAPI,
-    Teacher: TeacherAPI,
-    Keyword: KeywordAPI,
-    BannedKeyword: BannedKeywordAPI,
-    Database: DatabaseAPI
 };

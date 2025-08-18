@@ -1,237 +1,146 @@
-// 关键词管理模块变量
-let currentKeywordPage = 1;
-const keywordsPageSize = 20;
-
 // 加载关键词列表
-async function loadKeywords(page = 1, search = '') {
-    try {
-        showLoading();
-        
-        const result = await API.Keyword.getAll(page, keywordsPageSize, search);
-        
-        const tableBody = document.getElementById('keywords-table-body');
-        tableBody.innerHTML = '';
-        
-        if (result.keywords.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
-                        没有找到关键词数据
-                    </td>
-                </tr>
-            `;
-        } else {
-            result.keywords.forEach(keyword => {
-                let statusClass = keyword.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
-                let statusText = keyword.is_active ? '启用' : '禁用';
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap">${keyword.id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${keyword.keyword}</td>
-                    <td class="px-6 py-4">${keyword.response.substring(0, 50)}${keyword.response.length > 50 ? '...' : ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
-                            ${statusText}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <button class="text-blue-600 hover:text-blue-900 edit-keyword" data-id="${keyword.id}">
-                            <i class="fa fa-pencil"></i> 编辑
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-            
-            // 添加编辑事件监听
-            document.querySelectorAll('.edit-keyword').forEach(btn => {
-                btn.addEventListener('click', () => editKeyword(btn.dataset.id));
-            });
-        }
-        
-        // 更新分页信息
-        document.getElementById('keywords-showing').textContent = result.keywords.length;
-        document.getElementById('keywords-total').textContent = result.total;
-        
-        // 更新分页按钮状态
-        const prevBtn = document.getElementById('keywords-prev');
-        const nextBtn = document.getElementById('keywords-next');
-        
-        prevBtn.disabled = result.page <= 1;
-        nextBtn.disabled = result.page >= result.totalPages;
-        
-        prevBtn.onclick = () => {
-            if (result.page > 1) {
-                currentKeywordPage = result.page - 1;
-                loadKeywords(currentKeywordPage, search);
-            }
-        };
-        
-        nextBtn.onclick = () => {
-            if (result.page < result.totalPages) {
-                currentKeywordPage = result.page + 1;
-                loadKeywords(currentKeywordPage, search);
-            }
-        };
-        
-        currentKeywordPage = result.page;
-        
-    } catch (error) {
-        console.error('加载关键词失败:', error);
-        showNotification('加载关键词失败: ' + error.message, 'error');
-    } finally {
-        hideLoading();
-    }
+function loadKeywords() {
+    API.getKeywords().then(keywords => {
+        renderKeywordList(keywords);
+    });
 }
 
-// 编辑关键词
-async function editKeyword(keywordId) {
-    try {
-        showLoading();
-        
-        // 重置表单
-        resetKeywordForm();
-        
-        if (keywordId) {
-            // 编辑现有关键词
-            const keyword = await API.Keyword.getById(keywordId);
-            
-            if (keyword) {
-                document.getElementById('keyword-id').value = keyword.id;
-                document.getElementById('keyword-text').value = keyword.keyword || '';
-                document.getElementById('keyword-response').value = keyword.response || '';
-                document.getElementById('keyword-active').checked = keyword.is_active !== false;
-                
-                document.getElementById('keyword-modal-title').textContent = '编辑关键词';
-            }
-        } else {
-            // 添加新关键词
-            document.getElementById('keyword-modal-title').textContent = '添加关键词';
-        }
-        
-        document.getElementById('keyword-modal').classList.add('show');
-        
-    } catch (error) {
-        console.error('获取关键词信息失败:', error);
-        showNotification('获取关键词信息失败: ' + error.message, 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-// 重置关键词表单
-function resetKeywordForm() {
-    document.getElementById('keyword-id').value = '';
-    document.getElementById('keyword-text').value = '';
-    document.getElementById('keyword-response').value = '';
-    document.getElementById('keyword-active').checked = true;
-}
-
-// 保存关键词
-async function saveKeyword() {
-    try {
-        showLoading();
-        
-        const keywordId = document.getElementById('keyword-id').value;
-        const text = document.getElementById('keyword-text').value;
-        const response = document.getElementById('keyword-response').value;
-        const active = document.getElementById('keyword-active').checked;
-        
-        // 简单验证
-        if (!text) {
-            throw new Error('请输入关键词');
-        }
-        
-        if (!response) {
-            throw new Error('请输入回复内容');
-        }
-        
-        const keywordData = {
-            keyword: text,
-            response,
-            is_active: active
-        };
-        
-        if (keywordId) {
-            // 更新现有关键词
-            keywordData.id = parseInt(keywordId);
-            await API.Keyword.update(keywordData);
-        } else {
-            // 创建新关键词
-            await API.Keyword.create(keywordData);
-        }
-        
-        // 关闭模态框
-        document.getElementById('keyword-modal').classList.remove('show');
-        
-        // 重新加载关键词列表
-        loadKeywords(currentKeywordPage);
-        
-        showNotification(keywordId ? '关键词已更新' : '关键词已添加', 'success');
-        
-    } catch (error) {
-        console.error('保存关键词失败:', error);
-        showNotification('保存关键词失败: ' + error.message, 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-// 删除关键词
-async function deleteKeyword() {
-    if (!confirm('确定要删除这个关键词吗？此操作不可撤销！')) {
+// 渲染关键词列表
+function renderKeywordList(keywords) {
+    const keywordListElement = document.getElementById('keyword-list');
+    keywordListElement.innerHTML = '';
+    
+    if (keywords.length === 0) {
+        keywordListElement.innerHTML = `
+            <tr>
+                <td colspan="3" class="text-center py-4">没有找到关键词数据</td>
+            </tr>
+        `;
         return;
     }
     
-    try {
-        showLoading();
-        
-        const keywordId = document.getElementById('keyword-id').value;
-        await API.Keyword.delete(keywordId);
-        
-        // 关闭模态框
-        document.getElementById('keyword-modal').classList.remove('show');
-        
-        // 重新加载关键词列表
-        loadKeywords(currentKeywordPage);
-        
-        showNotification('关键词已删除', 'success');
-        
-    } catch (error) {
-        console.error('删除关键词失败:', error);
-        showNotification('删除关键词失败: ' + error.message, 'error');
-    } finally {
-        hideLoading();
-    }
+    keywords.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'fade-in';
+        tr.innerHTML = `
+            <td>${item.keyword}</td>
+            <td>${item.response}</td>
+            <td>
+                <button class="text-blue-600 hover:text-blue-800 mr-2 edit-keyword" data-keyword="${item.keyword}">
+                    <i class="fa fa-edit"></i> 编辑
+                </button>
+                <button class="text-red-600 hover:text-red-800 delete-keyword" data-keyword="${item.keyword}">
+                    <i class="fa fa-trash"></i> 删除
+                </button>
+            </td>
+        `;
+        keywordListElement.appendChild(tr);
+    });
+    
+    // 添加关键词操作事件监听
+    addKeywordActionListeners();
 }
 
-// 初始化关键词管理事件
-function initKeywordEvents() {
-    // 添加关键词
-    document.getElementById('add-keyword-btn').addEventListener('click', () => editKeyword(''));
-    
-    // 保存关键词
-    document.getElementById('save-keyword-btn').addEventListener('click', saveKeyword);
+// 添加关键词操作按钮监听
+function addKeywordActionListeners() {
+    // 编辑关键词
+    document.querySelectorAll('.edit-keyword').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const keyword = btn.getAttribute('data-keyword');
+            const keywords = DataStore.getKeywords();
+            const item = keywords.find(k => k.keyword === keyword);
+            
+            if (item) {
+                showEditKeywordModal(item);
+            }
+        });
+    });
     
     // 删除关键词
-    document.getElementById('delete-keyword-btn').addEventListener('click', deleteKeyword);
-    
-    // 关闭关键词模态框
-    document.getElementById('close-keyword-modal').addEventListener('click', () => {
-        document.getElementById('keyword-modal').classList.remove('show');
-    });
-    
-    // 点击模态框外部关闭
-    document.getElementById('keyword-modal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('keyword-modal')) {
-            document.getElementById('keyword-modal').classList.remove('show');
-        }
+    document.querySelectorAll('.delete-keyword').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const keyword = btn.getAttribute('data-keyword');
+            if (confirm(`确定要删除关键词"${keyword}"吗？`)) {
+                API.deleteKeyword(keyword).then(success => {
+                    if (success) {
+                        loadKeywords();
+                    }
+                });
+            }
+        });
     });
 }
 
-// 导出关键词管理函数
-window.Keywords = {
-    load: loadKeywords,
-    initEvents: initKeywordEvents
-};
+// 添加关键词
+document.getElementById('add-keyword-btn').addEventListener('click', () => {
+    const keyword = document.getElementById('new-keyword').value.trim();
+    const response = document.getElementById('keyword-response').value.trim();
+    
+    if (!keyword || !response) {
+        alert('请填写关键词和回复内容');
+        return;
+    }
+    
+    // 检查关键词是否已存在
+    const keywords = DataStore.getKeywords();
+    const exists = keywords.some(k => k.keyword === keyword);
+    
+    if (exists) {
+        alert('该关键词已存在，请使用不同的关键词');
+        return;
+    }
+    
+    API.addKeyword(keyword, response).then(success => {
+        if (success) {
+            loadKeywords();
+            // 清空输入框
+            document.getElementById('new-keyword').value = '';
+            document.getElementById('keyword-response').value = '';
+        }
+    });
+});
+
+// 编辑关键词模态框
+function showEditKeywordModal(item) {
+    const modalContent = `
+        <input type="hidden" id="old-keyword" value="${item.keyword}">
+        <div class="mb-4">
+            <label for="edit-keyword" class="block text-gray-700 mb-2">关键词</label>
+            <input type="text" id="edit-keyword" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value="${item.keyword}">
+        </div>
+        <div class="mb-4">
+            <label for="edit-response" class="block text-gray-700 mb-2">回复内容</label>
+            <input type="text" id="edit-response" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value="${item.response}">
+        </div>
+    `;
+    
+    showModal('编辑关键词', modalContent, () => {
+        const oldKeyword = document.getElementById('old-keyword').value;
+        const newKeyword = document.getElementById('edit-keyword').value.trim();
+        const newResponse = document.getElementById('edit-response').value.trim();
+        
+        if (!newKeyword || !newResponse) {
+            alert('请填写关键词和回复内容');
+            return false; // 不关闭模态框
+        }
+        
+        // 检查新关键词是否已存在（排除自身）
+        const keywords = DataStore.getKeywords();
+        const exists = keywords.some(k => k.keyword === newKeyword && k.keyword !== oldKeyword);
+        
+        if (exists) {
+            alert('该关键词已存在，请使用不同的关键词');
+            return false; // 不关闭模态框
+        }
+        
+        API.updateKeyword(oldKeyword, newKeyword, newResponse).then(success => {
+            if (success) {
+                loadKeywords();
+            }
+        });
+    });
+}

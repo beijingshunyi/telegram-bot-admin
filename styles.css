@@ -1,0 +1,98 @@
+/* 全局样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 动画效果 */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* 导航按钮样式 */
+.nav-btn.active {
+    position: relative;
+}
+
+.nav-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 3px 3px 0 0;
+}
+
+/* 表格行悬停效果 */
+tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+    transition: background-color 0.2s;
+}
+
+/* 按钮通用样式 */
+button {
+    cursor: pointer;
+}
+
+/* 滚动条样式优化 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* 模态框动画 */
+#edit-keyword-modal, #worker-params-modal {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+#edit-keyword-modal:not(.hidden), #worker-params-modal:not(.hidden) {
+    opacity: 1;
+    visibility: visible;
+}
+
+#edit-keyword-modal > div, #worker-params-modal > div {
+    transform: translateY(-20px);
+    transition: transform 0.3s;
+}
+
+#edit-keyword-modal:not(.hidden) > div, #worker-params-modal:not(.hidden) > div {
+    transform: translateY(0);
+}
+
+/* 加载指示器动画 */
+.fa-circle-o-notch {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

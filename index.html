@@ -86,6 +86,10 @@
                         <i class="fa fa-cog w-5 h-5 mr-3"></i>
                         <span>机器人设置</span>
                     </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-bar-chart w-5 h-5 mr-3"></i>
+                        <span>数据分析</span>
+                    </a>
                 </div>
             </nav>
         </aside>
@@ -129,7 +133,7 @@
                 </div>
                 
                 <!-- 统计卡片 -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                     <div class="card">
                         <div class="flex items-center justify-between">
                             <div>
@@ -333,20 +337,23 @@
             </div>
         </div>
     </div>
-
+    
     <!-- 积分调整模态框 -->
     <div class="modal fade" id="points-modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">调整积分</h5>
+                    <h5 class="modal-title">调整用户积分</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="points-form">
                     <div class="modal-body">
-                        <input type="hidden" id="points_user_id">
                         <div class="mb-3">
-                            <label for="points_username" class="form-label">用户名</label>
+                            <label for="points_user_id" class="form-label">用户ID</label>
+                            <input type="number" class="form-control" id="points_user_id" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="points_username" class="form-label">用户名称</label>
                             <input type="text" class="form-control" id="points_username" readonly>
                         </div>
                         <div class="mb-3">
@@ -355,8 +362,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="points_change" class="form-label">积分变动</label>
-                            <input type="number" class="form-control" id="points_change" placeholder="正数增加，负数减少">
-                            <small class="text-muted">输入正数增加积分，负数减少积分（不会低于0）</small>
+                            <input type="number" class="form-control" id="points_change" required>
+                            <small class="text-muted">增加积分请输入正数，减少积分请输入负数</small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -536,6 +543,10 @@
                         <i class="fa fa-cog w-5 h-5 mr-3"></i>
                         <span>机器人设置</span>
                     </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-bar-chart w-5 h-5 mr-3"></i>
+                        <span>数据分析</span>
+                    </a>
                 </div>
             </nav>
         </div>
@@ -545,27 +556,42 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script src="script.js"></script>
     <script>
-        // 侧边栏切换
-        document.getElementById('menu-toggle').addEventListener('click', function() {
-            const mobileSidebar = document.getElementById('mobile-sidebar');
-            const sidebarPanel = document.getElementById('sidebar-panel');
-            
-            mobileSidebar.classList.remove('hidden');
-            setTimeout(() => {
-                sidebarPanel.classList.remove('-translate-x-full');
-            }, 10);
-        });
-        
-        document.getElementById('mobile-sidebar').addEventListener('click', function(e) {
-            if (e.target === this) {
+        // 确保DOM加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 侧边栏切换
+            document.getElementById('menu-toggle')?.addEventListener('click', function() {
+                const mobileSidebar = document.getElementById('mobile-sidebar');
                 const sidebarPanel = document.getElementById('sidebar-panel');
-                sidebarPanel.classList.add('-translate-x-full');
-                setTimeout(() => {
-                    this.classList.add('hidden');
-                }, 300);
-            }
+                
+                if (mobileSidebar && sidebarPanel) {
+                    mobileSidebar.classList.remove('hidden');
+                    setTimeout(() => {
+                        sidebarPanel.classList.remove('-translate-x-full');
+                    }, 10);
+                }
+            });
+            
+            document.getElementById('mobile-sidebar')?.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    const sidebarPanel = document.getElementById('sidebar-panel');
+                    if (sidebarPanel) {
+                        sidebarPanel.classList.add('-translate-x-full');
+                        setTimeout(() => {
+                            this.classList.add('hidden');
+                        }, 300);
+                    }
+                }
+            });
+            
+            // 刷新按钮事件
+            document.getElementById('refresh-data')?.addEventListener('click', function() {
+                // 显示加载状态
+                const loader = document.getElementById('data-loader');
+                if (loader) loader.style.display = 'flex';
+                // 重新加载数据
+                setTimeout(loadRealData, 300); // 稍微延迟以显示加载效果
+            });
         });
     </script>
 </body>
 </html>
-    

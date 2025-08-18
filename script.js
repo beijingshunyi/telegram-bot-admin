@@ -128,7 +128,7 @@ function showLoading(show) {
   }
 }
 
-// 渲染用户数据
+// 渲染用户数据 - 增加显示用户设置的名称
 function renderUsers(users) {
   const container = document.getElementById('users-container');
   if (!container) return;
@@ -136,7 +136,7 @@ function renderUsers(users) {
   if (users.length === 0) {
     container.innerHTML = `
       <tr>
-        <td colspan="6" class="text-center py-3 text-muted">暂无用户数据，可通过机器人交互生成</td>
+        <td colspan="7" class="text-center py-3 text-muted">暂无用户数据，可通过机器人交互生成</td>
       </tr>
     `;
     return;
@@ -146,6 +146,7 @@ function renderUsers(users) {
     <tr>
       <td>${user.user_id}</td>
       <td>${user.username || '-'}</td>
+      <td>${user.display_name || '-'}</td> <!-- 显示用户设置的名称 -->
       <td>${user.first_name || ''} ${user.last_name || ''}</td>
       <td>${user.points || 0}</td>
       <td>${user.last_sign_date || '-'}</td>
@@ -167,7 +168,7 @@ function renderTeachers(teachers) {
   if (teachers.length === 0) {
     container.innerHTML = `
       <tr>
-        <td colspan="7" class="text-center py-3 text-muted">暂无老师数据，可通过下方按钮添加</td>
+        <td colspan="8" class="text-center py-3 text-muted">暂无老师数据，可通过下方按钮添加</td>
       </tr>
     `;
     return;
@@ -180,6 +181,7 @@ function renderTeachers(teachers) {
       <td>${teacher.age}</td>
       <td>${teacher.region}</td>
       <td>${teacher.service_type}</td>
+      <td>${teacher.price || '-'}</td> <!-- 显示价格字段 -->
       <td>
         <span class="badge bg-${teacher.status === 'approved' ? 'success' : 'warning'}">
           ${teacher.status === 'approved' ? '已认证' : '待审核'}
@@ -252,7 +254,7 @@ function renderBannedKeywords(keywords) {
   `).join('');
 }
 
-// 用户模态框操作
+// 用户模态框操作 - 增加用户设置名称字段
 function openUserModal() {
   currentEditId = null;
   document.getElementById('user-modal-title').textContent = '添加用户';
@@ -264,9 +266,10 @@ function editUser(user) {
   currentEditId = user.user_id;
   document.getElementById('user-modal-title').textContent = '编辑用户';
   
-  // 填充表单数据
+  // 填充表单数据，包括用户设置的名称
   document.getElementById('user_id').value = user.user_id;
   document.getElementById('username').value = user.username || '';
+  document.getElementById('display_name').value = user.display_name || '';
   document.getElementById('first_name').value = user.first_name || '';
   document.getElementById('last_name').value = user.last_name || '';
   document.getElementById('points').value = user.points || 0;
@@ -280,6 +283,7 @@ async function handleUserSubmit(e) {
   const formData = {
     user_id: parseInt(document.getElementById('user_id').value),
     username: document.getElementById('username').value,
+    display_name: document.getElementById('display_name').value, // 保存用户设置的名称
     first_name: document.getElementById('first_name').value,
     last_name: document.getElementById('last_name').value,
     points: parseInt(document.getElementById('points').value)
@@ -290,7 +294,7 @@ async function handleUserSubmit(e) {
       await fetchData('users', 'update', formData);
       showAlert('用户更新成功', 'success');
     } else {
-      await fetchData('users', 'add', formData);
+      await fetchData('users', 'insert', formData);
       showAlert('用户添加成功', 'success');
     }
     
@@ -306,7 +310,7 @@ async function handleUserSubmit(e) {
 async function deleteUser(userId) {
   if (confirm('确定要删除这个用户吗？此操作不可恢复！')) {
     try {
-      await fetchData('users', 'delete', { user_id: userId });
+      await fetchData('users', 'delete', { id: userId });
       showAlert('用户删除成功', 'success');
       loadRealData();
     } catch (error) {
@@ -315,7 +319,7 @@ async function deleteUser(userId) {
   }
 }
 
-// 老师模态框操作
+// 老师模态框操作 - 增加价格字段
 function openTeacherModal() {
   currentEditId = null;
   document.getElementById('teacher-modal-title').textContent = '添加老师';
@@ -327,12 +331,16 @@ function editTeacher(teacher) {
   currentEditId = teacher.id;
   document.getElementById('teacher-modal-title').textContent = '编辑老师';
   
-  // 填充表单数据
+  // 填充表单数据，包括价格字段
   document.getElementById('teacher_id').value = teacher.id;
   document.getElementById('nickname').value = teacher.nickname;
   document.getElementById('age').value = teacher.age;
   document.getElementById('region').value = teacher.region;
+  document.getElementById('telegram_account').value = teacher.telegram_account || '';
+  document.getElementById('channel').value = teacher.channel || '';
   document.getElementById('service_type').value = teacher.service_type;
+  document.getElementById('price').value = teacher.price || ''; // 价格字段
+  document.getElementById('intro').value = teacher.intro || '';
   document.getElementById('status').value = teacher.status;
   
   const teacherModal = new bootstrap.Modal(document.getElementById('teacher-modal'));
@@ -346,7 +354,11 @@ async function handleTeacherSubmit(e) {
     nickname: document.getElementById('nickname').value,
     age: parseInt(document.getElementById('age').value),
     region: document.getElementById('region').value,
+    telegram_account: document.getElementById('telegram_account').value,
+    channel: document.getElementById('channel').value,
     service_type: document.getElementById('service_type').value,
+    price: document.getElementById('price').value, // 保存价格
+    intro: document.getElementById('intro').value,
     status: document.getElementById('status').value
   };
 
@@ -355,7 +367,7 @@ async function handleTeacherSubmit(e) {
       await fetchData('teachers', 'update', formData);
       showAlert('老师信息更新成功', 'success');
     } else {
-      await fetchData('teachers', 'add', formData);
+      await fetchData('teachers', 'insert', formData);
       showAlert('老师添加成功', 'success');
     }
     
@@ -416,7 +428,7 @@ async function handleKeywordSubmit(e) {
       await fetchData('keywords', 'update', formData);
       showAlert('关键词更新成功', 'success');
     } else {
-      await fetchData('keywords', 'add', formData);
+      await fetchData('keywords', 'insert', formData);
       showAlert('关键词添加成功', 'success');
     }
     
@@ -456,7 +468,7 @@ async function handleBannedKeywordSubmit(e) {
   };
 
   try {
-    await fetchData('banned_keywords', 'add', formData);
+    await fetchData('banned_keywords', 'insert', formData);
     showAlert('禁言词添加成功', 'success');
     
     // 关闭模态框并刷新数据

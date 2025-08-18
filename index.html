@@ -7,8 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- 引入配置文件 -->
-    <script src="config.js"></script>
+    <script>
+        // 模拟配置数据
+        const config = {
+            apiUrl: '/api' // 实际项目中替换为真实API地址
+        };
+    </script>
     <script>
         tailwind.config = {
             theme: {
@@ -51,6 +55,18 @@
                 from { opacity: 0; }
                 to { opacity: 1; }
             }
+            .btn-action {
+                @apply px-2 py-1 rounded text-sm transition-all duration-200;
+            }
+            .btn-edit {
+                @apply text-blue-600 hover:bg-blue-100;
+            }
+            .btn-delete {
+                @apply text-red-600 hover:bg-red-100;
+            }
+            .btn-points {
+                @apply text-green-600 hover:bg-green-100;
+            }
         }
     </style>
 </head>
@@ -67,35 +83,35 @@
             
             <nav class="p-4">
                 <div class="space-y-1">
-                    <a href="#" class="sidebar-icon sidebar-icon-active">
+                    <a href="#" class="sidebar-icon sidebar-icon-active" data-section="dashboard">
                         <i class="fa fa-tachometer w-5 h-5 mr-3"></i>
                         <span>仪表盘</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="users">
                         <i class="fa fa-users w-5 h-5 mr-3"></i>
                         <span>用户管理</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="teachers">
                         <i class="fa fa-user-md w-5 h-5 mr-3"></i>
                         <span>老师管理</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="keywords">
                         <i class="fa fa-key w-5 h-5 mr-3"></i>
                         <span>关键词设置</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="banned">
                         <i class="fa fa-ban w-5 h-5 mr-3"></i>
                         <span>禁言词管理</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="messages">
                         <i class="fa fa-comments w-5 h-5 mr-3"></i>
                         <span>消息记录</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="settings">
                         <i class="fa fa-cog w-5 h-5 mr-3"></i>
                         <span>机器人设置</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="analytics">
                         <i class="fa fa-bar-chart w-5 h-5 mr-3"></i>
                         <span>数据分析</span>
                     </a>
@@ -117,8 +133,9 @@
                     <button id="refresh-data" class="text-gray-500 hover:text-primary mr-4">
                         <i class="fa fa-refresh text-xl"></i>
                     </button>
-                    <button class="text-gray-500 hover:text-primary mr-4">
+                    <button class="text-gray-500 hover:text-primary mr-4 relative">
                         <i class="fa fa-bell text-xl"></i>
+                        <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                     </button>
                     <div class="flex items-center">
                         <img src="https://picsum.photos/200/200" alt="管理员头像" class="w-8 h-8 rounded-full mr-2">
@@ -193,7 +210,7 @@
                 </div>
                 
                 <!-- 用户管理区域 -->
-                <div class="mb-8">
+                <div class="mb-8" id="users-section">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold">用户管理</h3>
                         <button id="add-user-btn" class="btn btn-primary">
@@ -229,7 +246,7 @@
                 </div>
                 
                 <!-- 老师管理区域 -->
-                <div class="mb-8">
+                <div class="mb-8" id="teachers-section">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold">老师管理</h3>
                         <button id="add-teacher-btn" class="btn btn-primary">
@@ -266,7 +283,7 @@
                 </div>
                 
                 <!-- 关键词管理区域 -->
-                <div class="mb-8">
+                <div class="mb-8" id="keywords-section">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold">关键词回复</h3>
                         <button id="add-keyword-btn" class="btn btn-primary">
@@ -299,7 +316,7 @@
                 </div>
                 
                 <!-- 禁言词管理区域 -->
-                <div class="mb-8">
+                <div class="mb-8" id="banned-section">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold">禁言词管理</h3>
                         <button id="add-banned-btn" class="btn btn-primary">
@@ -341,6 +358,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="user-form">
+                    <input type="hidden" id="user-form-mode" value="add">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="user_id" class="form-label">用户ID</label>
@@ -422,6 +440,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="teacher-form">
+                    <input type="hidden" id="teacher-form-mode" value="add">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="teacher_id" class="form-label">ID</label>
@@ -487,6 +506,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="keyword-form">
+                    <input type="hidden" id="keyword-form-mode" value="add">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="keyword_id" class="form-label">ID</label>
@@ -524,6 +544,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="banned-form">
+                    <input type="hidden" id="banned-form-mode" value="add">
+                    <input type="hidden" id="banned_id" value="">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="banned_text" class="form-label">禁言词</label>
@@ -536,6 +558,25 @@
                         <button type="submit" class="btn btn-primary">保存</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 确认删除模态框 -->
+    <div class="modal fade" id="confirm-delete-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">确认删除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>您确定要删除这条记录吗？此操作不可撤销。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">确认删除</button>
+                </div>
             </div>
         </div>
     </div>
@@ -553,35 +594,35 @@
             
             <nav class="p-4">
                 <div class="space-y-1">
-                    <a href="#" class="sidebar-icon sidebar-icon-active">
+                    <a href="#" class="sidebar-icon sidebar-icon-active" data-section="dashboard">
                         <i class="fa fa-tachometer w-5 h-5 mr-3"></i>
                         <span>仪表盘</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="users">
                         <i class="fa fa-users w-5 h-5 mr-3"></i>
                         <span>用户管理</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="teachers">
                         <i class="fa fa-user-md w-5 h-5 mr-3"></i>
                         <span>老师管理</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="keywords">
                         <i class="fa fa-key w-5 h-5 mr-3"></i>
                         <span>关键词设置</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="banned">
                         <i class="fa fa-ban w-5 h-5 mr-3"></i>
                         <span>禁言词管理</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="messages">
                         <i class="fa fa-comments w-5 h-5 mr-3"></i>
                         <span>消息记录</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="settings">
                         <i class="fa fa-cog w-5 h-5 mr-3"></i>
                         <span>机器人设置</span>
                     </a>
-                    <a href="#" class="sidebar-icon">
+                    <a href="#" class="sidebar-icon" data-section="analytics">
                         <i class="fa fa-bar-chart w-5 h-5 mr-3"></i>
                         <span>数据分析</span>
                     </a>
@@ -592,6 +633,736 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // 全局变量
+        let currentEditId = null;
+        let currentDeleteInfo = null; // 存储当前要删除的信息 {type: 'user|teacher|keyword|banned', id: xxx}
+        
+        // DOM元素
+        const userModal = new bootstrap.Modal(document.getElementById('user-modal'));
+        const teacherModal = new bootstrap.Modal(document.getElementById('teacher-modal'));
+        const keywordModal = new bootstrap.Modal(document.getElementById('keyword-modal'));
+        const bannedModal = new bootstrap.Modal(document.getElementById('banned-modal'));
+        const pointsModal = new bootstrap.Modal(document.getElementById('points-modal'));
+        const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirm-delete-modal'));
+        
+        // 初始化函数
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载所有数据
+            loadAllData();
+            
+            // 绑定事件处理程序
+            bindEventHandlers();
+        });
+        
+        // 绑定所有事件处理程序
+        function bindEventHandlers() {
+            // 移动端侧边栏切换
+            document.getElementById('menu-toggle').addEventListener('click', toggleMobileSidebar);
+            document.getElementById('mobile-sidebar').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeMobileSidebar();
+                }
+            });
+            
+            // 侧边栏导航
+            document.querySelectorAll('.sidebar-icon').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.getAttribute('data-section');
+                    activateSidebarItem(section);
+                    scrollToSection(section);
+                    closeMobileSidebar();
+                });
+            });
+            
+            // 刷新数据按钮
+            document.getElementById('refresh-data').addEventListener('click', refreshAllData);
+            
+            // 添加按钮点击事件
+            document.getElementById('add-user-btn').addEventListener('click', openAddUserModal);
+            document.getElementById('add-teacher-btn').addEventListener('click', openAddTeacherModal);
+            document.getElementById('add-keyword-btn').addEventListener('click', openAddKeywordModal);
+            document.getElementById('add-banned-btn').addEventListener('click', openAddBannedModal);
+            
+            // 表单提交事件
+            document.getElementById('user-form').addEventListener('submit', handleUserFormSubmit);
+            document.getElementById('teacher-form').addEventListener('submit', handleTeacherFormSubmit);
+            document.getElementById('keyword-form').addEventListener('submit', handleKeywordFormSubmit);
+            document.getElementById('banned-form').addEventListener('submit', handleBannedFormSubmit);
+            document.getElementById('points-form').addEventListener('submit', handlePointsFormSubmit);
+            
+            // 确认删除按钮
+            document.getElementById('confirm-delete-btn').addEventListener('click', confirmDelete);
+        }
+        
+        // 加载所有数据
+        function loadAllData() {
+            showLoader();
+            
+            // 模拟异步加载数据
+            setTimeout(() => {
+                loadUsersData();
+                loadTeachersData();
+                loadKeywordsData();
+                loadBannedKeywordsData();
+                
+                hideLoader();
+                showDataLoadedAlert();
+            }, 1000);
+        }
+        
+        // 刷新所有数据
+        function refreshAllData() {
+            showLoader();
+            
+            // 模拟异步加载数据
+            setTimeout(() => {
+                loadUsersData();
+                loadTeachersData();
+                loadKeywordsData();
+                loadBannedKeywordsData();
+                
+                hideLoader();
+                showDataLoadedAlert();
+            }, 1000);
+        }
+        
+        // 加载用户数据
+        function loadUsersData() {
+            // 模拟用户数据
+            const users = [
+                { id: 1001, username: '@user1', display_name: '修车达人', first_name: '张', last_name: '三', points: 1500, last_checkin: '2023-06-15' },
+                { id: 1002, username: '@user2', display_name: '爱车一族', first_name: '李', last_name: '四', points: 2300, last_checkin: '2023-06-16' },
+                { id: 1003, username: '@user3', display_name: '汽修专家', first_name: '王', last_name: '五', points: 800, last_checkin: '2023-06-14' },
+                { id: 1004, username: '@user4', display_name: '车迷', first_name: '赵', last_name: '六', points: 3200, last_checkin: '2023-06-16' },
+                { id: 1005, username: '@user5', display_name: '汽车医生', first_name: '孙', last_name: '七', points: 1900, last_checkin: '2023-06-15' }
+            ];
+            
+            const container = document.getElementById('users-container');
+            container.innerHTML = '';
+            
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-3 text-muted">暂无用户数据</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = 'fade-in';
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.username || '-'}</td>
+                    <td>${user.display_name || '-'}</td>
+                    <td>${user.last_name}${user.first_name}</td>
+                    <td>${user.points}</td>
+                    <td>${user.last_checkin}</td>
+                    <td>
+                        <div class="flex space-x-1">
+                            <button class="btn-action btn-edit edit-user" data-id="${user.id}" title="编辑">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn-action btn-points adjust-points" data-id="${user.id}" data-name="${user.last_name}${user.first_name}" data-points="${user.points}" title="调整积分">
+                                <i class="fa fa-credit-card"></i>
+                            </button>
+                            <button class="btn-action btn-delete delete-item" data-type="user" data-id="${user.id}" title="删除">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                container.appendChild(row);
+            });
+            
+            // 绑定用户相关按钮事件
+            document.querySelectorAll('.edit-user').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    openEditUserModal(userId);
+                });
+            });
+            
+            document.querySelectorAll('.adjust-points').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    const userName = this.getAttribute('data-name');
+                    const userPoints = this.getAttribute('data-points');
+                    openPointsModal(userId, userName, userPoints);
+                });
+            });
+            
+            document.querySelectorAll('.delete-item[data-type="user"]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    currentDeleteInfo = { type: 'user', id: id };
+                    confirmDeleteModal.show();
+                });
+            });
+        }
+        
+        // 加载老师数据
+        function loadTeachersData() {
+            // 模拟老师数据
+            const teachers = [
+                { id: 1, nickname: '修车老王', age: 45, region: '北京朝阳', service_type: '发动机维修', price: '800p', status: 'approved' },
+                { id: 2, nickname: '电路专家小李', age: 32, region: '北京海淀', service_type: '电路维修', price: '600p', status: 'approved' },
+                { id: 3, nickname: '钣金大师', age: 50, region: '北京丰台', service_type: '钣金喷漆', price: '1200p', status: 'pending' },
+                { id: 4, nickname: '轮胎专家', age: 38, region: '北京西城', service_type: '轮胎更换', price: '500p', status: 'approved' },
+                { id: 5, nickname: '变速箱达人', age: 42, region: '北京东城', service_type: '变速箱维修', price: '1500p', status: 'rejected' }
+            ];
+            
+            const container = document.getElementById('teachers-container');
+            container.innerHTML = '';
+            
+            if (teachers.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-3 text-muted">暂无老师数据</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            teachers.forEach(teacher => {
+                let statusClass = '';
+                let statusText = '';
+                
+                switch(teacher.status) {
+                    case 'approved':
+                        statusClass = 'text-green-600 bg-green-100';
+                        statusText = '已认证';
+                        break;
+                    case 'pending':
+                        statusClass = 'text-yellow-600 bg-yellow-100';
+                        statusText = '待审核';
+                        break;
+                    case 'rejected':
+                        statusClass = 'text-red-600 bg-red-100';
+                        statusText = '已拒绝';
+                        break;
+                }
+                
+                const row = document.createElement('tr');
+                row.className = 'fade-in';
+                row.innerHTML = `
+                    <td>${teacher.id}</td>
+                    <td>${teacher.nickname}</td>
+                    <td>${teacher.age}</td>
+                    <td>${teacher.region}</td>
+                    <td>${teacher.service_type}</td>
+                    <td>${teacher.price}</td>
+                    <td><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <div class="flex space-x-1">
+                            <button class="btn-action btn-edit edit-teacher" data-id="${teacher.id}" title="编辑">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn-action btn-delete delete-item" data-type="teacher" data-id="${teacher.id}" title="删除">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                container.appendChild(row);
+            });
+            
+            // 绑定老师相关按钮事件
+            document.querySelectorAll('.edit-teacher').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const teacherId = this.getAttribute('data-id');
+                    openEditTeacherModal(teacherId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-item[data-type="teacher"]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    currentDeleteInfo = { type: 'teacher', id: id };
+                    confirmDeleteModal.show();
+                });
+            });
+        }
+        
+        // 加载关键词数据
+        function loadKeywordsData() {
+            // 模拟关键词数据
+            const keywords = [
+                { id: 1, keyword: '价格', response: '我们的基础维修价格是600p起，具体根据维修项目而定', is_active: true },
+                { id: 2, keyword: '地址', response: '我们在北京各个区都有服务点，具体请联系客服获取最近地址', is_active: true },
+                { id: 3, keyword: '预约', response: '您可以直接在本群预约，发送"预约+服务类型"即可', is_active: false },
+                { id: 4, keyword: '支付方式', response: '支持现金、银行卡和电子支付', is_active: true },
+                { id: 5, keyword: '保修', response: '我们提供3个月的维修保修期', is_active: true }
+            ];
+            
+            const container = document.getElementById('keywords-container');
+            container.innerHTML = '';
+            
+            if (keywords.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-3 text-muted">暂无关键词数据</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            keywords.forEach(keyword => {
+                const statusClass = keyword.is_active ? 'text-green-600' : 'text-gray-400';
+                const statusText = keyword.is_active ? '启用' : '禁用';
+                
+                const row = document.createElement('tr');
+                row.className = 'fade-in';
+                row.innerHTML = `
+                    <td>${keyword.keyword}</td>
+                    <td>${keyword.response.substring(0, 30)}${keyword.response.length > 30 ? '...' : ''}</td>
+                    <td><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <div class="flex space-x-1">
+                            <button class="btn-action btn-edit edit-keyword" data-id="${keyword.id}" title="编辑">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn-action btn-delete delete-item" data-type="keyword" data-id="${keyword.id}" title="删除">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                container.appendChild(row);
+            });
+            
+            // 绑定关键词相关按钮事件
+            document.querySelectorAll('.edit-keyword').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const keywordId = this.getAttribute('data-id');
+                    openEditKeywordModal(keywordId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-item[data-type="keyword"]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    currentDeleteInfo = { type: 'keyword', id: id };
+                    confirmDeleteModal.show();
+                });
+            });
+        }
+        
+        // 加载禁言词数据
+        function loadBannedKeywordsData() {
+            // 模拟禁言词数据
+            const bannedKeywords = [
+                { id: 1, text: '垃圾' },
+                { id: 2, text: '骗子' },
+                { id: 3, text: '假货' },
+                { id: 4, text: '滚' },
+                { id: 5, text: '妈的' }
+            ];
+            
+            const container = document.getElementById('banned-keywords-container');
+            container.innerHTML = '';
+            
+            if (bannedKeywords.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="2" class="text-center py-3 text-muted">暂无禁言词数据</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            bannedKeywords.forEach(keyword => {
+                const row = document.createElement('tr');
+                row.className = 'fade-in';
+                row.innerHTML = `
+                    <td>${keyword.text}</td>
+                    <td>
+                        <div class="flex space-x-1">
+                            <button class="btn-action btn-edit edit-banned" data-id="${keyword.id}" data-text="${keyword.text}" title="编辑">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn-action btn-delete delete-item" data-type="banned" data-id="${keyword.id}" title="删除">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                container.appendChild(row);
+            });
+            
+            // 绑定禁言词相关按钮事件
+            document.querySelectorAll('.edit-banned').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const bannedId = this.getAttribute('data-id');
+                    const bannedText = this.getAttribute('data-text');
+                    openEditBannedModal(bannedId, bannedText);
+                });
+            });
+            
+            document.querySelectorAll('.delete-item[data-type="banned"]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    currentDeleteInfo = { type: 'banned', id: id };
+                    confirmDeleteModal.show();
+                });
+            });
+        }
+        
+        // 打开添加用户模态框
+        function openAddUserModal() {
+            document.getElementById('user-form-mode').value = 'add';
+            document.getElementById('user-modal-title').textContent = '添加用户';
+            document.getElementById('user-form').reset();
+            userModal.show();
+        }
+        
+        // 打开编辑用户模态框
+        function openEditUserModal(userId) {
+            // 模拟获取用户数据
+            const user = { id: userId, username: '@user' + userId, display_name: '用户' + userId, first_name: '张', last_name: userId, points: 1000 };
+            
+            document.getElementById('user-form-mode').value = 'edit';
+            document.getElementById('user-modal-title').textContent = '编辑用户';
+            document.getElementById('user_id').value = user.id;
+            document.getElementById('username').value = user.username;
+            document.getElementById('display_name').value = user.display_name;
+            document.getElementById('first_name').value = user.first_name;
+            document.getElementById('last_name').value = user.last_name;
+            document.getElementById('points').value = user.points;
+            
+            currentEditId = userId;
+            userModal.show();
+        }
+        
+        // 打开添加老师模态框
+        function openAddTeacherModal() {
+            document.getElementById('teacher-form-mode').value = 'add';
+            document.getElementById('teacher-modal-title').textContent = '添加老师';
+            document.getElementById('teacher-form').reset();
+            document.getElementById('teacher_id').value = '';
+            teacherModal.show();
+        }
+        
+        // 打开编辑老师模态框
+        function openEditTeacherModal(teacherId) {
+            // 模拟获取老师数据
+            const teacher = { 
+                id: teacherId, 
+                nickname: '老师' + teacherId, 
+                age: 30 + parseInt(teacherId), 
+                region: '北京', 
+                service_type: '维修', 
+                price: '800p', 
+                status: 'approved' 
+            };
+            
+            document.getElementById('teacher-form-mode').value = 'edit';
+            document.getElementById('teacher-modal-title').textContent = '编辑老师';
+            document.getElementById('teacher_id').value = teacher.id;
+            document.getElementById('nickname').value = teacher.nickname;
+            document.getElementById('age').value = teacher.age;
+            document.getElementById('region').value = teacher.region;
+            document.getElementById('service_type').value = teacher.service_type;
+            document.getElementById('price').value = teacher.price;
+            document.getElementById('status').value = teacher.status;
+            
+            currentEditId = teacherId;
+            teacherModal.show();
+        }
+        
+        // 打开添加关键词模态框
+        function openAddKeywordModal() {
+            document.getElementById('keyword-form-mode').value = 'add';
+            document.getElementById('keyword-modal-title').textContent = '添加关键词';
+            document.getElementById('keyword-form').reset();
+            document.getElementById('keyword_id').value = '';
+            document.getElementById('is_active').checked = true;
+            keywordModal.show();
+        }
+        
+        // 打开编辑关键词模态框
+        function openEditKeywordModal(keywordId) {
+            // 模拟获取关键词数据
+            const keyword = { 
+                id: keywordId, 
+                keyword: '关键词' + keywordId, 
+                response: '这是关键词' + keywordId + '的回复内容', 
+                is_active: true 
+            };
+            
+            document.getElementById('keyword-form-mode').value = 'edit';
+            document.getElementById('keyword-modal-title').textContent = '编辑关键词';
+            document.getElementById('keyword_id').value = keyword.id;
+            document.getElementById('keyword_text').value = keyword.keyword;
+            document.getElementById('response_text').value = keyword.response;
+            document.getElementById('is_active').checked = keyword.is_active;
+            
+            currentEditId = keywordId;
+            keywordModal.show();
+        }
+        
+        // 打开添加禁言词模态框
+        function openAddBannedModal() {
+            document.getElementById('banned-form-mode').value = 'add';
+            document.getElementById('banned-modal-title').textContent = '添加禁言词';
+            document.getElementById('banned-form').reset();
+            document.getElementById('banned_id').value = '';
+            bannedModal.show();
+        }
+        
+        // 打开编辑禁言词模态框
+        function openEditBannedModal(bannedId, bannedText) {
+            document.getElementById('banned-form-mode').value = 'edit';
+            document.getElementById('banned-modal-title').textContent = '编辑禁言词';
+            document.getElementById('banned_id').value = bannedId;
+            document.getElementById('banned_text').value = bannedText;
+            
+            currentEditId = bannedId;
+            bannedModal.show();
+        }
+        
+        // 打开积分调整模态框
+        function openPointsModal(userId, userName, userPoints) {
+            document.getElementById('points_user_id').value = userId;
+            document.getElementById('points_username').value = userName;
+            document.getElementById('current_points').value = userPoints;
+            document.getElementById('points_change').value = '';
+            
+            pointsModal.show();
+        }
+        
+        // 处理用户表单提交
+        function handleUserFormSubmit(e) {
+            e.preventDefault();
+            
+            const mode = document.getElementById('user-form-mode').value;
+            const userData = {
+                id: document.getElementById('user_id').value,
+                username: document.getElementById('username').value,
+                display_name: document.getElementById('display_name').value,
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                points: document.getElementById('points').value
+            };
+            
+            // 模拟API请求
+            setTimeout(() => {
+                userModal.hide();
+                loadUsersData();
+                
+                // 显示成功提示
+                showAlert(mode === 'add' ? '用户添加成功' : '用户编辑成功', 'success');
+            }, 500);
+        }
+        
+        // 处理老师表单提交
+        function handleTeacherFormSubmit(e) {
+            e.preventDefault();
+            
+            const mode = document.getElementById('teacher-form-mode').value;
+            const teacherData = {
+                id: document.getElementById('teacher_id').value,
+                nickname: document.getElementById('nickname').value,
+                age: document.getElementById('age').value,
+                region: document.getElementById('region').value,
+                telegram_account: document.getElementById('telegram_account').value,
+                channel: document.getElementById('channel').value,
+                service_type: document.getElementById('service_type').value,
+                price: document.getElementById('price').value,
+                intro: document.getElementById('intro').value,
+                status: document.getElementById('status').value
+            };
+            
+            // 模拟API请求
+            setTimeout(() => {
+                teacherModal.hide();
+                loadTeachersData();
+                
+                // 显示成功提示
+                showAlert(mode === 'add' ? '老师添加成功' : '老师编辑成功', 'success');
+            }, 500);
+        }
+        
+        // 处理关键词表单提交
+        function handleKeywordFormSubmit(e) {
+            e.preventDefault();
+            
+            const mode = document.getElementById('keyword-form-mode').value;
+            const keywordData = {
+                id: document.getElementById('keyword_id').value,
+                keyword: document.getElementById('keyword_text').value,
+                response: document.getElementById('response_text').value,
+                is_active: document.getElementById('is_active').checked
+            };
+            
+            // 模拟API请求
+            setTimeout(() => {
+                keywordModal.hide();
+                loadKeywordsData();
+                
+                // 显示成功提示
+                showAlert(mode === 'add' ? '关键词添加成功' : '关键词编辑成功', 'success');
+            }, 500);
+        }
+        
+        // 处理禁言词表单提交
+        function handleBannedFormSubmit(e) {
+            e.preventDefault();
+            
+            const mode = document.getElementById('banned-form-mode').value;
+            const bannedData = {
+                id: document.getElementById('banned_id').value,
+                text: document.getElementById('banned_text').value
+            };
+            
+            // 模拟API请求
+            setTimeout(() => {
+                bannedModal.hide();
+                loadBannedKeywordsData();
+                
+                // 显示成功提示
+                showAlert(mode === 'add' ? '禁言词添加成功' : '禁言词编辑成功', 'success');
+            }, 500);
+        }
+        
+        // 处理积分调整表单提交
+        function handlePointsFormSubmit(e) {
+            e.preventDefault();
+            
+            const userId = document.getElementById('points_user_id').value;
+            const change = document.getElementById('points_change').value;
+            
+            // 模拟API请求
+            setTimeout(() => {
+                pointsModal.hide();
+                loadUsersData();
+                
+                // 显示成功提示
+                showAlert('积分调整成功', 'success');
+            }, 500);
+        }
+        
+        // 确认删除
+        function confirmDelete() {
+            if (!currentDeleteInfo) return;
+            
+            // 模拟API请求
+            setTimeout(() => {
+                confirmDeleteModal.hide();
+                
+                // 根据类型重新加载对应数据
+                switch(currentDeleteInfo.type) {
+                    case 'user':
+                        loadUsersData();
+                        break;
+                    case 'teacher':
+                        loadTeachersData();
+                        break;
+                    case 'keyword':
+                        loadKeywordsData();
+                        break;
+                    case 'banned':
+                        loadBannedKeywordsData();
+                        break;
+                }
+                
+                // 显示成功提示
+                showAlert('删除成功', 'success');
+                currentDeleteInfo = null;
+            }, 500);
+        }
+        
+        // 显示加载指示器
+        function showLoader() {
+            document.getElementById('data-loader').classList.remove('hidden');
+        }
+        
+        // 隐藏加载指示器
+        function hideLoader() {
+            document.getElementById('data-loader').classList.add('hidden');
+        }
+        
+        // 显示数据加载完成提示
+        function showDataLoadedAlert() {
+            const alert = document.getElementById('data-loaded-alert');
+            alert.classList.remove('hidden');
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                alert.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // 显示提示信息
+        function showAlert(message, type = 'info') {
+            // 创建临时提示元素
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} fixed top-20 right-5 z-50 fade-in`;
+            alert.role = 'alert';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                alert.classList.remove('fade-in');
+                alert.classList.add('fade-out');
+                setTimeout(() => {
+                    document.body.removeChild(alert);
+                }, 500);
+            }, 3000);
+            
+            // 点击关闭按钮移除
+            alert.querySelector('.btn-close').addEventListener('click', () => {
+                document.body.removeChild(alert);
+            });
+        }
+        
+        // 切换移动端侧边栏
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const panel = document.getElementById('sidebar-panel');
+            
+            sidebar.classList.toggle('hidden');
+            setTimeout(() => {
+                panel.classList.toggle('-translate-x-full');
+            }, 10);
+        }
+        
+        // 关闭移动端侧边栏
+        function closeMobileSidebar() {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const panel = document.getElementById('sidebar-panel');
+            
+            panel.classList.add('-translate-x-full');
+            setTimeout(() => {
+                sidebar.classList.add('hidden');
+            }, 300);
+        }
+        
+        // 激活侧边栏项
+        function activateSidebarItem(section) {
+            document.querySelectorAll('.sidebar-icon').forEach(item => {
+                item.classList.remove('sidebar-icon-active');
+                if (item.getAttribute('data-section') === section) {
+                    item.classList.add('sidebar-icon-active');
+                }
+            });
+        }
+        
+        // 滚动到指定区域
+        function scrollToSection(section) {
+            const element = document.getElementById(`${section}-section`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
 </body>
 </html>

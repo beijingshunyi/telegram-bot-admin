@@ -1,7 +1,3 @@
-// 配置信息 - 与 Cloudflare Worker 保持一致
-const API_URL = "https://telegram-bot.jbk123jbk.workers.dev/admin-api";
-const ADMIN_KEY = "MySuperSecureKey123!"; // 务必与 Worker 里的密钥一致
-
 // 当前编辑的项ID（用于区分新增和编辑操作）
 let currentEditId = null;
 let currentPointsUserId = null;
@@ -9,9 +5,14 @@ let currentPointsUserId = null;
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function () {
   console.log('管理后台初始化');
+  // 检查配置是否加载
+  if (typeof config === 'undefined') {
+    showAlert('配置文件加载失败，请检查config.js', 'error');
+    return;
+  }
+  
   loadRealData(); // 加载真实数据
   setupEventListeners(); // 绑定按钮事件
-  setupModalListeners(); // 绑定模态框事件
 });
 
 // 加载所有数据（用户、老师、关键词、禁言词）
@@ -45,21 +46,16 @@ async function loadRealData() {
 // 绑定页面按钮事件
 function setupEventListeners() {
   // 添加按钮事件
-  document.getElementById('add-user-btn')?.addEventListener('click', () => openUserModal());
-  document.getElementById('add-teacher-btn')?.addEventListener('click', () => openTeacherModal());
-  document.getElementById('add-keyword-btn')?.addEventListener('click', () => openKeywordModal());
-  document.getElementById('add-banned-btn')?.addEventListener('click', () => openBannedKeywordModal());
+  document.getElementById('add-user-btn')?.addEventListener('click', openUserModal);
+  document.getElementById('add-teacher-btn')?.addEventListener('click', openTeacherModal);
+  document.getElementById('add-keyword-btn')?.addEventListener('click', openKeywordModal);
+  document.getElementById('add-banned-btn')?.addEventListener('click', openBannedKeywordModal);
   
   // 刷新按钮事件
   document.getElementById('refresh-data')?.addEventListener('click', loadRealData);
   
-  // 积分调整表单提交事件
-  document.getElementById('points-form')?.addEventListener('submit', handlePointsAdjustment);
-}
-
-// 绑定模态框相关事件
-function setupModalListeners() {
   // 表单提交事件
+  document.getElementById('points-form')?.addEventListener('submit', handlePointsAdjustment);
   document.getElementById('user-form')?.addEventListener('submit', handleUserSubmit);
   document.getElementById('teacher-form')?.addEventListener('submit', handleTeacherSubmit);
   document.getElementById('keyword-form')?.addEventListener('submit', handleKeywordSubmit);
@@ -71,7 +67,7 @@ function setupModalListeners() {
     const modal = document.getElementById(modalId);
     modal?.addEventListener('hidden.bs.modal', function() {
       const form = this.querySelector('form');
-      form?.reset();
+      if (form) form.reset();
       currentEditId = null; // 重置编辑ID
       currentPointsUserId = null; // 重置积分调整用户ID
     });
@@ -84,11 +80,11 @@ async function fetchData(table, action, data = null) {
     const requestData = { action, table };
     if (data) requestData.data = data;
 
-    const response = await fetch(API_URL, {
+    const response = await fetch(config.API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Admin-Key": ADMIN_KEY
+        "Admin-Key": config.ADMIN_KEY
       },
       body: JSON.stringify(requestData),
       timeout: 10000
@@ -96,7 +92,7 @@ async function fetchData(table, action, data = null) {
 
     if (!response.ok) {
       const errorMsg = await response.json().catch(() => ({ message: '未知错误' }));
-      throw new Error(`API 请求失败：${errorMsg.message}（状态码：${response.status}）`);
+      throw new Error(`API 请求失败：${errorMsg.message || '服务器错误'}（状态码：${response.status}）`);
     }
 
     return await response.json();
@@ -247,7 +243,6 @@ function renderBannedKeywords(keywords) {
         <td colspan="2" class="text-center py-3 text-muted">暂无禁言词数据，点击“添加禁言词”创建</td>
       </tr>
     `;
-    return;
     return;
   }
 
@@ -554,4 +549,3 @@ window.deleteTeacher = deleteTeacher;
 window.deleteKeyword = deleteKeyword;
 window.deleteBannedKeyword = deleteBannedKeyword;
 window.openPointsModal = openPointsModal;
-    

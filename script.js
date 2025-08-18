@@ -4,6 +4,7 @@ const ADMIN_KEY = "MySuperSecureKey123!"; // 务必与 Worker 里的密钥一致
 
 // 当前编辑的项ID（用于区分新增和编辑操作）
 let currentEditId = null;
+let currentPointsUserId = null;
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function () {
@@ -51,6 +52,9 @@ function setupEventListeners() {
   
   // 刷新按钮事件
   document.getElementById('refresh-data')?.addEventListener('click', loadRealData);
+  
+  // 积分调整表单提交事件
+  document.getElementById('points-form')?.addEventListener('submit', handlePointsAdjustment);
 }
 
 // 绑定模态框相关事件
@@ -62,13 +66,14 @@ function setupModalListeners() {
   document.getElementById('banned-form')?.addEventListener('submit', handleBannedKeywordSubmit);
   
   // 模态框关闭事件（重置表单）
-  const modals = ['user-modal', 'teacher-modal', 'keyword-modal', 'banned-modal'];
+  const modals = ['user-modal', 'teacher-modal', 'keyword-modal', 'banned-modal', 'points-modal'];
   modals.forEach(modalId => {
     const modal = document.getElementById(modalId);
     modal?.addEventListener('hidden.bs.modal', function() {
       const form = this.querySelector('form');
       form?.reset();
       currentEditId = null; // 重置编辑ID
+      currentPointsUserId = null; // 重置积分调整用户ID
     });
   });
 }
@@ -128,7 +133,7 @@ function showLoading(show) {
   }
 }
 
-// 渲染用户数据 - 增加显示用户设置的名称
+// 渲染用户数据
 function renderUsers(users) {
   const container = document.getElementById('users-container');
   if (!container) return;
@@ -146,13 +151,14 @@ function renderUsers(users) {
     <tr>
       <td>${user.user_id}</td>
       <td>${user.username || '-'}</td>
-      <td>${user.display_name || '-'}</td> <!-- 显示用户设置的名称 -->
+      <td>${user.display_name || '-'}</td>
       <td>${user.first_name || ''} ${user.last_name || ''}</td>
       <td>${user.points || 0}</td>
       <td>${user.last_sign_date || '-'}</td>
       <td>
         <div class="btn-group btn-group-sm">
           <button class="btn btn-warning" onclick="editUser(${JSON.stringify(user)})">编辑</button>
+          <button class="btn btn-success" onclick="openPointsModal(${JSON.stringify(user)})">调整积分</button>
           <button class="btn btn-danger" onclick="deleteUser(${user.user_id})">删除</button>
         </div>
       </td>
@@ -181,10 +187,10 @@ function renderTeachers(teachers) {
       <td>${teacher.age}</td>
       <td>${teacher.region}</td>
       <td>${teacher.service_type}</td>
-      <td>${teacher.price || '-'}</td> <!-- 显示价格字段 -->
+      <td>${teacher.price}</td>
       <td>
-        <span class="badge bg-${teacher.status === 'approved' ? 'success' : 'warning'}">
-          ${teacher.status === 'approved' ? '已认证' : '待审核'}
+        <span class="badge bg-${teacher.status === 'approved' ? 'success' : teacher.status === 'pending' ? 'warning' : 'danger'}">
+          ${teacher.status === 'approved' ? '已认证' : teacher.status === 'pending' ? '待审核' : '已拒绝'}
         </span>
       </td>
       <td>
@@ -242,6 +248,7 @@ function renderBannedKeywords(keywords) {
       </tr>
     `;
     return;
+    return;
   }
 
   container.innerHTML = keywords.map(keyword => `
@@ -254,7 +261,7 @@ function renderBannedKeywords(keywords) {
   `).join('');
 }
 
-// 用户模态框操作 - 增加用户设置名称字段
+// 用户模态框操作
 function openUserModal() {
   currentEditId = null;
   document.getElementById('user-modal-title').textContent = '添加用户';
@@ -266,7 +273,7 @@ function editUser(user) {
   currentEditId = user.user_id;
   document.getElementById('user-modal-title').textContent = '编辑用户';
   
-  // 填充表单数据，包括用户设置的名称
+  // 填充表单数据
   document.getElementById('user_id').value = user.user_id;
   document.getElementById('username').value = user.username || '';
   document.getElementById('display_name').value = user.display_name || '';
@@ -283,10 +290,10 @@ async function handleUserSubmit(e) {
   const formData = {
     user_id: parseInt(document.getElementById('user_id').value),
     username: document.getElementById('username').value,
-    display_name: document.getElementById('display_name').value, // 保存用户设置的名称
+    display_name: document.getElementById('display_name').value,
     first_name: document.getElementById('first_name').value,
     last_name: document.getElementById('last_name').value,
-    points: parseInt(document.getElementById('points').value)
+    points: parseInt(document.getElementById('points').value) || 0
   };
 
   try {
@@ -310,7 +317,7 @@ async function handleUserSubmit(e) {
 async function deleteUser(userId) {
   if (confirm('确定要删除这个用户吗？此操作不可恢复！')) {
     try {
-      await fetchData('users', 'delete', { id: userId });
+      await fetchData('users', 'delete', { user_id: userId });
       showAlert('用户删除成功', 'success');
       loadRealData();
     } catch (error) {
@@ -319,10 +326,55 @@ async function deleteUser(userId) {
   }
 }
 
-// 老师模态框操作 - 增加价格字段
+// 积分调整模态框
+function openPointsModal(user) {
+  currentPointsUserId = user.user_id;
+  
+  // 填充表单数据
+  document.getElementById('points_user_id').value = user.user_id;
+  document.getElementById('points_username').value = user.display_name || user.username || `${user.first_name} ${user.last_name}`;
+  document.getElementById('current_points').value = user.points || 0;
+  document.getElementById('points_change').value = '';
+  
+  const pointsModal = new bootstrap.Modal(document.getElementById('points-modal'));
+  pointsModal.show();
+}
+
+async function handlePointsAdjustment(e) {
+  e.preventDefault();
+  
+  if (!currentPointsUserId) return;
+  
+  const pointsChange = parseInt(document.getElementById('points_change').value) || 0;
+  
+  if (pointsChange === 0) {
+    showAlert('请输入积分变动值', 'warning');
+    return;
+  }
+  
+  try {
+    const result = await fetchData('users', 'adjust_points', {
+      user_id: currentPointsUserId,
+      points_change: pointsChange
+    });
+    
+    showAlert(`积分调整成功！新积分: ${result.new_points}`, 'success');
+    
+    // 关闭模态框并刷新数据
+    const modal = bootstrap.Modal.getInstance(document.getElementById('points-modal'));
+    modal.hide();
+    loadRealData();
+  } catch (error) {
+    console.error('积分调整失败:', error);
+  }
+}
+
+// 老师模态框操作
 function openTeacherModal() {
   currentEditId = null;
   document.getElementById('teacher-modal-title').textContent = '添加老师';
+  // 清空ID输入框，新增时不需要ID
+  document.getElementById('teacher_id').value = '';
   const teacherModal = new bootstrap.Modal(document.getElementById('teacher-modal'));
   teacherModal.show();
 }
@@ -331,7 +383,7 @@ function editTeacher(teacher) {
   currentEditId = teacher.id;
   document.getElementById('teacher-modal-title').textContent = '编辑老师';
   
-  // 填充表单数据，包括价格字段
+  // 填充表单数据
   document.getElementById('teacher_id').value = teacher.id;
   document.getElementById('nickname').value = teacher.nickname;
   document.getElementById('age').value = teacher.age;
@@ -339,7 +391,7 @@ function editTeacher(teacher) {
   document.getElementById('telegram_account').value = teacher.telegram_account || '';
   document.getElementById('channel').value = teacher.channel || '';
   document.getElementById('service_type').value = teacher.service_type;
-  document.getElementById('price').value = teacher.price || ''; // 价格字段
+  document.getElementById('price').value = teacher.price;
   document.getElementById('intro').value = teacher.intro || '';
   document.getElementById('status').value = teacher.status;
   
@@ -350,14 +402,14 @@ function editTeacher(teacher) {
 async function handleTeacherSubmit(e) {
   e.preventDefault();
   const formData = {
-    id: parseInt(document.getElementById('teacher_id').value),
+    id: currentEditId ? parseInt(document.getElementById('teacher_id').value) : null,
     nickname: document.getElementById('nickname').value,
     age: parseInt(document.getElementById('age').value),
     region: document.getElementById('region').value,
     telegram_account: document.getElementById('telegram_account').value,
     channel: document.getElementById('channel').value,
     service_type: document.getElementById('service_type').value,
-    price: document.getElementById('price').value, // 保存价格
+    price: document.getElementById('price').value,
     intro: document.getElementById('intro').value,
     status: document.getElementById('status').value
   };
@@ -396,6 +448,7 @@ async function deleteTeacher(teacherId) {
 function openKeywordModal() {
   currentEditId = null;
   document.getElementById('keyword-modal-title').textContent = '添加关键词';
+  document.getElementById('keyword_id').value = '';
   const keywordModal = new bootstrap.Modal(document.getElementById('keyword-modal'));
   keywordModal.show();
 }
@@ -500,3 +553,5 @@ window.deleteUser = deleteUser;
 window.deleteTeacher = deleteTeacher;
 window.deleteKeyword = deleteKeyword;
 window.deleteBannedKeyword = deleteBannedKeyword;
+window.openPointsModal = openPointsModal;
+    

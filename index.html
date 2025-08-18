@@ -1,403 +1,571 @@
-const SUPABASE_URL = "https://tekuxjnnwtqmygibvwux.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRla3V4am5ud3RxbXlnaWJ2d3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzNDUzNjAsImV4cCI6MjA3MDkyMTM2MH0.RGmuF44husXoJP8y4U1Gx7HqQJ6MsYZVl6_vHtG-KJY";
-const BOT_TOKEN = "8341196303:AAFbT_px8I12_q2b7AI_c00N3nHzFwLb4pg";
-const ADMIN_ID = 8392100400;
-const CHANNEL_IDS = ["-1002841497873", "-1002795304513", "-1002834136499", "-1002615160035"];
-const GROUP_IDS = ["-1002737769800", "-1002735235059"];
-const ADMIN_API_KEY = "MySuperSecureKey123!"; 
-
-// 处理OPTIONS请求
-function handleOptions() {
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Admin-Key',
-      'Access-Control-Max-Age': '86400'
-    }
-  });
-}
-
-// 设置CORS头
-function setCorsHeaders(response) {
-  const headers = new Headers(response.headers);
-  headers.set('Access-Control-Allow-Origin', '*');
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers: headers
-  });
-}
-
-async function handleRequest(request) {
-  try {
-    const url = new URL(request.url);
-    
-    if (request.method === "OPTIONS") {
-      return handleOptions();
-    }
-
-    // 测试数据库连接
-    if (request.method === "GET" && url.pathname === "/test-db") {
-      const response = await testDatabaseConnection();
-      return setCorsHeaders(response);
-    }
-
-    // 定时任务
-    if (request.method === "GET" && url.pathname === "/send-random-teacher") {
-      const response = await handleSendRandomTeacher();
-      return setCorsHeaders(response);
-    }
-
-    // 后台管理API
-    if (request.method === "POST" && url.pathname === "/admin-api") {
-      const response = await handleAdminAPI(request);
-      return setCorsHeaders(response);
-    }
-
-    // Telegram更新处理
-    if (request.method === "POST") {
-      const update = await request.json();
-      return handleUpdate(update);
-    }
-
-    return new Response("Telegram Bot is running");
-  } catch (e) {
-    console.error("全局错误:", e);
-    return setCorsHeaders(new Response(JSON.stringify({ 
-      error: "服务器错误", 
-      details: e.message 
-    }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    }));
-  }
-}
-
-// 测试数据库连接
-async function testDatabaseConnection() {
-  try {
-    const users = await supabaseFetchAll('users');
-    return new Response(JSON.stringify({
-      status: "success",
-      users_count: users.length
-    }), {
-      headers: { "Content-Type": "application/json" }
-    });
-  } catch (error) {
-    return new Response(JSON.stringify({
-      status: "error",
-      message: error.message
-    }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-}
-
-// 管理员API处理
-async function handleAdminAPI(request) {
-  const apiKey = request.headers.get('Admin-Key');
-
-  console.log("收到的API密钥:", apiKey ? "存在" : "不存在");
-  console.log("预期的API密钥:", ADMIN_API_KEY);
-  
-  if (!apiKey || apiKey !== ADMIN_API_KEY) {
-    console.warn(`密钥验证失败: 收到${apiKey || '空值'}`);
-    return new Response(JSON.stringify({ 
-      error: "Unauthorized",
-      message: "管理员密钥不正确"
-    }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-
-  try {
-    const { action, table, data, filter } = await request.json();
-
-    const validTables = ['users', 'teachers', 'keywords', 'banned_keywords'];
-    if (!validTables.includes(table)) {
-      throw new Error(`非法表名: ${table}`);
-    }
-
-    switch (action) {
-      case "get":
-        const records = await supabaseFetchAll(table, filter);
-        return new Response(JSON.stringify(records), {
-          headers: { "Content-Type": "application/json" }
-        });
-      case "update":
-        await supabaseUpsert(table, data, 'id');
-        return new Response(JSON.stringify({ status: "success" }), {
-          headers: { "Content-Type": "application/json" }
-        });
-      case "insert":
-        await supabaseInsert(table, data);
-        return new Response(JSON.stringify({ status: "success" }), {
-          headers: { "Content-Type": "application/json" }
-        });
-      case "delete":
-        await supabaseDelete(table, data.id);
-        return new Response(JSON.stringify({ status: "success" }), {
-          headers: { "Content-Type": "application/json" }
-        });
-      default:
-        return new Response(JSON.stringify({ error: "Invalid action" }), { status: 400 });
-    }
-  } catch (error) {
-    console.error("管理API错误:", error);
-    return new Response(JSON.stringify({ 
-      error: "数据库操作失败",
-      details: error.message 
-    }), { 
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-}
-
-// Telegram消息处理
-async function handleUpdate(update) {
-  if (!update.message) return new Response("OK");
-  
-  const { message } = update;
-  const chatId = message.chat.id;
-  const userId = message.from.id;
-  const text = message.text || "";
-  
-  console.log(`收到消息: ${text}`);
-  
-  const keywordResponse = await handleKeywordReply(text, chatId);
-  if (keywordResponse) return keywordResponse;
-  
-  const banResponse = await handleBannedKeyword(text, message);
-  if (banResponse) return banResponse;
-  
-  if (text === "签到") {
-    return handleSign(chatId, userId, message.from);
-  }
-  
-  if (text === "积分") {
-    return handlePoints(chatId, userId);
-  }
-  
-  if (text === "积分排行") {
-    return handlePointsRanking(chatId);
-  }
-  
-  if (text === "上传老师") {
-    const template = "📸 请发送照片和老师信息，格式如下：\n\n花名,年龄,地区,Telegram账号,频道链接,服务类型,修车费,自我介绍\n\n示例：\n甜甜,18,昌平天通苑,@lisifu,https://t.me/lisifu_channel,毒龙 69 深喉等,600p 1200pp,温柔体贴 不催人 不机车";
-    return sendMessage(chatId, template);
-  }
-  
-  if (message.photo) {
-    return handlePhotoMessage(message, chatId);
-  }
-  
-  return new Response("OK");
-}
-
-// 签到功能
-async function handleSign(chatId, userId, userInfo) {
-  try {
-    const today = new Date().toISOString().split('T')[0];
-    const user = await supabaseFetch('users', `user_id=eq.${userId}`);
-    
-    if (user && user.last_sign_date === today) {
-      return sendMessage(chatId, "❌ 您今天已经签到过了！", message.message_id);
-    }
-    
-    const points = user ? (user.points || 0) + 10 : 10;
-    
-    const userData = {
-      user_id: userId,
-      points,
-      last_sign_date: today,
-      username: userInfo.username || "",
-      first_name: userInfo.first_name || "",
-      last_name: userInfo.last_name || "",
-      display_name: userInfo.display_name || "" 
-    };
-    
-    await supabaseUpsert('users', userData, 'user_id');
-    
-    const todaySigns = await supabaseFetchAll('users', `last_sign_date=eq.${today}`);
-    const signRank = todaySigns.length;
-    
-    return sendMessage(chatId, `🎉 签到成功！+10积分\n💰 当前积分: ${points}\n🏆 您是今日第${signRank}位签到成员`, message.message_id);
-  } catch (error) {
-    console.error("签到错误:", error);
-    return sendMessage(chatId, "❌ 签到失败，请稍后再试", message.message_id);
-  }
-}
-
-// 积分查询
-async function handlePoints(chatId, userId) {
-  try {
-    const user = await supabaseFetch('users', `user_id=eq.${userId}`);
-    const points = user ? (user.points || 0) : 0;
-    
-    const allUsers = await supabaseFetchAll('users');
-    allUsers.sort((a, b) => (b.points || 0) - (a.points || 0));
-    const userRank = allUsers.findIndex(u => u.user_id === userId) + 1;
-    
-    const displayName = user.display_name || `${user.first_name} ${user.last_name}` || user.username || '未知用户';
-    return sendMessage(chatId, `💰 ${displayName}的当前积分: ${points}\n🏆 在本群排名: ${userRank}/${allUsers.length}`, message.message_id);
-  } catch (error) {
-    console.error("积分查询错误:", error);
-    return sendMessage(chatId, "❌ 查询积分失败", message.message_id);
-  }
-}
-
-// 积分排行
-async function handlePointsRanking(chatId) {
-  try {
-    const allUsers = await supabaseFetchAll('users');
-    allUsers.sort((a, b) => (b.points || 0) - (a.points || 0));
-    
-    let rankMsg = "🏆 积分排行榜 TOP 10 🏆\n\n";
-    const topUsers = allUsers.slice(0, 10);
-    
-    topUsers.forEach((user, index) => {
-      const displayName = user.display_name || `${user.first_name} ${user.last_name}` || user.username || '未知用户';
-      rankMsg += `${index + 1}. ${displayName}: ${user.points || 0}分\n`;
-    });
-    
-    return sendMessage(chatId, rankMsg);
-  } catch (error) {
-    console.error("积分排名错误:", error);
-    return sendMessage(chatId, "❌ 获取积分排名失败", message.message_id);
-  }
-}
-
-// 关键词回复功能
-async function handleKeywordReply(text, chatId) {
-  const keywords = await getKeywordReplies();
-  const lowerText = text.toLowerCase();
-  
-  for (const [keyword, reply] of Object.entries(keywords)) {
-    if (lowerText.includes(keyword.toLowerCase())) {
-      await sendMessage(chatId, reply, message.message_id);
-      return new Response("OK");
-    }
-  }
-  return null;
-}
-
-// 获取关键词回复
-async function getKeywordReplies() {
-  try {
-    const keywords = await supabaseFetchAll('keywords', 'is_active=eq.true');
-    const keywordMap = {};
-    keywords.forEach(k => {
-      keywordMap[k.keyword] = k.response;
-    });
-    return keywordMap;
-  } catch (error) {
-    console.error("获取关键词失败:", error);
-    return {
-      "你好": "您好！有什么可以帮您？",
-      "帮助": "这里是帮助信息：\n- 签到：发送「签到」\n- 积分查询：发送「积分」",
-      "价格": "服务价格表：\n- 基础课程：100积分\n- 高级课程：300积分"
-    };
-  }
-}
-
-// 禁言系统
-async function handleBannedKeyword(text, message) {
-  const bannedKeywords = await getBannedKeywords();
-  const lowerText = text.toLowerCase();
-  
-  for (const keyword of bannedKeywords) {
-    if (lowerText.includes(keyword.toLowerCase())) {
-      if (message.chat.type === 'group' || message.chat.type === 'supergroup') {
-        const chatId = message.chat.id;
-        const userId = message.from.id;
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram北京修车超级机器人管理后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0088cc',
+                        secondary: '#36b37e',
+                        accent: '#ff5630',
+                        dark: '#172b4d',
+                        light: '#f4f5f7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .sidebar-icon {
+                @apply flex items-center p-2 text-gray-600 hover:bg-primary hover:bg-opacity-10 hover:text-primary rounded-lg transition-all duration-200;
+            }
+            .sidebar-icon-active {
+                @apply bg-primary bg-opacity-10 text-primary;
+            }
+            .card {
+                @apply bg-white rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg;
+            }
+            .loader {
+                @apply absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-40;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- 侧边栏 -->
+        <aside class="w-64 bg-white shadow-md hidden md:block">
+            <div class="p-5 border-b">
+                <h1 class="text-xl font-bold text-dark flex items-center">
+                    <i class="fa fa-telegram text-primary mr-2"></i>
+                    修车机器人管理
+                </h1>
+            </div>
+            
+            <nav class="p-4">
+                <div class="space-y-1">
+                    <a href="#" class="sidebar-icon sidebar-icon-active">
+                        <i class="fa fa-tachometer w-5 h-5 mr-3"></i>
+                        <span>仪表盘</span>
+                    </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-users w-5 h-5 mr-3"></i>
+                        <span>用户管理</span>
+                    </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-user-md w-5 h-5 mr-3"></i>
+                        <span>老师管理</span>
+                    </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-key w-5 h-5 mr-3"></i>
+                        <span>关键词设置</span>
+                    </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-ban w-5 h-5 mr-3"></i>
+                        <span>禁言词管理</span>
+                    </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-comments w-5 h-5 mr-3"></i>
+                        <span>消息记录</span>
+                    </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-cog w-5 h-5 mr-3"></i>
+                        <span>机器人设置</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
         
-        await deleteMessage(chatId, message.message_id);
-        await restrictChatMember(chatId, userId, 3600);
+        <!-- 主内容区 -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- 顶部导航 -->
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+                <div class="flex items-center md:hidden">
+                    <button id="menu-toggle" class="text-gray-500 hover:text-primary">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                </div>
+                <div class="text-lg font-semibold text-dark">北京修车超级机器人管理后台</div>
+                <div class="flex items-center">
+                    <button id="refresh-data" class="text-gray-500 hover:text-primary mr-4">
+                        <i class="fa fa-refresh text-xl"></i>
+                    </button>
+                    <button class="text-gray-500 hover:text-primary mr-4">
+                        <i class="fa fa-bell text-xl"></i>
+                    </button>
+                    <div class="flex items-center">
+                        <img src="https://picsum.photos/200/200" alt="管理员头像" class="w-8 h-8 rounded-full mr-2">
+                        <span class="hidden md:inline">管理员</span>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- 页面内容 -->
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-50 relative">
+                <!-- 加载指示器 -->
+                <div id="data-loader" class="loader hidden">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-dark">仪表盘</h2>
+                    <p class="text-gray-500">监控机器人运行状态和关键数据</p>
+                </div>
+                
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">活跃用户</p>
+                                <h3 class="text-2xl font-bold mt-1">2,453</h3>
+                                <p class="text-green-500 text-sm mt-1"><i class="fa fa-arrow-up"></i> 12.5% 较上周</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-primary bg-opacity-10 flex items-center justify-center">
+                                <i class="fa fa-users text-primary text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">今日咨询</p>
+                                <h3 class="text-2xl font-bold mt-1">156</h3>
+                                <p class="text-green-500 text-sm mt-1"><i class="fa fa-arrow-up"></i> 8.2% 较昨日</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-secondary bg-opacity-10 flex items-center justify-center">
+                                <i class="fa fa-comments text-secondary text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">老师数量</p>
+                                <h3 class="text-2xl font-bold mt-1">32</h3>
+                                <p class="text-green-500 text-sm mt-1"><i class="fa fa-arrow-up"></i> 3.1% 较昨日</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-accent bg-opacity-10 flex items-center justify-center">
+                                <i class="fa fa-user-md text-accent text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 用户管理区域 -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">用户管理</h3>
+                        <button id="add-user-btn" class="btn btn-primary">
+                            <i class="fa fa-plus mr-1"></i> 添加用户
+                        </button>
+                    </div>
+                    <div class="card overflow-x-auto">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>用户ID</th>
+                                    <th>Telegram用户名</th>
+                                    <th>用户设置名称</th>
+                                    <th>姓名</th>
+                                    <th>积分</th>
+                                    <th>最后签到</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-container">
+                                <!-- 用户数据将通过JavaScript动态加载 -->
+                                <tr>
+                                    <td colspan="7" class="text-center py-3 text-muted">加载用户数据中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 老师管理区域 -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">老师管理</h3>
+                        <button id="add-teacher-btn" class="btn btn-primary">
+                            <i class="fa fa-plus mr-1"></i> 添加老师
+                        </button>
+                    </div>
+                    <div class="card overflow-x-auto">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>花名</th>
+                                    <th>年龄</th>
+                                    <th>地区</th>
+                                    <th>服务类型</th>
+                                    <th>价格</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teachers-container">
+                                <!-- 老师数据将通过JavaScript动态加载 -->
+                                <tr>
+                                    <td colspan="8" class="text-center py-3 text-muted">加载老师数据中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 关键词管理区域 -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">关键词回复</h3>
+                        <button id="add-keyword-btn" class="btn btn-primary">
+                            <i class="fa fa-plus mr-1"></i> 添加关键词
+                        </button>
+                    </div>
+                    <div class="card overflow-x-auto">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>关键词</th>
+                                    <th>回复内容</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keywords-container">
+                                <!-- 关键词数据将通过JavaScript动态加载 -->
+                                <tr>
+                                    <td colspan="4" class="text-center py-3 text-muted">加载关键词数据中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 禁言词管理区域 -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">禁言词管理</h3>
+                        <button id="add-banned-btn" class="btn btn-primary">
+                            <i class="fa fa-plus mr-1"></i> 添加禁言词
+                        </button>
+                    </div>
+                    <div class="card overflow-x-auto">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>禁言词</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="banned-keywords-container">
+                                <!-- 禁言词数据将通过JavaScript动态加载 -->
+                                <tr>
+                                    <td colspan="2" class="text-center py-3 text-muted">加载禁言词数据中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 用户模态框 -->
+    <div class="modal fade" id="user-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="user-modal-title">添加用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="user-form">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="user_id" class="form-label">用户ID</label>
+                            <input type="number" class="form-control" id="user_id" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Telegram用户名</label>
+                            <input type="text" class="form-control" id="username">
+                        </div>
+                        <div class="mb-3">
+                            <label for="display_name" class="form-label">用户设置名称</label>
+                            <input type="text" class="form-control" id="display_name" placeholder="用户在排行榜中显示的名称">
+                        </div>
+                        <div class="mb-3">
+                            <label for="first_name" class="form-label">名</label>
+                            <input type="text" class="form-control" id="first_name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="last_name" class="form-label">姓</label>
+                            <input type="text" class="form-control" id="last_name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="points" class="form-label">积分</label>
+                            <input type="number" class="form-control" id="points" min="0" value="0">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 积分调整模态框 -->
+    <div class="modal fade" id="points-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">调整积分</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="points-form">
+                    <div class="modal-body">
+                        <input type="hidden" id="points_user_id">
+                        <div class="mb-3">
+                            <label for="points_username" class="form-label">用户名</label>
+                            <input type="text" class="form-control" id="points_username" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="current_points" class="form-label">当前积分</label>
+                            <input type="number" class="form-control" id="current_points" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="points_change" class="form-label">积分变动</label>
+                            <input type="number" class="form-control" id="points_change" placeholder="正数增加，负数减少">
+                            <small class="text-muted">输入正数增加积分，负数减少积分（不会低于0）</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-primary">确认调整</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 老师模态框 -->
+    <div class="modal fade" id="teacher-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="teacher-modal-title">添加老师</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="teacher-form">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="teacher_id" class="form-label">ID</label>
+                            <input type="number" class="form-control" id="teacher_id" readonly>
+                            <small class="text-muted">新增时无需填写ID</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nickname" class="form-label">花名</label>
+                            <input type="text" class="form-control" id="nickname" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="age" class="form-label">年龄</label>
+                            <input type="number" class="form-control" id="age" min="18" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="region" class="form-label">地区</label>
+                            <input type="text" class="form-control" id="region" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="telegram_account" class="form-label">Telegram账号</label>
+                            <input type="text" class="form-control" id="telegram_account" placeholder="@username">
+                        </div>
+                        <div class="mb-3">
+                            <label for="channel" class="form-label">频道链接</label>
+                            <input type="url" class="form-control" id="channel" placeholder="https://t.me/...">
+                        </div>
+                        <div class="mb-3">
+                            <label for="service_type" class="form-label">服务类型</label>
+                            <input type="text" class="form-control" id="service_type" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="price" class="form-label">价格</label>
+                            <input type="text" class="form-control" id="price" required placeholder="如: 600p 1200pp">
+                        </div>
+                        <div class="mb-3">
+                            <label for="intro" class="form-label">自我介绍</label>
+                            <textarea class="form-control" id="intro" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">状态</label>
+                            <select class="form-select" id="status" required>
+                                <option value="pending">待审核</option>
+                                <option value="approved">已认证</option>
+                                <option value="rejected">已拒绝</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 关键词模态框 -->
+    <div class="modal fade" id="keyword-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="keyword-modal-title">添加关键词</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="keyword-form">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="keyword_id" class="form-label">ID</label>
+                            <input type="number" class="form-control" id="keyword_id" readonly>
+                            <small class="text-muted">新增时无需填写ID</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="keyword_text" class="form-label">关键词</label>
+                            <input type="text" class="form-control" id="keyword_text" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="response_text" class="form-label">回复内容</label>
+                            <textarea class="form-control" id="response_text" rows="3" required></textarea>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="is_active" checked>
+                            <label class="form-check-label" for="is_active">启用该关键词</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 禁言词模态框 -->
+    <div class="modal fade" id="banned-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="banned-modal-title">添加禁言词</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="banned-form">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="banned_text" class="form-label">禁言词</label>
+                            <input type="text" class="form-control" id="banned_text" required>
+                            <small class="text-muted">用户发送包含该词的消息将被禁言</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 移动端侧边栏 -->
+    <div id="mobile-sidebar" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden md:hidden">
+        <div class="bg-white h-full w-64 transform transition-transform duration-300 -translate-x-full" id="sidebar-panel">
+            <!-- 侧边栏内容与桌面版相同 -->
+            <div class="p-5 border-b">
+                <h1 class="text-xl font-bold text-dark flex items-center">
+                    <i class="fa fa-telegram text-primary mr-2"></i>
+                    修车机器人管理
+                </h1>
+            </div>
+            
+            <nav class="p-4">
+                <div class="space-y-1">
+                    <a href="#" class="sidebar-icon sidebar-icon-active">
+                        <i class="fa fa-tachometer w-5 h-5 mr-3"></i>
+                        <span>仪表盘</span>
+                    </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-users w-5 h-5 mr-3"></i>
+                        <span>用户管理</span>
+                    </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-user-md w-5 h-5 mr-3"></i>
+                        <span>老师管理</span>
+                    </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-key w-5 h-5 mr-3"></i>
+                        <span>关键词设置</span>
+                    </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-ban w-5 h-5 mr-3"></i>
+                        <span>禁言词管理</span>
+                    </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-comments w-5 h-5 mr-3"></i>
+                        <span>消息记录</span>
+                    </a>
+                    <a href="#" class="sidebar-icon">
+                        <i class="fa fa-cog w-5 h-5 mr-3"></i>
+                        <span>机器人设置</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // 侧边栏切换
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileSidebar = document.getElementById('mobile-sidebar');
+            const sidebarPanel = document.getElementById('sidebar-panel');
+            
+            mobileSidebar.classList.remove('hidden');
+            setTimeout(() => {
+                sidebarPanel.classList.remove('-translate-x-full');
+            }, 10);
+        });
         
-        await sendMessage(chatId, `用户 @${message.from.username || message.from.first_name} 因发送违禁词已被禁言1小时。`, message.message_id);
-      }
-      return new Response("OK");
-    }
-  }
-  return null;
-}
-
-// 获取禁言词
-async function getBannedKeywords() {
-  try {
-    const banned = await supabaseFetchAll('banned_keywords');
-    return banned.map(b => b.keyword);
-  } catch (error) {
-    console.error("获取禁言词失败:", error);
-    return ["赌博", "毒品", "诈骗", "广告"];
-  }
-}
-
-// 老师上传功能
-async function handlePhotoMessage(message, chatId) {
-  try {
-    const photo = message.photo[message.photo.length - 1];
-    const photoUrl = await getFileUrl(photo.file_id);
-    const caption = message.caption || "";
+        document.getElementById('mobile-sidebar').addEventListener('click', function(e) {
+            if (e.target === this) {
+                const sidebarPanel = document.getElementById('sidebar-panel');
+                sidebarPanel.classList.add('-translate-x-full');
+                setTimeout(() => {
+                    this.classList.add('hidden');
+                }, 300);
+            }
+        });
+    </script>
+</body>
+</html>
     
-    if (!caption) {
-      return sendMessage(chatId, "❌ 请添加说明文字，格式：花名,年龄,地区,Telegram账号,频道链接,服务类型,修车费,自我介绍", message.message_id);
-    }
-    
-    const fields = caption.split(',').map(field => field.trim());
-    
-    if (fields.length < 8) {
-      return sendMessage(chatId, `❌ 信息格式错误，请按以下格式发送：\n\n花名,年龄,地区,Telegram账号,频道链接,服务类型,修车费,自我介绍\n\n当前字段数: ${fields.length}/8\n\n示例：\n甜甜,18,昌平天通苑,@lisifu,https://t.me/lisifu_channel,毒龙 69 深喉等,600p 1200pp,温柔体贴 不催人 不机车`, message.message_id);
-    }
-    
-    const teacherData = {
-      nickname: fields[0],
-      age: parseInt(fields[1]) || 0,
-      region: fields[2],
-      telegram_account: fields[3],
-      channel: fields[4],
-      service_type: fields[5],
-      price: fields[6], 
-      intro: fields[7],
-      photo_url: photoUrl,
-      status: 'pending'
-    };
-    
-    await supabaseInsert('teachers', teacherData);
-    await sendTeacherToChannels(teacherData);
-    
-    return sendMessage(chatId, "✅ 老师信息已成功上传并分享！", message.message_id);
-  } catch (error) {
-    console.error("照片处理错误:", error);
-    return sendMessage(chatId, `❌ 上传失败: ${error.message}`, message.message_id);
-  }
-}
-
-// 发送老师资料到频道
-async function sendTeacherToChannels(teacher) {
-  try {
-    const caption = `🌟 新老师推荐 🌟\n\n` +
-                   `花名: ${teacher.nickname}\n` +
-                   `年龄: ${teacher.age}\n` +
-                   `地区: ${teacher.region}\n` +
-                   `Telegram账号: ${teacher.telegram_account}\n` +
-                   `频道: ${teacher.channel}\n` +
-                   `服务类型: ${teacher.service_type}\n` +
-                   `费用: ${teacher.price}\n` +
-                   `自我介绍: ${teacher.intro}`;
-
-    for (const channelId of CHANNEL_IDS) {
-      await sendPhotoToChannel(channelId, teacher.photo_url, caption);
-    }
-    
-    for (const groupId of GROUP_IDS) {
-      await sendPhotoToChannel(groupId, teacher.photo_url, caption);
-    }
-  } catch (error) {
-    console.error("发送老师资料到频道失败:", error);
-  }
-}

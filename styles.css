@@ -1,98 +1,82 @@
-/* 全局样式 */
-* {
+/* 基础样式 */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
     margin: 0;
     padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+}
+
+/* 表单样式 */
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
     box-sizing: border-box;
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* 动画效果 */
-.fade-in {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* 导航按钮样式 */
-.nav-btn.active {
-    position: relative;
-}
-
-.nav-btn.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 3px 3px 0 0;
-}
-
-/* 表格行悬停效果 */
-tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.02);
-    transition: background-color 0.2s;
-}
-
-/* 按钮通用样式 */
 button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
     cursor: pointer;
 }
 
-/* 滚动条样式优化 */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+button:hover {
+    background-color: #45a049;
 }
 
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
+/* 导航样式 */
+nav {
+    background-color: #333;
+    color: white;
+    padding: 10px;
 }
 
-::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
+nav a {
+    color: white;
+    margin-right: 15px;
+    text-decoration: none;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: #a1a1a1;
+/* 用户列表样式 */
+.user-item {
+    border-radius: 4px;
 }
 
-/* 模态框动画 */
-#edit-keyword-modal, #worker-params-modal {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
+.ban-button {
+    margin-top: 10px;
+    cursor: pointer;
 }
 
-#edit-keyword-modal:not(.hidden), #worker-params-modal:not(.hidden) {
-    opacity: 1;
-    visibility: visible;
+/* 隐藏元素 */
+.hidden {
+    display: none;
 }
 
-#edit-keyword-modal > div, #worker-params-modal > div {
-    transform: translateY(-20px);
-    transition: transform 0.3s;
+/* 错误提示 */
+.error-message {
+    color: red;
+    margin: 10px 0;
 }
 
-#edit-keyword-modal:not(.hidden) > div, #worker-params-modal:not(.hidden) > div {
-    transform: translateY(0);
-}
-
-/* 加载指示器动画 */
-.fa-circle-o-notch {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+/* 成功提示 */
+.success-message {
+    color: green;
+    margin: 10px 0;
 }

@@ -1,5 +1,5 @@
 // 管理员认证逻辑
-const ADMIN_KEY = "9712202273aA."; // 统一设置的管理员密钥
+const ADMIN_KEY = "9712202273aA"; // 统一设置的管理员密钥
 
 // 检查是否已登录
 function checkAuth() {

@@ -1,61 +1,75 @@
-// 认证模块 - 处理密码验证
-const crypto = require('crypto');
+// 移除require语句，使用浏览器兼容的方式
+// 假设这些模块通过CDN或其他方式已经加载
 
-// 密码哈希函数 - 用于安全存储密码
-function hashPassword(password) {
-  const salt = 'fixed-salt-for-consistency'; // 固定盐值确保验证一致性
-  return crypto.createHmac('sha256', salt)
-    .update(password)
-    .digest('hex');
-}
-
-// 验证密码函数
-function verifyPassword(inputPassword, storedHash) {
-  // 对输入密码进行相同的哈希处理然后比较
-  const inputHash = hashPassword(inputPassword);
-  return inputHash === storedHash;
-}
-
-// 存储的密码哈希 - 基于你提供的密码"9712202273aA."生成
-const validPasswordHash = hashPassword("9712202273aA.");
-
-// 处理认证请求
-function handleAuthentication(req, res) {
-  const { password } = req.body;
-  
-  if (!password) {
-    return res.status(400).send({ message: "请输入密码" });
-  }
-  
-  try {
-    const isAuthenticated = verifyPassword(password, validPasswordHash);
+// 登录功能
+async function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
     
-    if (isAuthenticated) {
-      res.status(200).send({ 
-        success: true, 
-        message: "认证成功" 
-      });
-    } else {
-      res.status(401).send({ 
-        success: false, 
-        message: "密钥不正确，请重新输入" 
-      });
+    try {
+        // 这里使用适合浏览器环境的认证逻辑
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // 登录成功，存储令牌并重定向
+            localStorage.setItem('token', data.token);
+            window.location.href = '/dashboard.html'; // 根据你的实际页面修改
+        } else {
+            alert(data.message || '登录失败，请检查用户名和密码');
+        }
+    } catch (error) {
+        console.error('登录错误:', error);
+        alert('登录时发生错误，请稍后再试');
     }
-  } catch (error) {
-    console.error("认证错误:", error);
-    res.status(500).send({ 
-      success: false, 
-      message: "认证过程出错，请重试" 
-    });
-  }
 }
 
-module.exports = {
-  handleAuthentication,
-  // 仅用于测试目的
-  _test: {
-    hashPassword,
-    verifyPassword,
-    validPasswordHash
-  }
-};
+// 登记/注册功能
+async function register() {
+    const username = document.getElementById('reg-username').value;
+    const password = document.getElementById('reg-password').value;
+    
+    try {
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert('注册成功，请登录');
+            // 可以切换到登录表单
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+        } else {
+            alert(data.message || '注册失败');
+        }
+    } catch (error) {
+        console.error('注册错误:', error);
+        alert('注册时发生错误，请稍后再试');
+    }
+}
+
+// 为按钮添加事件监听器
+document.addEventListener('DOMContentLoaded', () => {
+    const loginButton = document.getElementById('login-button');
+    if (loginButton) {
+        loginButton.addEventListener('click', login);
+    }
+    
+    const registerButton = document.getElementById('register-button');
+    if (registerButton) {
+        registerButton.addEventListener('click', register);
+    }
+});

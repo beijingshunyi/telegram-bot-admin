@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram北京修车超级机器人管理后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- 左侧导航栏 -->
+        <aside id="sidebar" class="bg-gray-800 text-white w-64 flex-shrink-0 hidden md:block">
+            <div class="p-4 border-b border-gray-700">
+                <h1 class="text-xl font-bold">修车机器人管理</h1>
+            </div>
+            <nav class="p-4">
+                <ul>
+                    <li class="mb-2">
+                        <a href="#dashboard" class="nav-link flex items-center p-2 rounded hover:bg-gray-700">
+                            <i class="fa fa-tachometer mr-2"></i> 仪表盘
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#users" class="nav-link flex items-center p-2 rounded hover:bg-gray-700">
+                            <i class="fa fa-users mr-2"></i> 用户管理
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#teachers" class="nav-link flex items-center p-2 rounded hover:bg-gray-700">
+                            <i class="fa fa-user-md mr-2"></i> 老师管理
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#keywords" class="nav-link flex items-center p-2 rounded hover:bg-gray-700">
+                            <i class="fa fa-key mr-2"></i> 关键词回复
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#banned" class="nav-link flex items-center p-2 rounded hover:bg-gray-700">
+                            <i class="fa fa-ban mr-2"></i> 禁言词管理
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#settings" class="nav-link flex items-center p-2 rounded hover:bg-gray-700">
+                            <i class="fa fa-cog mr-2"></i> 系统设置
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#test" class="nav-link flex items-center p-2 rounded hover:bg-gray-700">
+                            <i class="fa fa-check-circle mr-2"></i> 测试连接
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- 顶部导航 -->
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+                <button id="menu-toggle" class="md:hidden text-gray-500 focus:outline-none">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+                <div class="flex items-center">
+                    <h2 class="text-lg font-semibold text-gray-700">管理后台</h2>
+                </div>
+                <div>
+                    <button id="logout-btn" class="text-red-500 hover:text-red-700">
+                        <i class="fa fa-sign-out mr-1"></i> 退出
+                    </button>
+                </div>
+            </header>
+
+            <!-- 内容区域 -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- 登录界面 -->
+                <div id="login-screen" class="max-w-md mx-auto mt-10 bg-white p-8 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-6 text-center">管理员登录</h2>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="admin-key">
+                            管理员密钥
+                        </label>
+                        <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                               id="admin-key" type="password" placeholder="输入管理员密钥">
+                    </div>
+                    <button id="login-btn" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        登录
+                    </button>
+                    <div id="login-error" class="mt-4 text-red-500 hidden"></div>
+                </div>
+
+                <!-- 仪表盘 -->
+                <div id="dashboard-screen" class="hidden">
+                    <h2 class="text-2xl font-bold mb-6">仪表盘</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">总用户数</p>
+                                    <h3 id="total-users" class="text-3xl font-bold mt-1">0</h3>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded-full">
+                                    <i class="fa fa-users text-blue-500 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">老师总数</p>
+                                    <h3 id="total-teachers" class="text-3xl font-bold mt-1">0</h3>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded-full">
+                                    <i class="fa fa-user-md text-green-500 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">关键词数量</p>
+                                    <h3 id="total-keywords" class="text-3xl font-bold mt-1">0</h3>
+                                </div>
+                                <div class="bg-yellow-100 p-3 rounded-full">
+                                    <i class="fa fa-key text-yellow-500 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">今日签到</p>
+                                    <h3 id="today-signs" class="text-3xl font-bold mt-1">0</h3>
+                                </div>
+                                <div class="bg-purple-100 p-3 rounded-full">
+                                    <i class="fa fa-calendar-check-o text-purple-500 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">积分排名前10用户</h3>
+                            <div id="top-users" class="space-y-3">
+                                <!-- 动态填充 -->
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">最近添加的老师</h3>
+                            <div id="recent-teachers" class="space-y-3">
+                                <!-- 动态填充 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户管理 -->
+                <div id="users-screen" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">用户管理</h2>
+                        <div class="flex space-x-2">
+                            <div class="relative">
+                                <input type="text" id="user-search" placeholder="搜索用户..." 
+                                       class="pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fa fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户名</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">显示名称</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">积分</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最后签到</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
+                                <!-- 动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 用户编辑模态框 -->
+                    <div id="user-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-lg w-full max-w-md p-6">
+                            <h3 class="text-xl font-bold mb-4">编辑用户</h3>
+                            <input type="hidden" id="edit-user-id">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2" for="edit-username">
+                                    用户名
+                                </label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                       id="edit-username" type="text" disabled>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2" for="edit-display-name">
+                                    显示名称
+                                </label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                       id="edit-display-name" type="text">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2" for="edit-points">
+                                    积分
+                                </label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                       id="edit-points" type="number" min="0">
+                            </div>
+                            <div class="flex justify-end space-x-3 mt-6">
+                                <button id="cancel-user-edit" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">
+                                    取消
+                                </button>
+                                <button id="save-user-edit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                                    保存
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 老师管理 -->
+                <div id="teachers-screen" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">老师管理</h2>
+                        <button id="add-teacher-btn" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600">
+                            <i class="fa fa-plus mr-1"></i> 添加老师
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">花名</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">年龄</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">地区</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teachers-table-body" class="bg-white divide-y divide-gray-200">
+                                <!-- 动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 老师详情模态框 -->
+                    <div id="teacher-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6">
+                            <h3 class="text-xl font-bold mb-4">老师详情</h3>
+                            <input type="hidden" id="edit-teacher-id">
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-gray-700 mb-2" for="teacher-nickname">
+                                        花名
+                                    </label>
+                                    <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                           id="teacher-nickname" type="text">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2" for="teacher-age">
+                                        年龄
+                                    </label>
+                                    <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                           id="teacher-age" type="number">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2" for="teacher-region">
+                                        地区
+                                    </label>
+                                    <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                           id="teacher-region" type="text">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2" for="teacher-telegram">
+                                        Telegram账号
+                                    </label>
+                                    <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                           id="teacher-telegram" type="text">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2" for="teacher-channel">
+                                        频道链接
+                                    </label>
+                                    <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                           id="teacher-channel" type="text">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2" for="teacher-status">
+                                        状态
+                                    </label>
+                                    <select class="w-full px-3 py-2 border border-gray-300 rounded-md" id="teacher-status">
+                                        <option value="pending">待审核</option>
+                                        <option value="approved">已通过</option>
+                                        <option value="rejected">已拒绝</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2" for="teacher-service">
+                                        服务类型
+                                    </label>
+                                    <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                           id="teacher-service" type="text">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2" for="teacher-cost">
+                                        修车费
+                                    </label>
+                                    <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                           id="teacher-cost" type="text">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label class="block text-gray-700 mb-2" for="teacher-intro">
+                                    自我介绍
+                                </label>
+                                <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                          id="teacher-intro" rows="4"></textarea>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="font-medium mb-3">照片</h4>
+                                <div class="grid grid-cols-3 gap-3" id="teacher-photos">
+                                    <div class="border-2 border-dashed border-gray-300 rounded-md p-3 text-center">
+                                        <input type="text" id="teacher-photo-1" class="w-full text-sm" placeholder="照片URL 1">
+                                    </div>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-md p-3 text-center">
+                                        <input type="text" id="teacher-photo-2" class="w-full text-sm" placeholder="照片URL 2">
+                                    </div>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-md p-3 text-center">
+                                        <input type="text" id="teacher-photo-3" class="w-full text-sm" placeholder="照片URL 3">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="font-medium mb-3">视频</h4>
+                                <input type="text" id="teacher-video" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="视频URL">
+                            </div>
+                            
+                            <div class="flex justify-end space-x-3 mt-6">
+                                <button id="cancel-teacher-edit" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">
+                                    取消
+                                </button>
+                                <button id="save-teacher-edit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                                    保存
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 关键词管理 -->
+                <div id="keywords-screen" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">关键词回复管理</h2>
+                        <button id="add-keyword-btn" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600">
+                            <i class="fa fa-plus mr-1"></i> 添加关键词
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">关键词</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">回复内容</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keywords-table-body" class="bg-white divide-y divide-gray-200">
+                                <!-- 动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 关键词编辑模态框 -->
+                    <div id="keyword-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-lg w-full max-w-2xl p-6">
+                            <h3 class="text-xl font-bold mb-4" id="keyword-modal-title">添加关键词</h3>
+                            <input type="hidden" id="edit-keyword-id">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2" for="keyword-text">
+                                    关键词
+                                </label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                       id="keyword-text" type="text">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2" for="keyword-response">
+                                    回复内容
+                                </label>
+                                <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                          id="keyword-response" rows="4"></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" id="keyword-active" class="form-checkbox text-blue-500" checked>
+                                    <span class="ml-2 text-gray-700">启用</span>
+                                </label>
+                            </div>
+                            <div class="flex justify-end space-x-3 mt-6">
+                                <button id="cancel-keyword-edit" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">
+                                    取消
+                                </button>
+                                <button id="save-keyword-edit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                                    保存
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 禁言词管理 -->
+                <div id="banned-screen" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">禁言词管理</h2>
+                        <button id="add-banned-btn" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600">
+                            <i class="fa fa-plus mr-1"></i> 添加禁言词
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">禁言词</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="banned-table-body" class="bg-white divide-y divide-gray-200">
+                                <!-- 动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 禁言词编辑模态框 -->
+                    <div id="banned-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-lg w-full max-w-md p-6">
+                            <h3 class="text-xl font-bold mb-4" id="banned-modal-title">添加禁言词</h3>
+                            <input type="hidden" id="edit-banned-id">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2" for="banned-keyword">
+                                    禁言词
+                                </label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                       id="banned-keyword" type="text" placeholder="输入禁言词">
+                            </div>
+                            <div class="flex justify-end space-x-3 mt-6">
+                                <button id="cancel-banned-edit" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">
+                                    取消
+                                </button>
+                                <button id="save-banned-edit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                                    保存
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 系统设置 -->
+                <div id="settings-screen" class="hidden">
+                    <h2 class="text-2xl font-bold mb-6">系统设置</h2>
+                    
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <h3 class="text-lg font-semibold mb-4">机器人设置</h3>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2" for="bot-token">
+                                Telegram Bot Token
+                            </label>
+                            <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                   id="bot-token" type="text" value="8341196303:AAFbT_px8I12_q2b7AI_c00N3nHzFwLb4pg" readonly>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2" for="admin-id">
+                                管理员ID
+                            </label>
+                            <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                   id="admin-id" type="text" value="8392100400" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <h3 class="text-lg font-semibold mb-4">数据库设置</h3>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2" for="supabase-url">
+                                Supabase URL
+                            </label>
+                            <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                   id="supabase-url" type="text" value="https://tekuxjnnwtqmygibvwux.supabase.co" readonly>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2" for="supabase-key">
+                                Supabase Key
+                            </label>
+                            <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                   id="supabase-key" type="text" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRla3V4am5ud3RxbXlnaWJ2d3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzNDUzNjAsImV4cCI6MjA3MDkyMTM2MH0.RGmuF44husXoJP8y4U1Gx7HqQJ6MsYZVl6_vHtG-KJY" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">操作</h3>
+                        
+                        <button id="send-random-teacher-btn" class="bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-600 mb-4">
+                            <i class="fa fa-random mr-1"></i> 发送随机老师推荐
+                        </button>
+                        
+                        <button id="test-connection-btn" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600">
+                            <i class="fa fa-check-circle mr-1"></i> 测试数据库连接
+                        </button>
+                        
+                        <div id="test-result" class="mt-4 hidden"></div>
+                    </div>
+                </div>
+
+                <!-- 测试连接 -->
+                <div id="test-screen" class="hidden">
+                    <h2 class="text-2xl font-bold mb-6">测试连接</h2>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">连接状态</h3>
+                        
+                        <div class="mb-4">
+                            <button id="run-test-btn" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
+                                运行测试
+                            </button>
+                        </div>
+                        
+                        <div id="test-output" class="border border-gray-300 rounded-md p-4 bg-gray-50 font-mono text-sm h-64 overflow-y-auto">
+                            测试结果将显示在这里...
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 通知组件 -->
+    <div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center">
+        <i class="fa fa-check-circle mr-2"></i>
+        <span id="notification-text">操作成功</span>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,5 +1,6 @@
-// config.js
-const config = {
-  API_URL: "https://telegram-bot.jbk123jbk.workers.dev/admin-api",
-  ADMIN_KEY: "MySuperSecureKey123!" // 确保与Worker中的密钥一致
-};
+// 配置文件
+    const config = {
+        // 已设置为你提供的API地址
+        apiUrl: 'https://telegram-bot.jbk123jbk.workers.dev/api'
+    };
+    

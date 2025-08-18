@@ -1,54 +1,61 @@
-// 管理员认证逻辑
-const ADMIN_KEY = "9712202273"; // 统一设置的管理员密钥
+// 认证模块 - 处理密码验证
+const crypto = require('crypto');
 
-// 检查是否已登录
-function checkAuth() {
-    const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
-    const authSection = document.getElementById('auth-section');
-    const adminSection = document.getElementById('admin-section');
-    
-    if (isAuthenticated) {
-        // 已登录，显示管理界面
-        authSection.classList.add('hidden');
-        adminSection.classList.remove('hidden');
-        // 加载数据
-        loadAllData();
-    } else {
-        // 未登录，显示登录界面
-        authSection.classList.remove('hidden');
-        adminSection.classList.add('hidden');
-    }
+// 密码哈希函数 - 用于安全存储密码
+function hashPassword(password) {
+  const salt = 'fixed-salt-for-consistency'; // 固定盐值确保验证一致性
+  return crypto.createHmac('sha256', salt)
+    .update(password)
+    .digest('hex');
 }
 
-// 登录处理
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const keyInput = document.getElementById('admin-key');
-    const key = keyInput.value.trim();
+// 验证密码函数
+function verifyPassword(inputPassword, storedHash) {
+  // 对输入密码进行相同的哈希处理然后比较
+  const inputHash = hashPassword(inputPassword);
+  return inputHash === storedHash;
+}
+
+// 存储的密码哈希 - 基于你提供的密码"9712202273aA."生成
+const validPasswordHash = hashPassword("9712202273aA.");
+
+// 处理认证请求
+function handleAuthentication(req, res) {
+  const { password } = req.body;
+  
+  if (!password) {
+    return res.status(400).send({ message: "请输入密码" });
+  }
+  
+  try {
+    const isAuthenticated = verifyPassword(password, validPasswordHash);
     
-    // 本地验证 + 远程验证
-    const localValid = key === ADMIN_KEY;
-    const remoteValid = await API.verifyAdminKey(key);
-    
-    if (localValid && remoteValid.success) {
-        localStorage.setItem('adminAuthenticated', 'true');
-        checkAuth();
-        showNotification('登录成功', 'success');
-        keyInput.value = '';
+    if (isAuthenticated) {
+      res.status(200).send({ 
+        success: true, 
+        message: "认证成功" 
+      });
     } else {
-        showNotification('密钥不正确，请重新输入', 'error');
-        keyInput.focus();
+      res.status(401).send({ 
+        success: false, 
+        message: "密钥不正确，请重新输入" 
+      });
     }
-});
+  } catch (error) {
+    console.error("认证错误:", error);
+    res.status(500).send({ 
+      success: false, 
+      message: "认证过程出错，请重试" 
+    });
+  }
+}
 
-// 登出处理
-document.getElementById('logout-btn').addEventListener('click', () => {
-    if (confirm('确定要退出登录吗？')) {
-        localStorage.removeItem('adminAuthenticated');
-        checkAuth();
-        showNotification('已退出登录', 'info');
-    }
-});
-
-// 页面加载时检查认证状态
-window.addEventListener('DOMContentLoaded', checkAuth);
+module.exports = {
+  handleAuthentication,
+  // 仅用于测试目的
+  _test: {
+    hashPassword,
+    verifyPassword,
+    validPasswordHash
+  }
+};

@@ -43,6 +43,15 @@
             .fade-in {
                 animation: fadeIn 0.3s ease-in-out;
             }
+            .error-box {
+                @apply bg-red-50 border border-red-200 p-4 rounded-md mb-4 text-red-700 text-sm;
+            }
+            .warning-box {
+                @apply bg-yellow-50 border border-yellow-200 p-4 rounded-md mb-4 text-yellow-700 text-sm;
+            }
+            .success-box {
+                @apply bg-green-50 border border-green-200 p-4 rounded-md mb-4 text-green-700 text-sm;
+            }
         }
         
         @keyframes fadeIn {
@@ -91,8 +100,8 @@
                         </a>
                     </li>
                     <li class="mb-2">
-                        <a href="#test" class="nav-link flex items-center p-2 rounded hover:bg-gray-700">
-                            <i class="fa fa-check-circle mr-2"></i> 测试连接
+                        <a href="#database-check" class="nav-link flex items-center p-2 rounded hover:bg-gray-700">
+                            <i class="fa fa-database mr-2"></i> 数据库检查
                         </a>
                     </li>
                 </ul>
@@ -151,7 +160,7 @@
                     <div id="login-error" class="mt-4 text-red-500 hidden"></div>
                 </div>
 
-                <!-- 数据库连接设置（强制显示） -->
+                <!-- 数据库连接设置 -->
                 <div id="db-setup-screen" class="max-w-2xl mx-auto mt-10 bg-white p-8 rounded-lg shadow-md">
                     <h2 class="text-2xl font-bold mb-6 text-center">数据库连接设置</h2>
                     <p class="text-gray-600 mb-6 text-center">请输入您的数据库连接信息以继续</p>
@@ -171,7 +180,10 @@
                         </label>
                         <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                                id="db-key" type="text" placeholder="输入您的数据库访问密钥">
-                        <p class="text-xs text-gray-500 mt-1">您的Supabase anon/public密钥，可在Supabase控制台获取</p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            请使用Supabase的服务密钥（service_role）而非匿名密钥，
+                            服务密钥可在Supabase控制台的项目设置->API中找到
+                        </p>
                     </div>
                     
                     <div class="mb-4">
@@ -235,11 +247,11 @@
                         <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-gray-500 text-sm">今日签到</p>
-                                    <h3 id="today-signs" class="text-3xl font-bold mt-1">0</h3>
+                                    <p class="text-gray-500 text-sm">禁言词数量</p>
+                                    <h3 id="total-banned" class="text-3xl font-bold mt-1">0</h3>
                                 </div>
                                 <div class="bg-purple-100 p-3 rounded-full">
-                                    <i class="fa fa-calendar-check-o text-purple-500 text-xl"></i>
+                                    <i class="fa fa-ban text-purple-500 text-xl"></i>
                                 </div>
                             </div>
                         </div>
@@ -277,6 +289,8 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div id="users-table-error" class="error-box hidden"></div>
                     
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -346,6 +360,8 @@
                             <i class="fa fa-plus mr-1"></i> 添加老师
                         </button>
                     </div>
+                    
+                    <div id="teachers-table-error" class="error-box hidden"></div>
                     
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -477,7 +493,7 @@
                     </div>
                 </div>
 
-                <!-- 关键词管理 -->
+                <!-- 关键词回复管理 -->
                 <div id="keywords-screen" class="hidden fade-in">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold">关键词回复管理</h2>
@@ -485,6 +501,8 @@
                             <i class="fa fa-plus mr-1"></i> 添加关键词
                         </button>
                     </div>
+                    
+                    <div id="keywords-table-error" class="error-box hidden"></div>
                     
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -551,6 +569,8 @@
                             <i class="fa fa-plus mr-1"></i> 添加禁言词
                         </button>
                     </div>
+                    
+                    <div id="banned-table-error" class="error-box hidden"></div>
                     
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -642,7 +662,10 @@
                             </label>
                             <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
                                    id="settings-db-key" type="text">
-                            <p class="text-xs text-gray-500 mt-1">您的数据库访问密钥</p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                请使用Supabase的服务密钥（service_role）而非匿名密钥，
+                                服务密钥可在Supabase控制台的项目设置->API中找到
+                            </p>
                         </div>
                         
                         <button id="test-db-connection-settings" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 mb-4">
@@ -668,21 +691,39 @@
                     </div>
                 </div>
 
-                <!-- 测试连接 -->
-                <div id="test-screen" class="hidden fade-in">
-                    <h2 class="text-2xl font-bold mb-6">测试连接</h2>
+                <!-- 数据库检查 -->
+                <div id="database-check-screen" class="hidden fade-in">
+                    <h2 class="text-2xl font-bold mb-6">数据库检查</h2>
+                    
+                    <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow mb-6">
+                        <h3 class="text-lg font-semibold mb-4">表结构检查</h3>
+                        
+                        <button id="run-db-check-btn" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors mb-6">
+                            <i class="fa fa-check-circle mr-1"></i> 运行数据库检查
+                        </button>
+                        
+                        <div id="db-check-results" class="space-y-6">
+                            <div class="text-gray-500 text-center py-8">
+                                点击上方按钮运行数据库检查...
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
-                        <h3 class="text-lg font-semibold mb-4">连接状态</h3>
+                        <h3 class="text-lg font-semibold mb-4">快速修复工具</h3>
                         
                         <div class="mb-4">
-                            <button id="run-test-btn" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
-                                运行测试
+                            <button id="create-banned-table-btn" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors mr-2">
+                                <i class="fa fa-table mr-1"></i> 创建禁言词表
                             </button>
+                            <span class="text-sm text-gray-600">如果提示banned_words表不存在，请点击此按钮</span>
                         </div>
                         
-                        <div id="test-output" class="border border-gray-300 rounded-md p-4 bg-gray-50 font-mono text-sm h-64 overflow-y-auto">
-                            测试结果将显示在这里...
+                        <div class="mb-4">
+                            <button id="fix-permissions-btn" class="bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600 transition-colors mr-2">
+                                <i class="fa fa-key mr-1"></i> 修复表权限
+                            </button>
+                            <span class="text-sm text-gray-600">如果提示权限错误，请点击此按钮（需要服务密钥）</span>
                         </div>
                     </div>
                 </div>
@@ -744,7 +785,7 @@
                 'keywords-screen',
                 'banned-screen',
                 'settings-screen',
-                'test-screen'
+                'database-check-screen'
             ];
             
             screens.forEach(screen => {
@@ -909,8 +950,10 @@
             // 系统设置相关按钮
             document.getElementById('send-random-teacher-btn').addEventListener('click', sendRandomTeacher);
             
-            // 测试连接页面按钮
-            document.getElementById('run-test-btn').addEventListener('click', runConnectionTest);
+            // 数据库检查页面按钮
+            document.getElementById('run-db-check-btn').addEventListener('click', runDatabaseCheck);
+            document.getElementById('create-banned-table-btn').addEventListener('click', createBannedWordsTable);
+            document.getElementById('fix-permissions-btn').addEventListener('click', fixTablePermissions);
             
             // 用户搜索
             document.getElementById('user-search').addEventListener('input', filterUsers);
@@ -978,12 +1021,12 @@
         function handleLogin() {
             const adminKey = document.getElementById('admin-key').value;
             
-            // 简单验证（实际应用中应该与后端验证）
+            // 简单验证
             if (adminKey === 'admin123') { // 这里使用简单密码仅作示例，实际应用中应修改
                 state.isLoggedIn = true;
                 document.getElementById('login-error').classList.add('hidden');
                 
-                // 无论是否有设置，都先显示数据库设置页面
+                // 登录后显示数据库设置页面
                 navigateToScreen('db-setup');
                 showNotification('登录成功，请配置数据库连接');
             } else {
@@ -1161,13 +1204,20 @@
             } catch (error) {
                 console.error('数据库连接测试失败:', error);
                 const errorMsg = error.message || '未知错误';
-                const message = `连接失败: ${errorMsg}`;
+                let message = `连接失败: ${errorMsg}`;
+                
+                // 增加错误原因分析
+                if (errorMsg.includes('permission denied')) {
+                    message += '<br>可能原因：使用了匿名密钥而非服务密钥，请在Supabase控制台获取service_role密钥';
+                } else if (errorMsg.includes('Could not find the table')) {
+                    message += '<br>可能原因：表不存在，请检查表名或使用数据库检查页面的修复工具';
+                }
                 
                 if (resultElement) {
                     resultElement.classList.add('text-red-500');
                     resultElement.innerHTML = `<i class="fa fa-exclamation-circle mr-2"></i> ${message}`;
                 } else {
-                    showNotification(message, 'error');
+                    showNotification(message.replace('<br>', ' '), 'error');
                 }
                 return false;
             }
@@ -1312,7 +1362,13 @@
                 
             } catch (error) {
                 console.error('保存老师信息失败:', error);
-                showNotification(`保存失败: ${error.message}`, 'error');
+                let message = `保存失败: ${error.message}`;
+                
+                if (error.message.includes('permission denied')) {
+                    message += '，请检查数据库权限或使用数据库检查页面的修复工具';
+                }
+                
+                showNotification(message, 'error');
             }
         }
 
@@ -1425,7 +1481,13 @@
                 
             } catch (error) {
                 console.error('保存关键词失败:', error);
-                showNotification(`保存失败: ${error.message}`, 'error');
+                let message = `保存失败: ${error.message}`;
+                
+                if (error.message.includes('permission denied')) {
+                    message += '，请检查数据库权限或使用数据库检查页面的修复工具';
+                }
+                
+                showNotification(message, 'error');
             }
         }
 
@@ -1524,13 +1586,23 @@
                     showNotification('新禁言词已添加');
                 }
                 
+                
                 // 关闭模态框并刷新表格
                 closeModal('banned-modal');
                 renderBannedWordsTable();
+                updateDashboardStats();
                 
             } catch (error) {
                 console.error('保存禁言词失败:', error);
-                showNotification(`保存失败: ${error.message}`, 'error');
+                let message = `保存失败: ${error.message}`;
+                
+                if (error.message.includes('Could not find the table')) {
+                    message += '，请先创建banned_words表或使用数据库检查页面的修复工具';
+                } else if (error.message.includes('permission denied')) {
+                    message += '，请检查数据库权限或使用数据库检查页面的修复工具';
+                }
+                
+                showNotification(message, 'error');
             }
         }
 
@@ -1542,7 +1614,7 @@
             if (user) {
                 document.getElementById('edit-user-id').value = user.id;
                 document.getElementById('edit-username').value = user.username || '';
-                document.getElementById('edit-display-name').value = user.display_name || '';
+                document.getElementById('edit-display-name').value = user.display_name || user.name || '';
                 document.getElementById('edit-points').value = user.points || 0;
                 
                 // 显示模态框
@@ -1639,25 +1711,13 @@
                 // 随机选择一个老师
                 const randomTeacher = approvedTeachers[Math.floor(Math.random() * approvedTeachers.length)];
                 
-                // 模拟发送推荐（实际应用中应该调用Telegram API）
+                // 模拟发送推荐
                 showNotification(`正在向用户推荐老师: ${randomTeacher.nickname}`, 'info');
-                
-                // 这里应该有实际调用Telegram API发送消息的代码
-                // 示例:
-                // const response = await fetch(`https://api.telegram.org/bot${state.settings.botToken}/sendMessage`, {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify({
-                //         chat_id: state.settings.adminId, // 可以改为特定用户ID或广播
-                //         text: `推荐老师: ${randomTeacher.nickname}\n地区: ${randomTeacher.region}\n服务: ${randomTeacher.service}`
-                //     })
-                // });
                 
                 // 模拟延迟
                 setTimeout(() => {
                     showNotification(`已成功推荐老师: ${randomTeacher.nickname}`);
                 }, 1500);
-                
                 
             } catch (error) {
                 console.error('发送推荐失败:', error);
@@ -1665,112 +1725,216 @@
             }
         }
 
-        // 运行连接测试
-        async function runConnectionTest() {
-            const outputElement = document.getElementById('test-output');
-            outputElement.textContent = '开始执行连接测试...\n\n';
+        // 运行数据库检查
+        async function runDatabaseCheck() {
+            if (!state.supabase) {
+                showNotification('数据库未连接，请先设置数据库', 'error');
+                return;
+            }
             
-            // 测试步骤1: 检查本地存储
-            setTimeout(async () => {
-                outputElement.textContent += '1. 检查本地存储... ';
-                try {
-                    localStorage.setItem('test', 'test');
-                    localStorage.removeItem('test');
-                    outputElement.textContent += '✅ 成功\n';
+            const resultsContainer = document.getElementById('db-check-results');
+            resultsContainer.innerHTML = '<div class="text-center py-8"><i class="fa fa-spinner fa-spin mr-2"></i> 正在执行数据库检查...</div>';
+            
+            const tablesToCheck = [
+                { name: 'users', required: true },
+                { name: 'teachers', required: true },
+                { name: 'keywords', required: true },
+                { name: 'banned_words', required: true }
+            ];
+            
+            let resultsHtml = '';
+            
+            try {
+                // 检查每个表
+                for (const table of tablesToCheck) {
+                    resultsHtml += `<div class="p-4 border rounded-md">`;
+                    resultsHtml += `<h4 class="font-medium mb-2">检查表: ${table.name}</h4>`;
                     
-                    // 测试步骤2: 检查数据库配置
-                    setTimeout(async () => {
-                        outputElement.textContent += '2. 检查数据库配置... ';
-                        if (state.settings.dbUrl && state.settings.dbKey) {
-                            outputElement.textContent += '✅ 已配置\n';
+                    try {
+                        // 检查表是否存在
+                        const { error: tableError } = await state.supabase
+                            .from(table.name)
+                            .select('count', { count: 'exact', head: true });
+                        
+                        if (tableError) throw tableError;
+                        
+                        resultsHtml += `<div class="success-box mb-2">
+                            <i class="fa fa-check-circle mr-1"></i> 表存在且可访问
+                        </div>`;
+                        
+                        // 检查表中的记录数
+                        const { count, error: countError } = await state.supabase
+                            .from(table.name)
+                            .select('*', { count: 'exact', head: true });
                             
-                            // 测试步骤3: 测试数据库连接
-                            setTimeout(async () => {
-                                outputElement.textContent += '3. 测试数据库连接... ';
-                                if (state.supabase) {
-                                    try {
-                                        const { error } = await state.supabase
-                                            .from('users')
-                                            .select('count', { count: 'exact', head: true });
-                                        
-                                        if (error) throw error;
-                                        outputElement.textContent += '✅ 连接成功\n';
-                                        
-                                        // 测试步骤4: 尝试加载示例数据
-                                        setTimeout(async () => {
-                                            outputElement.textContent += '4. 尝试加载示例数据... ';
-                                            try {
-                                                const { data, error } = await state.supabase
-                                                    .from('users')
-                                                    .select('*')
-                                                    .limit(1);
-                                                
-                                                if (error) throw error;
-                                                outputElement.textContent += `✅ 成功 (${data.length} 条记录)\n`;
-                                                
-                                                // 测试步骤5: 检查Telegram配置
-                                                setTimeout(() => {
-                                                    outputElement.textContent += '5. 检查Telegram配置... ';
-                                                    if (state.settings.botToken) {
-                                                        outputElement.textContent += '✅ 已配置\n';
-                                                        
-                                                        setTimeout(() => {
-                                                            outputElement.textContent += '\n所有测试已完成，系统状态正常！';
-                                                            showNotification('测试完成，所有连接正常');
-                                                        }, 800);
-                                                    } else {
-                                                        outputElement.textContent += '⚠️ 未配置Telegram Bot Token\n';
-                                                        
-                                                        setTimeout(() => {
-                                                            outputElement.textContent += '\n测试完成，发现警告: 请配置Telegram Bot Token';
-                                                            showNotification('测试完成，发现警告', 'info');
-                                                        }, 800);
-                                                    }
-                                                }, 800);
-                                            } catch (error) {
-                                                outputElement.textContent += `❌ 失败: ${error.message}\n`;
-                                                
-                                                setTimeout(() => {
-                                                    outputElement.textContent += '\n测试完成，发现错误: 无法加载数据';
-                                                    showNotification('测试完成，发现错误', 'error');
-                                                }, 800);
-                                            }
-                                        }, 800);
-                                    } catch (error) {
-                                        outputElement.textContent += `❌ 失败: ${error.message}\n`;
-                                        
-                                        setTimeout(() => {
-                                            outputElement.textContent += '\n测试完成，发现错误: 数据库连接失败';
-                                            showNotification('测试完成，发现错误', 'error');
-                                        }, 800);
-                                    }
-                                } else {
-                                    outputElement.textContent += '❌ 未初始化\n';
-                                    
-                                    setTimeout(() => {
-                                        outputElement.textContent += '\n测试完成，发现错误: 数据库未初始化';
-                                        showNotification('测试完成，发现错误', 'error');
-                                    }, 800);
-                                }
-                            }, 800);
+                        if (countError) {
+                            resultsHtml += `<div class="warning-box">
+                                <i class="fa fa-exclamation-triangle mr-1"></i> 无法获取记录数: ${countError.message}
+                            </div>`;
                         } else {
-                            outputElement.textContent += '❌ 未配置\n';
-                            
-                            setTimeout(() => {
-                                outputElement.textContent += '\n测试完成，发现错误: 请先配置数据库';
-                                showNotification('测试完成，发现错误', 'error');
-                            }, 800);
+                            resultsHtml += `<div class="text-sm text-gray-600 mb-2">
+                                记录数: ${count || 0}
+                            </div>`;
                         }
-                    }, 800);
-                } catch (error) {
-                    outputElement.textContent += `❌ 失败: ${error.message}\n`;
+                        
+                        // 检查用户表的字段
+                        if (table.name === 'users') {
+                            const { data: sampleData, error: sampleError } = await state.supabase
+                                .from('users')
+                                .select('*')
+                                .limit(1);
+                                
+                            if (sampleError) {
+                                resultsHtml += `<div class="warning-box">
+                                    <i class="fa fa-exclamation-triangle mr-1"></i> 无法获取样本数据: ${sampleError.message}
+                                </div>`;
+                            } else if (sampleData && sampleData.length > 0) {
+                                const user = sampleData[0];
+                                const requiredFields = ['id', 'username'];
+                                const missingFields = requiredFields.filter(field => !(field in user));
+                                
+                                if (missingFields.length > 0) {
+                                    resultsHtml += `<div class="warning-box">
+                                        <i class="fa fa-exclamation-triangle mr-1"></i> 缺少建议字段: ${missingFields.join(', ')}
+                                    </div>`;
+                                } else {
+                                    resultsHtml += `<div class="text-sm text-green-600">
+                                        <i class="fa fa-check mr-1"></i> 包含必要字段
+                                    </div>`;
+                                }
+                            }
+                        }
+                        
+                    } catch (error) {
+                        console.error(`检查${table.name}表失败:`, error);
+                        
+                        if (error.message.includes('Could not find the table')) {
+                            resultsHtml += `<div class="error-box mb-2">
+                                <i class="fa fa-exclamation-circle mr-1"></i> 表不存在
+                            </div>`;
+                            
+                            if (table.name === 'banned_words') {
+                                resultsHtml += `<div class="mt-2">
+                                    <button onclick="createBannedWordsTable()" class="text-sm bg-green-500 text-white py-1 px-2 rounded">
+                                        <i class="fa fa-plus mr-1"></i> 创建此表
+                                    </button>
+                                </div>`;
+                            }
+                        } else if (error.message.includes('permission denied')) {
+                            resultsHtml += `<div class="error-box mb-2">
+                                <i class="fa fa-exclamation-circle mr-1"></i> 没有访问权限
+                            </div>`;
+                            resultsHtml += `<div class="mt-2">
+                                <button onclick="fixTablePermissions()" class="text-sm bg-yellow-500 text-white py-1 px-2 rounded">
+                                    <i class="fa fa-key mr-1"></i> 修复权限
+                                </button>
+                            </div>`;
+                        } else {
+                            resultsHtml += `<div class="error-box mb-2">
+                                <i class="fa fa-exclamation-circle mr-1"></i> 错误: ${error.message}
+                            </div>`;
+                        }
+                    }
                     
-                    setTimeout(() => {
-                        outputElement.textContent += '\n测试完成，发现错误: 本地存储不可用';
-                        showNotification('测试完成，发现错误', 'error');
-                    }, 800);
+                    resultsHtml += `</div>`;
                 }
-            }, 500);
+                
+                resultsContainer.innerHTML = resultsHtml;
+                
+            } catch (error) {
+                console.error('数据库检查失败:', error);
+                resultsContainer.innerHTML = `<div class="error-box">
+                    <i class="fa fa-exclamation-circle mr-1"></i> 数据库检查失败: ${error.message}
+                </div>`;
+            }
+        }
+
+        // 创建禁言词表
+        async function createBannedWordsTable() {
+            if (!state.supabase) {
+                showNotification('数据库未连接，请先设置数据库', 'error');
+                return;
+            }
+            
+            if (!confirm('确定要创建banned_words表吗？如果表已存在，此操作不会影响现有数据。')) {
+                return;
+            }
+            
+            try {
+                // 使用SQL创建表
+                const { error } = await state.supabase.rpc('create_banned_words_table');
+                
+                // 如果存储过程不存在，尝试直接执行SQL（在实际环境中，这需要通过Supabase SQL编辑器执行）
+                if (error && error.message.includes('function create_banned_words_table() does not exist')) {
+                    showNotification('请在Supabase SQL编辑器中执行以下SQL来创建表:', 'info');
+                    console.log(`
+                        CREATE TABLE public.banned_words (
+                            id text PRIMARY KEY,
+                            word text NOT NULL,
+                            created_at timestamp with time zone DEFAULT now(),
+                            updated_at timestamp with time zone DEFAULT now()
+                        );
+                        
+                        -- 添加索引
+                        CREATE INDEX idx_banned_words_word ON public.banned_words USING btree (word);
+                        
+                        -- 授予权限
+                        GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+                        GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.banned_words TO anon, authenticated, service_role;
+                    `);
+                    
+                    // 显示包含SQL的模态框
+                    alert(`请在Supabase SQL编辑器中执行以下SQL来创建表:\n\nCREATE TABLE public.banned_words (\n  id text PRIMARY KEY,\n  word text NOT NULL,\n  created_at timestamp with time zone DEFAULT now(),\n  updated_at timestamp with time zone DEFAULT now()\n);\n\n-- 添加索引\nCREATE INDEX idx_banned_words_word ON public.banned_words USING btree (word);\n\n-- 授予权限\nGRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;\nGRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.banned_words TO anon, authenticated, service_role;`);
+                    return;
+                }
+                
+                if (error) throw error;
+                
+                showNotification('banned_words表创建成功');
+                
+                // 如果在数据库检查页面，重新运行检查
+                if (state.currentScreen === 'database-check-screen') {
+                    runDatabaseCheck();
+                }
+                
+            } catch (error) {
+                console.error('创建banned_words表失败:', error);
+                showNotification(`创建表失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 修复表权限
+        async function fixTablePermissions() {
+            if (!state.supabase) {
+                showNotification('数据库未连接，请先设置数据库', 'error');
+                return;
+            }
+            
+            if (!confirm('确定要修复表权限吗？这将授予必要的访问权限给所有用户角色。')) {
+                return;
+            }
+            
+            try {
+                // 使用SQL修复权限（在实际环境中，这需要通过Supabase SQL编辑器执行）
+                showNotification('请在Supabase SQL编辑器中执行以下SQL来修复权限:', 'info');
+                console.log(`
+                    -- 授予schema权限
+                    GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+                    
+                    -- 授予表权限
+                    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.users TO anon, authenticated, service_role;
+                    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.teachers TO anon, authenticated, service_role;
+                    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.keywords TO anon, authenticated, service_role;
+                    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.banned_words TO anon, authenticated, service_role;
+                `);
+                
+                // 显示包含SQL的模态框
+                alert(`请在Supabase SQL编辑器中执行以下SQL来修复权限:\n\n-- 授予schema权限\nGRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;\n\n-- 授予表权限\nGRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.users TO anon, authenticated, service_role;\nGRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.teachers TO anon, authenticated, service_role;\nGRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.keywords TO anon, authenticated, service_role;\nGRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.banned_words TO anon, authenticated, service_role;`);
+                
+            } catch (error) {
+                console.error('修复表权限失败:', error);
+                showNotification(`修复权限失败: ${error.message}`, 'error');
+            }
         }
 
         // 过滤用户
@@ -1778,7 +1942,7 @@
             const searchTerm = document.getElementById('user-search').value.toLowerCase();
             const filteredUsers = state.users.filter(user => 
                 (user.username && user.username.toLowerCase().includes(searchTerm)) || 
-                (user.display_name && user.display_name.toLowerCase().includes(searchTerm))
+                ((user.display_name || user.name) && (user.display_name || user.name).toLowerCase().includes(searchTerm))
             );
             
             renderUsersTable(filteredUsers);
@@ -1796,21 +1960,30 @@
                 const [
                     usersData,
                     teachersData,
-                    keywordsData
+                    keywordsData,
+                    bannedData
                 ] = await Promise.all([
                     state.supabase.from('users').select('*'),
                     state.supabase.from('teachers').select('*'),
-                    state.supabase.from('keywords').select('*')
+                    state.supabase.from('keywords').select('*'),
+                    state.supabase.from('banned_words').select('*').catch(err => ({ data: [], error: err }))
                 ]);
                 
                 if (usersData.error) throw usersData.error;
-                if (teachersData.error) throw teachersData.error;
-                if (keywordsData.error) throw keywordsData.error;
+                if (teachersData.error) {
+                    showTableError('teachers-table-error', teachersData.error);
+                    teachersData.data = [];
+                }
+                if (keywordsData.error) {
+                    showTableError('keywords-table-error', keywordsData.error);
+                    keywordsData.data = [];
+                }
                 
                 // 更新本地缓存 - 来自实际数据库
                 state.users = usersData.data || [];
                 state.teachers = teachersData.data || [];
                 state.keywords = keywordsData.data || [];
+                state.bannedWords = bannedData.data || [];
                 
                 // 更新仪表盘
                 updateDashboardStats();
@@ -1823,7 +1996,24 @@
                 document.getElementById('total-users').textContent = '?';
                 document.getElementById('total-teachers').textContent = '?';
                 document.getElementById('total-keywords').textContent = '?';
-                document.getElementById('today-signs').textContent = '?';
+                document.getElementById('total-banned').textContent = '?';
+            }
+        }
+
+        // 显示表格错误
+        function showTableError(elementId, error) {
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                let message = `<i class="fa fa-exclamation-circle mr-1"></i> 加载失败: ${error.message}`;
+                
+                if (error.message.includes('permission denied')) {
+                    message += '<br>请检查数据库权限或使用"数据库检查"页面的修复工具';
+                } else if (error.message.includes('Could not find the table')) {
+                    message += '<br>表不存在，请检查表名或使用"数据库检查"页面的修复工具';
+                }
+                
+                errorElement.innerHTML = message;
+                errorElement.classList.remove('hidden');
             }
         }
 
@@ -1835,6 +2025,9 @@
             }
             
             const tableBody = document.getElementById('users-table-body');
+            const errorElement = document.getElementById('users-table-error');
+            
+            errorElement.classList.add('hidden');
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="6" class="px-6 py-10 text-center text-gray-500">
@@ -1874,6 +2067,9 @@
             }
             
             const tableBody = document.getElementById('teachers-table-body');
+            const errorElement = document.getElementById('teachers-table-error');
+            
+            errorElement.classList.add('hidden');
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="6" class="px-6 py-10 text-center text-gray-500">
@@ -1902,6 +2098,7 @@
                         </td>
                     </tr>
                 `;
+                showTableError('teachers-table-error', error);
             }
         }
 
@@ -1913,6 +2110,9 @@
             }
             
             const tableBody = document.getElementById('keywords-table-body');
+            const errorElement = document.getElementById('keywords-table-error');
+            
+            errorElement.classList.add('hidden');
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="4" class="px-6 py-10 text-center text-gray-500">
@@ -1941,6 +2141,7 @@
                         </td>
                     </tr>
                 `;
+                showTableError('keywords-table-error', error);
             }
         }
 
@@ -1952,6 +2153,9 @@
             }
             
             const tableBody = document.getElementById('banned-table-body');
+            const errorElement = document.getElementById('banned-table-error');
+            
+            errorElement.classList.add('hidden');
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="2" class="px-6 py-10 text-center text-gray-500">
@@ -1966,7 +2170,23 @@
                     .select('*')
                     .order('created_at', { ascending: false });
                     
-                if (error) throw error;
+                if (error) {
+                    // 如果表不存在，不抛出错误，而是显示空状态
+                    if (error.message.includes('Could not find the table')) {
+                        state.bannedWords = [];
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="2" class="px-6 py-10 text-center text-yellow-500">
+                                    <i class="fa fa-exclamation-triangle mr-2"></i> 禁言词表不存在，请先创建
+                                </td>
+                            </tr>
+                        `;
+                        showTableError('banned-table-error', error);
+                        return;
+                    } else {
+                        throw error;
+                    }
+                }
                 
                 state.bannedWords = data || [];
                 renderBannedWordsTable();
@@ -1980,6 +2200,7 @@
                         </td>
                     </tr>
                 `;
+                showTableError('banned-table-error', error);
             }
         }
 
@@ -2001,13 +2222,13 @@
             
             tableBody.innerHTML = usersToRender.map(user => `
                 <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap">${user.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${user.id || 'N/A'}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${user.username || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${user.display_name || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${user.display_name || user.name || '-'}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${user.points || 0}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${formatDate(user.last_sign_in)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${formatDate(user.last_sign_in || user.last_login)}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <button onclick="openUserModal('${user.id}')" class="text-blue-500 hover:text-blue-700 mr-3">
+                        <button onclick="openUserModal('${user.id || ''}')" class="text-blue-500 hover:text-blue-700 mr-3">
                             <i class="fa fa-pencil"></i> 编辑
                         </button>
                     </td>
@@ -2054,7 +2275,7 @@
                 
                 return `
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap">${teacher.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${teacher.id || 'N/A'}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${teacher.nickname || '-'}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${teacher.age || '-'}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${teacher.region || '-'}</td>
@@ -2062,10 +2283,10 @@
                             <span class="status-badge ${statusClass}">${statusText}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <button onclick="openTeacherModal('${teacher.id}')" class="text-blue-500 hover:text-blue-700 mr-3">
+                            <button onclick="openTeacherModal('${teacher.id || ''}')" class="text-blue-500 hover:text-blue-700 mr-3">
                                 <i class="fa fa-pencil"></i> 编辑
                             </button>
-                            <button onclick="deleteTeacher('${teacher.id}')" class="text-red-500 hover:text-red-700">
+                            <button onclick="deleteTeacher('${teacher.id || ''}')" class="text-red-500 hover:text-red-700">
                                 <i class="fa fa-trash"></i> 删除
                             </button>
                         </td>
@@ -2101,10 +2322,10 @@
                             <span class="status-badge ${statusClass}">${statusText}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <button onclick="openKeywordModal('${keyword.id}')" class="text-blue-500 hover:text-blue-700 mr-3">
+                            <button onclick="openKeywordModal('${keyword.id || ''}')" class="text-blue-500 hover:text-blue-700 mr-3">
                                 <i class="fa fa-pencil"></i> 编辑
                             </button>
-                            <button onclick="deleteKeyword('${keyword.id}')" class="text-red-500 hover:text-red-700">
+                            <button onclick="deleteKeyword('${keyword.id || ''}')" class="text-red-500 hover:text-red-700">
                                 <i class="fa fa-trash"></i> 删除
                             </button>
                         </td>
@@ -2132,249 +2353,7 @@
                 <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap font-medium">${banned.word || '-'}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <button onclick="openBannedModal('${banned.id}')" class="text-blue-500 hover:text-blue-700 mr-3">
+                        <button onclick="openBannedModal('${banned.id || ''}')" class="text-blue-500 hover:text-blue-700 mr-3">
                             <i class="fa fa-pencil"></i> 编辑
                         </button>
-                        <button onclick="deleteBannedWord('${banned.id}')" class="text-red-500 hover:text-red-700">
-                            <i class="fa fa-trash"></i> 删除
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // 更新仪表盘统计数据
-        function updateDashboardStats() {
-            document.getElementById('total-users').textContent = state.users.length;
-            document.getElementById('total-teachers').textContent = state.teachers.length;
-            document.getElementById('total-keywords').textContent = state.keywords.length;
-            
-            // 计算今日签到人数
-            const today = new Date().toDateString();
-            const todaySigns = state.users.filter(user => 
-                user.last_sign_in && new Date(user.last_sign_in).toDateString() === today
-            ).length;
-            document.getElementById('today-signs').textContent = todaySigns;
-            
-            // 更新排名和最近列表
-            updateTopUsersList();
-            updateRecentTeachersList();
-        }
-
-        // 更新积分排名前10用户列表
-        function updateTopUsersList() {
-            const topUsersContainer = document.getElementById('top-users');
-            
-            // 按积分排序，取前10
-            const topUsers = [...state.users]
-                .sort((a, b) => (b.points || 0) - (a.points || 0))
-                .slice(0, 10);
-            
-            if (topUsers.length === 0) {
-                topUsersContainer.innerHTML = '<p class="text-gray-500">数据库中没有用户数据</p>';
-                return;
-            }
-            
-            topUsersContainer.innerHTML = topUsers.map((user, index) => `
-                <div class="flex items-center p-2 border-b border-gray-100 last:border-0">
-                    <div class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full mr-3 font-medium">
-                        ${index + 1}
-                    </div>
-                    <div class="flex-1">
-                        <p class="font-medium">${user.display_name || user.username || '未知用户'}</p>
-                        <p class="text-sm text-gray-500">${user.username || '-'}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-bold text-blue-600">${user.points || 0}</p>
-                        <p class="text-xs text-gray-500">积分</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // 更新最近添加的老师列表
-        function updateRecentTeachersList() {
-            const recentTeachersContainer = document.getElementById('recent-teachers');
-            
-            // 按添加时间排序，取最近5个
-            const recentTeachers = [...state.teachers]
-                .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
-                .slice(0, 5);
-            
-            if (recentTeachers.length === 0) {
-                recentTeachersContainer.innerHTML = '<p class="text-gray-500">数据库中没有老师数据</p>';
-                return;
-            }
-            
-            recentTeachersContainer.innerHTML = recentTeachers.map(teacher => {
-                let statusClass = '';
-                let statusText = '';
-                
-                switch (teacher.status) {
-                    case 'pending':
-                        statusClass = 'bg-yellow-100 text-yellow-800';
-                        statusText = '待审核';
-                        break;
-                    case 'approved':
-                        statusClass = 'bg-green-100 text-green-800';
-                        statusText = '已通过';
-                        break;
-                    case 'rejected':
-                        statusClass = 'bg-red-100 text-red-800';
-                        statusText = '已拒绝';
-                        break;
-                    default:
-                        statusClass = 'bg-gray-100 text-gray-800';
-                        statusText = '未知';
-                }
-                
-                return `
-                    <div class="flex items-center p-2 border-b border-gray-100 last:border-0">
-                        <div class="w-10 h-10 bg-gray-200 rounded-full overflow-hidden mr-3 flex-shrink-0">
-                            ${teacher.photos && teacher.photos[0] ? 
-                                `<img src="${teacher.photos[0]}" alt="${teacher.nickname}" class="w-full h-full object-cover">` : 
-                                `<div class="w-full h-full flex items-center justify-center text-gray-500">
-                                    <i class="fa fa-user"></i>
-                                </div>`
-                            }
-                        </div>
-                        <div class="flex-1">
-                            <p class="font-medium">${teacher.nickname || '-'}</p>
-                            <p class="text-sm text-gray-500">${teacher.region || '-'} · ${teacher.service || '-'}</p>
-                        </div>
-                        <span class="status-badge ${statusClass}">${statusText}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // 删除老师
-        async function deleteTeacher(teacherId) {
-            if (!confirm('确定要删除这个老师吗？此操作不可撤销。')) {
-                return;
-            }
-            
-            if (!state.supabase) {
-                showNotification('数据库未连接，请先设置数据库', 'error');
-                return;
-            }
-            
-            try {
-                const { error } = await state.supabase
-                    .from('teachers')
-                    .delete()
-                    .eq('id', teacherId);
-                    
-                if (error) throw error;
-                
-                // 更新本地缓存
-                state.teachers = state.teachers.filter(teacher => teacher.id !== teacherId);
-                
-                renderTeachersTable();
-                updateDashboardStats();
-                showNotification('老师已删除');
-                
-            } catch (error) {
-                console.error('删除老师失败:', error);
-                showNotification(`删除失败: ${error.message}`, 'error');
-            }
-        }
-
-        // 删除关键词
-        async function deleteKeyword(keywordId) {
-            if (!confirm('确定要删除这个关键词吗？此操作不可撤销。')) {
-                return;
-            }
-            
-            if (!state.supabase) {
-                showNotification('数据库未连接，请先设置数据库', 'error');
-                return;
-            }
-            
-            try {
-                const { error } = await state.supabase
-                    .from('keywords')
-                    .delete()
-                    .eq('id', keywordId);
-                    
-                if (error) throw error;
-                
-                // 更新本地缓存
-                state.keywords = state.keywords.filter(keyword => keyword.id !== keywordId);
-                
-                renderKeywordsTable();
-                updateDashboardStats();
-                showNotification('关键词已删除');
-                
-            } catch (error) {
-                console.error('删除关键词失败:', error);
-                showNotification(`删除失败: ${error.message}`, 'error');
-            }
-        }
-
-        // 删除禁言词
-        async function deleteBannedWord(bannedId) {
-            if (!confirm('确定要删除这个禁言词吗？此操作不可撤销。')) {
-                return;
-            }
-            
-            if (!state.supabase) {
-                showNotification('数据库未连接，请先设置数据库', 'error');
-                return;
-            }
-            
-            try {
-                const { error } = await state.supabase
-                    .from('banned_words')
-                    .delete()
-                    .eq('id', bannedId);
-                    
-                if (error) throw error;
-                
-                // 更新本地缓存
-                state.bannedWords = state.bannedWords.filter(banned => banned.id !== bannedId);
-                
-                renderBannedWordsTable();
-                showNotification('禁言词已删除');
-                
-            } catch (error) {
-                console.error('删除禁言词失败:', error);
-                showNotification(`删除失败: ${error.message}`, 'error');
-            }
-        }
-
-        // 工具函数：格式化日期
-        function formatDate(dateString) {
-            if (!dateString) return '从未签到';
-            
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return '无效日期';
-            
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            
-            if (date.toDateString() === today.toDateString()) {
-                return `今天 ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-            } else if (date.toDateString() === yesterday.toDateString()) {
-                return `昨天 ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-            } else {
-                return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-            }
-        }
-
-        // 工具函数：截断文本
-        function truncateText(text, maxLength) {
-            if (text.length <= maxLength) return text;
-            return text.substring(0, maxLength) + '...';
-        }
-
-        // 暴露一些函数到全局，以便在HTML中直接调用
-        window.openUserModal = openUserModal;
-        window.deleteTeacher = deleteTeacher;
-        window.deleteKeyword = deleteKeyword;
-        window.deleteBannedWord = deleteBannedWord;
-    </script>
-</body>
-</html>
-    
+                        

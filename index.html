@@ -42,6 +42,13 @@
             .loader {
                 @apply absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-40;
             }
+            .fade-in {
+                animation: fadeIn 0.5s ease-in-out;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
         }
     </style>
 </head>
@@ -122,9 +129,18 @@
             <main class="flex-1 overflow-y-auto p-6 bg-gray-50 relative">
                 <!-- 加载指示器 -->
                 <div id="data-loader" class="loader hidden">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">加载中...</span>
+                    <div class="text-center">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p>正在加载数据，请稍候...</p>
                     </div>
+                </div>
+                
+                <!-- 数据加载完成提示 -->
+                <div id="data-loaded-alert" class="alert alert-success fixed top-20 right-5 z-50 hidden fade-in" role="alert">
+                    <strong>数据加载完成!</strong> 所有信息已更新
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
                 
                 <div class="mb-6">
@@ -198,7 +214,12 @@
                             <tbody id="users-container">
                                 <!-- 用户数据将通过JavaScript动态加载 -->
                                 <tr>
-                                    <td colspan="7" class="text-center py-3 text-muted">加载用户数据中...</td>
+                                    <td colspan="7" class="text-center py-3 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                            <span class="visually-hidden">加载中...</span>
+                                        </div>
+                                        加载用户数据中...
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -230,7 +251,12 @@
                             <tbody id="teachers-container">
                                 <!-- 老师数据将通过JavaScript动态加载 -->
                                 <tr>
-                                    <td colspan="8" class="text-center py-3 text-muted">加载老师数据中...</td>
+                                    <td colspan="8" class="text-center py-3 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                            <span class="visually-hidden">加载中...</span>
+                                        </div>
+                                        加载老师数据中...
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -258,7 +284,12 @@
                             <tbody id="keywords-container">
                                 <!-- 关键词数据将通过JavaScript动态加载 -->
                                 <tr>
-                                    <td colspan="4" class="text-center py-3 text-muted">加载关键词数据中...</td>
+                                    <td colspan="4" class="text-center py-3 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                            <span class="visually-hidden">加载中...</span>
+                                        </div>
+                                        加载关键词数据中...
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -284,7 +315,12 @@
                             <tbody id="banned-keywords-container">
                                 <!-- 禁言词数据将通过JavaScript动态加载 -->
                                 <tr>
-                                    <td colspan="2" class="text-center py-3 text-muted">加载禁言词数据中...</td>
+                                    <td colspan="2" class="text-center py-3 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                            <span class="visually-hidden">加载中...</span>
+                                        </div>
+                                        加载禁言词数据中...
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -591,123 +627,205 @@
             // 加载用户数据
             const usersContainer = document.getElementById('users-container');
             if (usersContainer) {
-                usersContainer.innerHTML = '';
-                mockUsers.forEach(user => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${user.id}</td>
-                        <td>${user.username}</td>
-                        <td>${user.display_name}</td>
-                        <td>${user.last_name}${user.first_name}</td>
-                        <td>${user.points}</td>
-                        <td>${user.last_checkin}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary edit-user" data-id="${user.id}">编辑</button>
-                            <button class="btn btn-sm btn-secondary adjust-points" data-id="${user.id}" data-name="${user.display_name}" data-points="${user.points}">调整积分</button>
+                // 先显示行内加载状态
+                usersContainer.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-3 text-muted">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">加载中...</span>
+                            </div>
+                            加载用户数据中...
                         </td>
-                    `;
-                    usersContainer.appendChild(row);
-                });
+                    </tr>
+                `;
+                
+                // 模拟网络延迟
+                setTimeout(() => {
+                    usersContainer.innerHTML = '';
+                    mockUsers.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.className = 'fade-in';
+                        row.innerHTML = `
+                            <td>${user.id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.display_name}</td>
+                            <td>${user.last_name}${user.first_name}</td>
+                            <td>${user.points}</td>
+                            <td>${user.last_checkin}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary edit-user" data-id="${user.id}">编辑</button>
+                                <button class="btn btn-sm btn-secondary adjust-points" data-id="${user.id}" data-name="${user.display_name}" data-points="${user.points}">调整积分</button>
+                            </td>
+                        `;
+                        usersContainer.appendChild(row);
+                    });
+                }, 600);
             }
             
             // 加载老师数据
             const teachersContainer = document.getElementById('teachers-container');
             if (teachersContainer) {
-                teachersContainer.innerHTML = '';
-                mockTeachers.forEach(teacher => {
-                    let statusClass = '';
-                    let statusText = '';
-                    
-                    switch(teacher.status) {
-                        case 'approved':
-                            statusClass = 'text-green-600';
-                            statusText = '已认证';
-                            break;
-                        case 'pending':
-                            statusClass = 'text-yellow-600';
-                            statusText = '待审核';
-                            break;
-                        case 'rejected':
-                            statusClass = 'text-red-600';
-                            statusText = '已拒绝';
-                            break;
-                    }
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${teacher.id}</td>
-                        <td>${teacher.nickname}</td>
-                        <td>${teacher.age}</td>
-                        <td>${teacher.region}</td>
-                        <td>${teacher.service_type}</td>
-                        <td>${teacher.price}</td>
-                        <td><span class="${statusClass}">${statusText}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-primary edit-teacher" data-id="${teacher.id}">编辑</button>
-                            <button class="btn btn-sm btn-danger delete-teacher" data-id="${teacher.id}">删除</button>
+                // 先显示行内加载状态
+                teachersContainer.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-3 text-muted">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">加载中...</span>
+                            </div>
+                            加载老师数据中...
                         </td>
-                    `;
-                    teachersContainer.appendChild(row);
-                });
+                    </tr>
+                `;
+                
+                // 模拟网络延迟
+                setTimeout(() => {
+                    teachersContainer.innerHTML = '';
+                    mockTeachers.forEach(teacher => {
+                        let statusClass = '';
+                        let statusText = '';
+                        
+                        switch(teacher.status) {
+                            case 'approved':
+                                statusClass = 'text-green-600';
+                                statusText = '已认证';
+                                break;
+                            case 'pending':
+                                statusClass = 'text-yellow-600';
+                                statusText = '待审核';
+                                break;
+                            case 'rejected':
+                                statusClass = 'text-red-600';
+                                statusText = '已拒绝';
+                                break;
+                        }
+                        
+                        const row = document.createElement('tr');
+                        row.className = 'fade-in';
+                        row.innerHTML = `
+                            <td>${teacher.id}</td>
+                            <td>${teacher.nickname}</td>
+                            <td>${teacher.age}</td>
+                            <td>${teacher.region}</td>
+                            <td>${teacher.service_type}</td>
+                            <td>${teacher.price}</td>
+                            <td><span class="${statusClass}">${statusText}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-primary edit-teacher" data-id="${teacher.id}">编辑</button>
+                                <button class="btn btn-sm btn-danger delete-teacher" data-id="${teacher.id}">删除</button>
+                            </td>
+                        `;
+                        teachersContainer.appendChild(row);
+                    });
+                }, 800);
             }
             
             // 加载关键词数据
             const keywordsContainer = document.getElementById('keywords-container');
             if (keywordsContainer) {
-                keywordsContainer.innerHTML = '';
-                mockKeywords.forEach(keyword => {
-                    const statusClass = keyword.is_active ? 'text-green-600' : 'text-gray-400';
-                    const statusText = keyword.is_active ? '启用' : '禁用';
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${keyword.keyword}</td>
-                        <td>${keyword.response}</td>
-                        <td><span class="${statusClass}">${statusText}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-primary edit-keyword" data-id="${keyword.id}">编辑</button>
-                            <button class="btn btn-sm btn-danger delete-keyword" data-id="${keyword.id}">删除</button>
+                // 先显示行内加载状态
+                keywordsContainer.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-3 text-muted">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">加载中...</span>
+                            </div>
+                            加载关键词数据中...
                         </td>
-                    `;
-                    keywordsContainer.appendChild(row);
-                });
+                    </tr>
+                `;
+                
+                // 模拟网络延迟
+                setTimeout(() => {
+                    keywordsContainer.innerHTML = '';
+                    mockKeywords.forEach(keyword => {
+                        const statusClass = keyword.is_active ? 'text-green-600' : 'text-gray-400';
+                        const statusText = keyword.is_active ? '启用' : '禁用';
+                        
+                        const row = document.createElement('tr');
+                        row.className = 'fade-in';
+                        row.innerHTML = `
+                            <td>${keyword.keyword}</td>
+                            <td>${keyword.response}</td>
+                            <td><span class="${statusClass}">${statusText}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-primary edit-keyword" data-id="${keyword.id}">编辑</button>
+                                <button class="btn btn-sm btn-danger delete-keyword" data-id="${keyword.id}">删除</button>
+                            </td>
+                        `;
+                        keywordsContainer.appendChild(row);
+                    });
+                }, 1000);
             }
             
             // 加载禁言词数据
             const bannedContainer = document.getElementById('banned-keywords-container');
             if (bannedContainer) {
-                bannedContainer.innerHTML = '';
-                mockBannedKeywords.forEach(banned => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${banned.word}</td>
-                        <td>
-                            <button class="btn btn-sm btn-danger delete-banned" data-id="${banned.id}">删除</button>
+                // 先显示行内加载状态
+                bannedContainer.innerHTML = `
+                    <tr>
+                        <td colspan="2" class="text-center py-3 text-muted">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">加载中...</span>
+                            </div>
+                            加载禁言词数据中...
                         </td>
-                    `;
-                    bannedContainer.appendChild(row);
-                });
+                    </tr>
+                `;
+                
+                // 模拟网络延迟
+                setTimeout(() => {
+                    bannedContainer.innerHTML = '';
+                    mockBannedKeywords.forEach(banned => {
+                        const row = document.createElement('tr');
+                        row.className = 'fade-in';
+                        row.innerHTML = `
+                            <td>${banned.word}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger delete-banned" data-id="${banned.id}">删除</button>
+                            </td>
+                        `;
+                        bannedContainer.appendChild(row);
+                    });
+                    
+                    // 所有数据加载完成后隐藏全局加载指示器并显示提示
+                    const loader = document.getElementById('data-loader');
+                    if (loader) loader.classList.add('hidden');
+                    
+                    // 显示加载完成提示
+                    const alert = document.getElementById('data-loaded-alert');
+                    if (alert) {
+                        alert.classList.remove('hidden');
+                        // 5秒后自动隐藏提示
+                        setTimeout(() => {
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }, 5000);
+                    }
+                }, 1200);
             }
-            
-            // 隐藏加载指示器
-            const loader = document.getElementById('data-loader');
-            if (loader) loader.classList.add('hidden');
         }
         
-        // 定义之前缺失的loadRealData函数
+        // 定义加载真实数据的函数（模拟）
         function loadRealData() {
-            // 在实际应用中，这里会通过API加载真实数据
-            // 这里我们仍然使用模拟数据演示
-            loadMockData();
+            // 显示全局加载指示器
+            const loader = document.getElementById('data-loader');
+            if (loader) loader.classList.remove('hidden');
             
-            // 显示成功提示
-            alert('数据已更新');
+            // 隐藏之前的提示
+            const alert = document.getElementById('data-loaded-alert');
+            if (alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }
+            
+            // 模拟API请求延迟
+            setTimeout(loadMockData, 1500);
         }
         
         // 确保DOM加载完成后执行
         document.addEventListener('DOMContentLoaded', function() {
             // 初始加载数据
-            loadMockData();
+            loadRealData();
             
             // 侧边栏切换
             document.getElementById('menu-toggle')?.addEventListener('click', function() {
@@ -736,11 +854,7 @@
             
             // 刷新按钮事件
             document.getElementById('refresh-data')?.addEventListener('click', function() {
-                // 显示加载状态
-                const loader = document.getElementById('data-loader');
-                if (loader) loader.classList.remove('hidden');
-                // 重新加载数据
-                setTimeout(loadRealData, 300); // 稍微延迟以显示加载效果
+                loadRealData();
             });
             
             // 积分调整按钮事件
@@ -766,12 +880,26 @@
                 // 处理积分调整逻辑
                 const pointsModal = bootstrap.Modal.getInstance(document.getElementById('points-modal'));
                 pointsModal.hide();
-                alert('积分调整成功');
-                // 刷新数据
-                loadRealData();
+                
+                // 显示加载状态
+                const loader = document.getElementById('data-loader');
+                if (loader) loader.classList.remove('hidden');
+                
+                // 模拟API请求延迟
+                setTimeout(() => {
+                    // 更新模拟数据中的积分
+                    const userId = parseInt(document.getElementById('points_user_id').value);
+                    const pointsChange = parseInt(document.getElementById('points_change').value);
+                    const userIndex = mockUsers.findIndex(u => u.id === userId);
+                    
+                    if (userIndex !== -1) {
+                        mockUsers[userIndex].points += pointsChange;
+                    }
+                    
+                    // 重新加载数据
+                    loadMockData();
+                }, 800);
             });
-            
-            // 模态框相关事件可以在这里继续添加
         });
     </script>
 </body>

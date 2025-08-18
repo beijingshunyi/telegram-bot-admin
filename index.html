@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram北京修车超级机器人管理后台</title>
-    <!-- 使用生产环境兼容的Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
@@ -111,6 +110,9 @@
                     <h2 class="text-lg font-semibold text-gray-700">管理后台</h2>
                 </div>
                 <div>
+                    <button id="clear-storage-btn" class="text-yellow-500 hover:text-yellow-700 mr-4">
+                        <i class="fa fa-refresh mr-1"></i> 重置设置
+                    </button>
                     <button id="logout-btn" class="text-red-500 hover:text-red-700">
                         <i class="fa fa-sign-out mr-1"></i> 退出
                     </button>
@@ -119,6 +121,20 @@
 
             <!-- 内容区域 -->
             <main class="flex-1 overflow-y-auto p-6">
+                <!-- 数据库连接检查提示 -->
+                <div id="db-connection-alert" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 hidden">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-exclamation-triangle text-yellow-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                数据库连接未配置或配置不正确，请先完成数据库设置。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 登录界面 -->
                 <div id="login-screen" class="max-w-md mx-auto mt-10 bg-white p-8 rounded-lg shadow-md">
                     <h2 class="text-2xl font-bold mb-6 text-center">管理员登录</h2>
@@ -135,25 +151,27 @@
                     <div id="login-error" class="mt-4 text-red-500 hidden"></div>
                 </div>
 
-                <!-- 数据库连接设置（首次登录时显示） -->
-                <div id="db-setup-screen" class="max-w-2xl mx-auto mt-10 bg-white p-8 rounded-lg shadow-md hidden">
+                <!-- 数据库连接设置（强制显示） -->
+                <div id="db-setup-screen" class="max-w-2xl mx-auto mt-10 bg-white p-8 rounded-lg shadow-md">
                     <h2 class="text-2xl font-bold mb-6 text-center">数据库连接设置</h2>
                     <p class="text-gray-600 mb-6 text-center">请输入您的数据库连接信息以继续</p>
                     
                     <div class="mb-4">
                         <label class="block text-gray-700 mb-2" for="db-url">
-                            数据库URL
+                            数据库URL <span class="text-red-500">*</span>
                         </label>
                         <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                                id="db-url" type="text" placeholder="例如: https://your-project.supabase.co">
+                        <p class="text-xs text-gray-500 mt-1">您的Supabase项目URL，可在Supabase控制台获取</p>
                     </div>
                     
                     <div class="mb-4">
                         <label class="block text-gray-700 mb-2" for="db-key">
-                            数据库密钥
+                            数据库密钥 <span class="text-red-500">*</span>
                         </label>
                         <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                                id="db-key" type="text" placeholder="输入您的数据库访问密钥">
+                        <p class="text-xs text-gray-500 mt-1">您的Supabase anon/public密钥，可在Supabase控制台获取</p>
                     </div>
                     
                     <div class="mb-4">
@@ -162,6 +180,13 @@
                         </label>
                         <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                                id="bot-token" type="text" placeholder="输入您的Telegram机器人令牌">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <button id="test-db-connection" class="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 mb-4">
+                            <i class="fa fa-check-circle mr-1"></i> 测试连接
+                        </button>
+                        <div id="test-connection-result" class="text-sm hidden"></div>
                     </div>
                     
                     <button id="save-db-settings" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-6">
@@ -225,7 +250,7 @@
                             <h3 class="text-lg font-semibold mb-4">积分排名前10用户</h3>
                             <div id="top-users" class="space-y-3">
                                 <div class="flex items-center justify-center p-8 text-gray-500">
-                                    <i class="fa fa-spinner fa-spin mr-2"></i> 加载中...
+                                    <i class="fa fa-spinner fa-spin mr-2"></i> 从数据库加载中...
                                 </div>
                             </div>
                         </div>
@@ -233,7 +258,7 @@
                             <h3 class="text-lg font-semibold mb-4">最近添加的老师</h3>
                             <div id="recent-teachers" class="space-y-3">
                                 <div class="flex items-center justify-center p-8 text-gray-500">
-                                    <i class="fa fa-spinner fa-spin mr-2"></i> 加载中...
+                                    <i class="fa fa-spinner fa-spin mr-2"></i> 从数据库加载中...
                                 </div>
                             </div>
                         </div>
@@ -268,7 +293,7 @@
                             <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
                                 <tr>
                                     <td colspan="6" class="px-6 py-10 text-center text-gray-500">
-                                        <i class="fa fa-spinner fa-spin mr-2"></i> 加载用户数据中...
+                                        <i class="fa fa-spinner fa-spin mr-2"></i> 从数据库加载用户数据中...
                                     </td>
                                 </tr>
                             </tbody>
@@ -337,7 +362,7 @@
                             <tbody id="teachers-table-body" class="bg-white divide-y divide-gray-200">
                                 <tr>
                                     <td colspan="6" class="px-6 py-10 text-center text-gray-500">
-                                        <i class="fa fa-spinner fa-spin mr-2"></i> 加载老师数据中...
+                                        <i class="fa fa-spinner fa-spin mr-2"></i> 从数据库加载老师数据中...
                                     </td>
                                 </tr>
                             </tbody>
@@ -474,7 +499,7 @@
                             <tbody id="keywords-table-body" class="bg-white divide-y divide-gray-200">
                                 <tr>
                                     <td colspan="4" class="px-6 py-10 text-center text-gray-500">
-                                        <i class="fa fa-spinner fa-spin mr-2"></i> 加载关键词数据中...
+                                        <i class="fa fa-spinner fa-spin mr-2"></i> 从数据库加载关键词数据中...
                                     </td>
                                 </tr>
                             </tbody>
@@ -538,7 +563,7 @@
                             <tbody id="banned-table-body" class="bg-white divide-y divide-gray-200">
                                 <tr>
                                     <td colspan="2" class="px-6 py-10 text-center text-gray-500">
-                                        <i class="fa fa-spinner fa-spin mr-2"></i> 加载禁言词数据中...
+                                        <i class="fa fa-spinner fa-spin mr-2"></i> 从数据库加载禁言词数据中...
                                     </td>
                                 </tr>
                             </tbody>
@@ -604,7 +629,7 @@
                         
                         <div class="mb-4">
                             <label class="block text-gray-700 mb-2" for="settings-db-url">
-                                数据库URL
+                                数据库URL <span class="text-red-500">*</span>
                             </label>
                             <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
                                    id="settings-db-url" type="text">
@@ -613,12 +638,17 @@
                         
                         <div class="mb-4">
                             <label class="block text-gray-700 mb-2" for="settings-db-key">
-                                数据库密钥
+                                数据库密钥 <span class="text-red-500">*</span>
                             </label>
                             <input class="w-full px-3 py-2 border border-gray-300 rounded-md" 
                                    id="settings-db-key" type="text">
                             <p class="text-xs text-gray-500 mt-1">您的数据库访问密钥</p>
                         </div>
+                        
+                        <button id="test-db-connection-settings" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 mb-4">
+                            <i class="fa fa-check-circle mr-1"></i> 测试连接
+                        </button>
+                        <div id="test-connection-result-settings" class="text-sm hidden mb-4"></div>
                         
                         <button id="save-db-settings-from-settings" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                             保存数据库设置
@@ -632,11 +662,9 @@
                             <i class="fa fa-random mr-1"></i> 发送随机老师推荐
                         </button>
                         
-                        <button id="test-connection-btn" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors">
-                            <i class="fa fa-check-circle mr-1"></i> 测试数据库连接
+                        <button id="clear-all-storage-btn" class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition-colors">
+                            <i class="fa fa-trash mr-1"></i> 清除所有本地数据
                         </button>
-                        
-                        <div id="test-result" class="mt-4 hidden"></div>
                     </div>
                 </div>
 
@@ -681,7 +709,7 @@
                 botToken: '',
                 adminId: ''
             },
-            // 数据缓存
+            // 数据缓存 - 从实际数据库加载
             users: [],
             teachers: [],
             keywords: [],
@@ -690,26 +718,61 @@
 
         // DOM 元素加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
+            // 初始化时隐藏所有屏幕，除了登录屏幕
+            hideAllScreensExcept('login-screen');
+            
             // 尝试从本地存储加载设置
             loadSettingsFromStorage();
             
             // 初始化事件监听
             initEventListeners();
             
-            // 如果已有设置，尝试连接数据库
+            // 检查是否已有设置，如果有则尝试连接数据库
             if (state.settings.dbUrl && state.settings.dbKey) {
                 initSupabase();
             }
         });
 
+        // 隐藏所有屏幕，只显示指定的屏幕
+        function hideAllScreensExcept(screenId) {
+            const screens = [
+                'login-screen', 
+                'db-setup-screen', 
+                'dashboard-screen',
+                'users-screen',
+                'teachers-screen',
+                'keywords-screen',
+                'banned-screen',
+                'settings-screen',
+                'test-screen'
+            ];
+            
+            screens.forEach(screen => {
+                const element = document.getElementById(screen);
+                if (element) {
+                    if (screen === screenId) {
+                        element.classList.remove('hidden');
+                    } else {
+                        element.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
         // 初始化Supabase连接
         function initSupabase() {
             if (state.settings.dbUrl && state.settings.dbKey && window.supabase) {
                 try {
+                    // 清除之前的连接
+                    state.supabase = null;
+                    
+                    // 创建新连接
                     state.supabase = window.supabase.createClient(
                         state.settings.dbUrl,
                         state.settings.dbKey
                     );
+                    
+                    console.log('数据库连接已初始化');
                     return true;
                 } catch (error) {
                     console.error('初始化数据库连接失败:', error);
@@ -732,6 +795,11 @@
                     document.getElementById('settings-db-key').value = state.settings.dbKey || '';
                     document.getElementById('settings-bot-token').value = state.settings.botToken || '';
                     document.getElementById('settings-admin-id').value = state.settings.adminId || '';
+                    
+                    // 更新数据库设置页面
+                    document.getElementById('db-url').value = state.settings.dbUrl || '';
+                    document.getElementById('db-key').value = state.settings.dbKey || '';
+                    document.getElementById('bot-token').value = state.settings.botToken || '';
                 }
             } catch (error) {
                 console.error('加载设置失败:', error);
@@ -746,6 +814,40 @@
             } catch (error) {
                 console.error('保存设置失败:', error);
                 return false;
+            }
+        }
+
+        // 清除所有本地存储数据
+        function clearAllStorage() {
+            if (confirm('确定要清除所有本地数据吗？这将重置所有设置，需要重新登录和配置数据库。')) {
+                try {
+                    localStorage.removeItem('botAdminSettings');
+                    state.settings = {
+                        dbUrl: '',
+                        dbKey: '',
+                        botToken: '',
+                        adminId: ''
+                    };
+                    state.supabase = null;
+                    state.isLoggedIn = false;
+                    
+                    // 重置表单
+                    document.getElementById('settings-db-url').value = '';
+                    document.getElementById('settings-db-key').value = '';
+                    document.getElementById('settings-bot-token').value = '';
+                    document.getElementById('settings-admin-id').value = '';
+                    document.getElementById('db-url').value = '';
+                    document.getElementById('db-key').value = '';
+                    document.getElementById('bot-token').value = '';
+                    document.getElementById('admin-key').value = '';
+                    
+                    // 返回登录页面
+                    navigateToScreen('login');
+                    showNotification('所有本地数据已清除');
+                } catch (error) {
+                    console.error('清除本地数据失败:', error);
+                    showNotification('清除本地数据失败', 'error');
+                }
             }
         }
 
@@ -772,10 +874,18 @@
             // 退出按钮
             document.getElementById('logout-btn').addEventListener('click', handleLogout);
             
+            // 清除设置按钮
+            document.getElementById('clear-storage-btn').addEventListener('click', clearAllStorage);
+            document.getElementById('clear-all-storage-btn').addEventListener('click', clearAllStorage);
+            
             // 数据库设置按钮
             document.getElementById('save-db-settings').addEventListener('click', saveDatabaseSettings);
             document.getElementById('save-db-settings-from-settings').addEventListener('click', saveDatabaseSettings);
             document.getElementById('save-bot-settings').addEventListener('click', saveBotSettings);
+            
+            // 数据库连接测试按钮
+            document.getElementById('test-db-connection').addEventListener('click', () => testDatabaseConnection('test-connection-result'));
+            document.getElementById('test-db-connection-settings').addEventListener('click', () => testDatabaseConnection('test-connection-result-settings'));
             
             // 老师管理相关按钮
             document.getElementById('add-teacher-btn').addEventListener('click', () => openTeacherModal());
@@ -797,7 +907,6 @@
             document.getElementById('save-user-edit').addEventListener('click', saveUser);
             
             // 系统设置相关按钮
-            document.getElementById('test-connection-btn').addEventListener('click', testDatabaseConnection);
             document.getElementById('send-random-teacher-btn').addEventListener('click', sendRandomTeacher);
             
             // 测试连接页面按钮
@@ -815,12 +924,18 @@
                 return;
             }
             
-            // 隐藏当前屏幕
-            document.getElementById(state.currentScreen).classList.add('hidden');
+            // 检查数据库连接状态（数据库设置和登录屏幕除外）
+            if (screenId !== 'login' && screenId !== 'db-setup' && (!state.supabase || !state.settings.dbUrl || !state.settings.dbKey)) {
+                showDbConnectionAlert(true);
+                // 强制导航到数据库设置页面
+                screenId = 'db-setup';
+            } else {
+                showDbConnectionAlert(false);
+            }
             
-            // 显示目标屏幕
+            // 隐藏所有屏幕，显示目标屏幕
             const targetScreen = `${screenId}-screen`;
-            document.getElementById(targetScreen).classList.remove('hidden');
+            hideAllScreensExcept(targetScreen);
             
             // 更新当前屏幕状态
             state.currentScreen = targetScreen;
@@ -847,6 +962,18 @@
             }
         }
 
+        // 显示/隐藏数据库连接警告
+        function showDbConnectionAlert(show) {
+            const alert = document.getElementById('db-connection-alert');
+            if (alert) {
+                if (show) {
+                    alert.classList.remove('hidden');
+                } else {
+                    alert.classList.add('hidden');
+                }
+            }
+        }
+
         // 处理登录
         function handleLogin() {
             const adminKey = document.getElementById('admin-key').value;
@@ -856,17 +983,9 @@
                 state.isLoggedIn = true;
                 document.getElementById('login-error').classList.add('hidden');
                 
-                // 检查是否已有数据库设置
-                if (state.settings.dbUrl && state.settings.dbKey) {
-                    // 已有设置，直接进入仪表盘
-                    navigateToScreen('dashboard');
-                    showNotification('登录成功');
-                } else {
-                    // 没有设置，显示数据库设置页面
-                    document.getElementById('login-screen').classList.add('hidden');
-                    document.getElementById('db-setup-screen').classList.remove('hidden');
-                    state.currentScreen = 'db-setup-screen';
-                }
+                // 无论是否有设置，都先显示数据库设置页面
+                navigateToScreen('db-setup');
+                showNotification('登录成功，请配置数据库连接');
             } else {
                 document.getElementById('login-error').classList.remove('hidden');
                 document.getElementById('login-error').textContent = '管理员密钥不正确';
@@ -920,17 +1039,17 @@
             
             if (initSuccess) {
                 // 测试连接
-                testDatabaseConnection().then(success => {
-                    if (success) {
-                        showNotification('数据库设置已保存并连接成功');
-                        
-                        // 如果是从设置页面来的，留在当前页面
-                        if (state.currentScreen === 'db-setup-screen') {
-                            // 从初始设置页面来的，跳转到仪表盘
-                            navigateToScreen('dashboard');
+                testDatabaseConnection(state.currentScreen === 'db-setup-screen' ? 'test-connection-result' : 'test-connection-result-settings')
+                    .then(success => {
+                        if (success) {
+                            showNotification('数据库设置已保存并连接成功');
+                            
+                            // 从数据库设置页面跳转至仪表盘
+                            if (state.currentScreen === 'db-setup-screen') {
+                                navigateToScreen('dashboard');
+                            }
                         }
-                    }
-                });
+                    });
             }
         }
 
@@ -985,6 +1104,73 @@
             setTimeout(() => {
                 notification.classList.add('translate-y-20', 'opacity-0');
             }, 3000);
+        }
+
+        // 测试数据库连接
+        async function testDatabaseConnection(resultElementId) {
+            const resultElement = document.getElementById(resultElementId);
+            
+            if (resultElement) {
+                resultElement.classList.remove('hidden', 'text-green-500', 'text-red-500');
+                resultElement.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i> 正在测试连接...';
+            } else {
+                showNotification('正在测试数据库连接...', 'info');
+            }
+            
+            // 获取当前表单中的值进行测试
+            let dbUrl, dbKey;
+            if (state.currentScreen === 'db-setup-screen') {
+                dbUrl = document.getElementById('db-url').value.trim();
+                dbKey = document.getElementById('db-key').value.trim();
+            } else {
+                dbUrl = document.getElementById('settings-db-url').value.trim();
+                dbKey = document.getElementById('settings-db-key').value.trim();
+            }
+            
+            // 验证输入
+            if (!dbUrl || !dbKey) {
+                const message = '请先填写数据库URL和密钥';
+                if (resultElement) {
+                    resultElement.classList.add('text-red-500');
+                    resultElement.innerHTML = `<i class="fa fa-exclamation-circle mr-2"></i> ${message}`;
+                } else {
+                    showNotification(message, 'error');
+                }
+                return false;
+            }
+            
+            try {
+                // 创建临时连接进行测试
+                const tempSupabase = window.supabase.createClient(dbUrl, dbKey);
+                
+                // 尝试查询表结构来验证连接
+                const { error } = await tempSupabase
+                    .from('users')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) throw error;
+                
+                if (resultElement) {
+                    resultElement.classList.add('text-green-500');
+                    resultElement.innerHTML = '<i class="fa fa-check-circle mr-2"></i> 数据库连接成功！';
+                } else {
+                    showNotification('数据库连接成功');
+                }
+                return true;
+                
+            } catch (error) {
+                console.error('数据库连接测试失败:', error);
+                const errorMsg = error.message || '未知错误';
+                const message = `连接失败: ${errorMsg}`;
+                
+                if (resultElement) {
+                    resultElement.classList.add('text-red-500');
+                    resultElement.innerHTML = `<i class="fa fa-exclamation-circle mr-2"></i> ${message}`;
+                } else {
+                    showNotification(message, 'error');
+                }
+                return false;
+            }
         }
 
         // 打开老师编辑模态框
@@ -1424,50 +1610,6 @@
             document.getElementById(modalId).classList.add('hidden');
         }
 
-        // 测试数据库连接
-        async function testDatabaseConnection() {
-            if (!state.supabase) {
-                showNotification('请先配置数据库连接', 'error');
-                return false;
-            }
-            
-            const resultElement = document.getElementById('test-result');
-            if (resultElement) {
-                resultElement.classList.remove('hidden', 'text-green-500', 'text-red-500');
-                resultElement.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i> 正在测试连接...';
-            } else {
-                showNotification('正在测试数据库连接...', 'info');
-            }
-            
-            try {
-                // 尝试查询一个简单的表
-                const { data, error } = await state.supabase
-                    .from('users')
-                    .select('count', { count: 'exact', head: true });
-                    
-                if (error) throw error;
-                
-                if (resultElement) {
-                    resultElement.classList.add('text-green-500');
-                    resultElement.innerHTML = '<i class="fa fa-check-circle mr-2"></i> 数据库连接成功';
-                } else {
-                    showNotification('数据库连接成功');
-                }
-                return true;
-                
-            } catch (error) {
-                console.error('数据库连接测试失败:', error);
-                
-                if (resultElement) {
-                    resultElement.classList.add('text-red-500');
-                    resultElement.innerHTML = `<i class="fa fa-exclamation-circle mr-2"></i> 连接失败: ${error.message}`;
-                } else {
-                    showNotification(`数据库连接失败: ${error.message}`, 'error');
-                }
-                return false;
-            }
-        }
-
         // 发送随机老师推荐
         async function sendRandomTeacher() {
             if (!state.supabase) {
@@ -1516,6 +1658,7 @@
                     showNotification(`已成功推荐老师: ${randomTeacher.nickname}`);
                 }, 1500);
                 
+                
             } catch (error) {
                 console.error('发送推荐失败:', error);
                 showNotification(`发送失败: ${error.message}`, 'error');
@@ -1553,22 +1696,43 @@
                                         if (error) throw error;
                                         outputElement.textContent += '✅ 连接成功\n';
                                         
-                                        // 测试步骤4: 检查Telegram配置
-                                        setTimeout(() => {
-                                            outputElement.textContent += '4. 检查Telegram配置... ';
-                                            if (state.settings.botToken) {
-                                                outputElement.textContent += '✅ 已配置\n';
+                                        // 测试步骤4: 尝试加载示例数据
+                                        setTimeout(async () => {
+                                            outputElement.textContent += '4. 尝试加载示例数据... ';
+                                            try {
+                                                const { data, error } = await state.supabase
+                                                    .from('users')
+                                                    .select('*')
+                                                    .limit(1);
                                                 
+                                                if (error) throw error;
+                                                outputElement.textContent += `✅ 成功 (${data.length} 条记录)\n`;
+                                                
+                                                // 测试步骤5: 检查Telegram配置
                                                 setTimeout(() => {
-                                                    outputElement.textContent += '\n所有测试已完成，系统状态正常！';
-                                                    showNotification('测试完成，所有连接正常');
+                                                    outputElement.textContent += '5. 检查Telegram配置... ';
+                                                    if (state.settings.botToken) {
+                                                        outputElement.textContent += '✅ 已配置\n';
+                                                        
+                                                        setTimeout(() => {
+                                                            outputElement.textContent += '\n所有测试已完成，系统状态正常！';
+                                                            showNotification('测试完成，所有连接正常');
+                                                        }, 800);
+                                                    } else {
+                                                        outputElement.textContent += '⚠️ 未配置Telegram Bot Token\n';
+                                                        
+                                                        setTimeout(() => {
+                                                            outputElement.textContent += '\n测试完成，发现警告: 请配置Telegram Bot Token';
+                                                            showNotification('测试完成，发现警告', 'info');
+                                                        }, 800);
+                                                    }
                                                 }, 800);
-                                            } else {
-                                                outputElement.textContent += '⚠️ 未配置Telegram Bot Token\n';
+                                            } catch (error) {
+                                                outputElement.textContent += `❌ 失败: ${error.message}\n`;
                                                 
                                                 setTimeout(() => {
-                                                    outputElement.textContent += '\n测试完成，发现警告: 请配置Telegram Bot Token';
-                                                    showNotification('测试完成，发现警告', 'info');
+                                                    outputElement.textContent += '\n测试完成，发现错误: 无法加载数据';
+                                                    showNotification('测试完成，发现错误', 'error');
                                                 }, 800);
                                             }
                                         }, 800);
@@ -1643,7 +1807,7 @@
                 if (teachersData.error) throw teachersData.error;
                 if (keywordsData.error) throw keywordsData.error;
                 
-                // 更新本地缓存
+                // 更新本地缓存 - 来自实际数据库
                 state.users = usersData.data || [];
                 state.teachers = teachersData.data || [];
                 state.keywords = keywordsData.data || [];
@@ -1674,7 +1838,7 @@
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="6" class="px-6 py-10 text-center text-gray-500">
-                        <i class="fa fa-spinner fa-spin mr-2"></i> 加载用户数据中...
+                        <i class="fa fa-spinner fa-spin mr-2"></i> 从数据库加载用户数据中...
                     </td>
                 </tr>
             `;
@@ -1713,7 +1877,7 @@
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="6" class="px-6 py-10 text-center text-gray-500">
-                        <i class="fa fa-spinner fa-spin mr-2"></i> 加载老师数据中...
+                        <i class="fa fa-spinner fa-spin mr-2"></i> 从数据库加载老师数据中...
                     </td>
                 </tr>
             `;
@@ -1752,7 +1916,7 @@
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="4" class="px-6 py-10 text-center text-gray-500">
-                        <i class="fa fa-spinner fa-spin mr-2"></i> 加载关键词数据中...
+                        <i class="fa fa-spinner fa-spin mr-2"></i> 从数据库加载关键词数据中...
                     </td>
                 </tr>
             `;
@@ -1791,7 +1955,7 @@
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="2" class="px-6 py-10 text-center text-gray-500">
-                        <i class="fa fa-spinner fa-spin mr-2"></i> 加载禁言词数据中...
+                        <i class="fa fa-spinner fa-spin mr-2"></i> 从数据库加载禁言词数据中...
                     </td>
                 </tr>
             `;
@@ -1806,7 +1970,6 @@
                 
                 state.bannedWords = data || [];
                 renderBannedWordsTable();
-                
                 
             } catch (error) {
                 console.error('获取禁言词数据失败:', error);
@@ -1829,7 +1992,7 @@
                 tableBody.innerHTML = `
                     <tr>
                         <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                            没有找到用户数据
+                            数据库中没有找到用户数据
                         </td>
                     </tr>
                 `;
@@ -1860,7 +2023,7 @@
                 tableBody.innerHTML = `
                     <tr>
                         <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                            没有找到老师数据
+                            数据库中没有找到老师数据
                         </td>
                     </tr>
                 `;
@@ -1919,7 +2082,7 @@
                 tableBody.innerHTML = `
                     <tr>
                         <td colspan="4" class="px-6 py-4 text-center text-gray-500">
-                            没有找到关键词数据
+                            数据库中没有找到关键词数据
                         </td>
                     </tr>
                 `;
@@ -1958,7 +2121,7 @@
                 tableBody.innerHTML = `
                     <tr>
                         <td colspan="2" class="px-6 py-4 text-center text-gray-500">
-                            没有找到禁言词数据
+                            数据库中没有找到禁言词数据
                         </td>
                     </tr>
                 `;
@@ -2008,7 +2171,7 @@
                 .slice(0, 10);
             
             if (topUsers.length === 0) {
-                topUsersContainer.innerHTML = '<p class="text-gray-500">没有用户数据</p>';
+                topUsersContainer.innerHTML = '<p class="text-gray-500">数据库中没有用户数据</p>';
                 return;
             }
             
@@ -2039,7 +2202,7 @@
                 .slice(0, 5);
             
             if (recentTeachers.length === 0) {
-                recentTeachersContainer.innerHTML = '<p class="text-gray-500">没有老师数据</p>';
+                recentTeachersContainer.innerHTML = '<p class="text-gray-500">数据库中没有老师数据</p>';
                 return;
             }
             

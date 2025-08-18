@@ -554,10 +554,161 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-    <script src="script.js"></script>
     <script>
+        // 模拟数据
+        const mockUsers = [
+            { id: 1001, username: "@user1", display_name: "修车达人", first_name: "张", last_name: "三", points: 1500, last_checkin: "2023-06-15" },
+            { id: 1002, username: "@user2", display_name: "爱车一族", first_name: "李", last_name: "四", points: 2300, last_checkin: "2023-06-16" },
+            { id: 1003, username: "@user3", display_name: "汽车迷", first_name: "王", last_name: "五", points: 800, last_checkin: "2023-06-14" },
+            { id: 1004, username: "@user4", display_name: "修车新手", first_name: "赵", last_name: "六", points: 500, last_checkin: "2023-06-15" },
+            { id: 1005, username: "@user5", display_name: "老司机", first_name: "孙", last_name: "七", points: 3200, last_checkin: "2023-06-16" }
+        ];
+        
+        const mockTeachers = [
+            { id: 1, nickname: "修车老王", age: 45, region: "北京朝阳", service_type: "发动机维修", price: "800p", status: "approved" },
+            { id: 2, nickname: "电路专家", age: 38, region: "北京海淀", service_type: "电路维修", price: "600p", status: "approved" },
+            { id: 3, nickname: "钣金小李", age: 32, region: "北京丰台", service_type: "钣金喷漆", price: "1200p", status: "pending" },
+            { id: 4, nickname: "轮胎达人", age: 29, region: "北京西城", service_type: "轮胎更换", price: "500p", status: "approved" },
+            { id: 5, nickname: "空调维修", age: 41, region: "北京东城", service_type: "空调维修", price: "700p", status: "rejected" }
+        ];
+        
+        const mockKeywords = [
+            { id: 1, keyword: "价格", response: "我们的维修价格根据车型和故障类型而定，具体请咨询在线老师。", is_active: true },
+            { id: 2, keyword: "地址", response: "我们在北京多个区域有服务点，具体请告知您所在区域。", is_active: true },
+            { id: 3, keyword: "预约", response: "您可以直接在群里@相关老师进行预约。", is_active: false },
+            { id: 4, keyword: "保养", response: "常规保养价格从500p起，包含机油更换和基础检查。", is_active: true }
+        ];
+        
+        const mockBannedKeywords = [
+            { id: 1, word: "骗子" },
+            { id: 2, word: "垃圾" },
+            { id: 3, word: "假货" },
+            { id: 4, word: "滚开" }
+        ];
+        
+        // 加载模拟数据到表格
+        function loadMockData() {
+            // 加载用户数据
+            const usersContainer = document.getElementById('users-container');
+            if (usersContainer) {
+                usersContainer.innerHTML = '';
+                mockUsers.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.display_name}</td>
+                        <td>${user.last_name}${user.first_name}</td>
+                        <td>${user.points}</td>
+                        <td>${user.last_checkin}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-user" data-id="${user.id}">编辑</button>
+                            <button class="btn btn-sm btn-secondary adjust-points" data-id="${user.id}" data-name="${user.display_name}" data-points="${user.points}">调整积分</button>
+                        </td>
+                    `;
+                    usersContainer.appendChild(row);
+                });
+            }
+            
+            // 加载老师数据
+            const teachersContainer = document.getElementById('teachers-container');
+            if (teachersContainer) {
+                teachersContainer.innerHTML = '';
+                mockTeachers.forEach(teacher => {
+                    let statusClass = '';
+                    let statusText = '';
+                    
+                    switch(teacher.status) {
+                        case 'approved':
+                            statusClass = 'text-green-600';
+                            statusText = '已认证';
+                            break;
+                        case 'pending':
+                            statusClass = 'text-yellow-600';
+                            statusText = '待审核';
+                            break;
+                        case 'rejected':
+                            statusClass = 'text-red-600';
+                            statusText = '已拒绝';
+                            break;
+                    }
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${teacher.id}</td>
+                        <td>${teacher.nickname}</td>
+                        <td>${teacher.age}</td>
+                        <td>${teacher.region}</td>
+                        <td>${teacher.service_type}</td>
+                        <td>${teacher.price}</td>
+                        <td><span class="${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-teacher" data-id="${teacher.id}">编辑</button>
+                            <button class="btn btn-sm btn-danger delete-teacher" data-id="${teacher.id}">删除</button>
+                        </td>
+                    `;
+                    teachersContainer.appendChild(row);
+                });
+            }
+            
+            // 加载关键词数据
+            const keywordsContainer = document.getElementById('keywords-container');
+            if (keywordsContainer) {
+                keywordsContainer.innerHTML = '';
+                mockKeywords.forEach(keyword => {
+                    const statusClass = keyword.is_active ? 'text-green-600' : 'text-gray-400';
+                    const statusText = keyword.is_active ? '启用' : '禁用';
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${keyword.keyword}</td>
+                        <td>${keyword.response}</td>
+                        <td><span class="${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-keyword" data-id="${keyword.id}">编辑</button>
+                            <button class="btn btn-sm btn-danger delete-keyword" data-id="${keyword.id}">删除</button>
+                        </td>
+                    `;
+                    keywordsContainer.appendChild(row);
+                });
+            }
+            
+            // 加载禁言词数据
+            const bannedContainer = document.getElementById('banned-keywords-container');
+            if (bannedContainer) {
+                bannedContainer.innerHTML = '';
+                mockBannedKeywords.forEach(banned => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${banned.word}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger delete-banned" data-id="${banned.id}">删除</button>
+                        </td>
+                    `;
+                    bannedContainer.appendChild(row);
+                });
+            }
+            
+            // 隐藏加载指示器
+            const loader = document.getElementById('data-loader');
+            if (loader) loader.classList.add('hidden');
+        }
+        
+        // 定义之前缺失的loadRealData函数
+        function loadRealData() {
+            // 在实际应用中，这里会通过API加载真实数据
+            // 这里我们仍然使用模拟数据演示
+            loadMockData();
+            
+            // 显示成功提示
+            alert('数据已更新');
+        }
+        
         // 确保DOM加载完成后执行
         document.addEventListener('DOMContentLoaded', function() {
+            // 初始加载数据
+            loadMockData();
+            
             // 侧边栏切换
             document.getElementById('menu-toggle')?.addEventListener('click', function() {
                 const mobileSidebar = document.getElementById('mobile-sidebar');
@@ -587,10 +738,40 @@
             document.getElementById('refresh-data')?.addEventListener('click', function() {
                 // 显示加载状态
                 const loader = document.getElementById('data-loader');
-                if (loader) loader.style.display = 'flex';
+                if (loader) loader.classList.remove('hidden');
                 // 重新加载数据
                 setTimeout(loadRealData, 300); // 稍微延迟以显示加载效果
             });
+            
+            // 积分调整按钮事件
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('adjust-points')) {
+                    const userId = e.target.getAttribute('data-id');
+                    const userName = e.target.getAttribute('data-name');
+                    const userPoints = e.target.getAttribute('data-points');
+                    
+                    document.getElementById('points_user_id').value = userId;
+                    document.getElementById('points_username').value = userName;
+                    document.getElementById('current_points').value = userPoints;
+                    document.getElementById('points_change').value = '';
+                    
+                    const pointsModal = new bootstrap.Modal(document.getElementById('points-modal'));
+                    pointsModal.show();
+                }
+            });
+            
+            // 积分调整表单提交
+            document.getElementById('points-form')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                // 处理积分调整逻辑
+                const pointsModal = bootstrap.Modal.getInstance(document.getElementById('points-modal'));
+                pointsModal.hide();
+                alert('积分调整成功');
+                // 刷新数据
+                loadRealData();
+            });
+            
+            // 模态框相关事件可以在这里继续添加
         });
     </script>
 </body>

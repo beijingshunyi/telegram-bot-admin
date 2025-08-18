@@ -1,0 +1,2200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram北京修车超级机器人管理后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        // 配置Tailwind自定义主题
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        accent: '#722ED1',
+                        dark: '#1D2129',
+                        light: '#F2F3F5',
+                        success: '#52C41A',
+                        warning: '#FAAD14',
+                        danger: '#FF4D4F',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .sidebar-item {
+                @apply flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-primary/10 hover:text-primary rounded-lg transition-all duration-200;
+            }
+            .sidebar-item.active {
+                @apply bg-primary/10 text-primary font-medium;
+            }
+            .btn {
+                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2;
+            }
+            .btn-primary {
+                @apply bg-primary text-white hover:bg-primary/90;
+            }
+            .btn-secondary {
+                @apply bg-white border border-gray-300 text-gray-700 hover:bg-gray-50;
+            }
+            .btn-danger {
+                @apply bg-danger text-white hover:bg-danger/90;
+            }
+            .card {
+                @apply bg-white rounded-xl shadow-sm border border-gray-100 p-5 transition-all duration-300 hover:shadow-md;
+            }
+            .input {
+                @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all;
+            }
+            .badge {
+                @apply px-2 py-1 rounded-full text-xs font-medium;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button id="sidebar-toggle" class="lg:hidden text-gray-600 hover:text-primary">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+                <h1 class="text-xl font-bold text-primary">
+                    <i class="fa fa-telegram mr-2"></i>北京修车超级机器人管理后台
+                </h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <button id="notifications-btn" class="text-gray-600 hover:text-primary relative">
+                        <i class="fa fa-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 bg-danger text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <img src="https://picsum.photos/id/1005/40/40" alt="管理员头像" class="w-8 h-8 rounded-full object-cover">
+                    <span class="hidden md:inline font-medium">管理员</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="bg-white w-64 border-r border-gray-200 flex-shrink-0 hidden lg:block overflow-y-auto h-[calc(100vh-4rem)] transition-all duration-300 z-20">
+            <div class="p-4">
+                <div class="mb-6">
+                    <p class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">主要功能</p>
+                    <nav>
+                        <a href="#dashboard" class="sidebar-item active" data-target="dashboard">
+                            <i class="fa fa-dashboard w-5 text-center"></i>
+                            <span>控制面板</span>
+                        </a>
+                        <a href="#users" class="sidebar-item" data-target="users">
+                            <i class="fa fa-users w-5 text-center"></i>
+                            <span>用户管理</span>
+                        </a>
+                        <a href="#teachers" class="sidebar-item" data-target="teachers">
+                            <i class="fa fa-user-md w-5 text-center"></i>
+                            <span>老师管理</span>
+                        </a>
+                        <a href="#keywords" class="sidebar-item" data-target="keywords">
+                            <i class="fa fa-key w-5 text-center"></i>
+                            <span>关键词回复</span>
+                        </a>
+                        <a href="#banned" class="sidebar-item" data-target="banned">
+                            <i class="fa fa-ban w-5 text-center"></i>
+                            <span>禁言词管理</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="mb-6">
+                    <p class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">系统管理</p>
+                    <nav>
+                        <a href="#settings" class="sidebar-item" data-target="settings">
+                            <i class="fa fa-cog w-5 text-center"></i>
+                            <span>系统设置</span>
+                        </a>
+                        <a href="#logs" class="sidebar-item" data-target="logs">
+                            <i class="fa fa-history w-5 text-center"></i>
+                            <span>操作日志</span>
+                        </a>
+                        <a href="#database" class="sidebar-item" data-target="database">
+                            <i class="fa fa-database w-5 text-center"></i>
+                            <span>数据库测试</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">工具</p>
+                    <nav>
+                        <a href="#broadcast" class="sidebar-item" data-target="broadcast">
+                            <i class="fa fa-bullhorn w-5 text-center"></i>
+                            <span>广播消息</span>
+                        </a>
+                        <a href="#send-teacher" class="sidebar-item" data-target="send-teacher">
+                            <i class="fa fa-paper-plane w-5 text-center"></i>
+                            <span>发送老师资料</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-50">
+            <!-- 控制面板 -->
+            <section id="dashboard" class="page-content">
+                <div class="mb-6">
+                    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">控制面板</h2>
+                    <p class="text-gray-500">欢迎回来，这是系统的运行概览</p>
+                </div>
+
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">总用户数</p>
+                                <h3 class="text-3xl font-bold mt-1" id="total-users">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa fa-users text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <span class="text-success flex items-center">
+                                <i class="fa fa-arrow-up mr-1"></i> 12%
+                            </span>
+                            <span class="text-gray-500 ml-2">较上周</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">老师总数</p>
+                                <h3 class="text-3xl font-bold mt-1" id="total-teachers">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                                <i class="fa fa-user-md text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <span class="text-success flex items-center">
+                                <i class="fa fa-arrow-up mr-1"></i> 8%
+                            </span>
+                            <span class="text-gray-500 ml-2">较上周</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">今日签到</p>
+                                <h3 class="text-3xl font-bold mt-1" id="today-checkins">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                                <i class="fa fa-calendar-check-o text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <span class="text-danger flex items-center">
+                                <i class="fa fa-arrow-down mr-1"></i> 3%
+                            </span>
+                            <span class="text-gray-500 ml-2">较昨日</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">关键词数量</p>
+                                <h3 class="text-3xl font-bold mt-1" id="total-keywords">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+                                <i class="fa fa-key text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <span class="text-success flex items-center">
+                                <i class="fa fa-arrow-up mr-1"></i> 5%
+                            </span>
+                            <span class="text-gray-500 ml-2">较上周</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图表和数据 -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="card lg:col-span-2">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-lg">用户增长趋势</h3>
+                            <div class="flex gap-2">
+                                <button class="btn btn-secondary py-1 px-3 text-sm">周</button>
+                                <button class="btn btn-primary py-1 px-3 text-sm">月</button>
+                                <button class="btn btn-secondary py-1 px-3 text-sm">年</button>
+                            </div>
+                        </div>
+                        <div class="h-80">
+                            <canvas id="user-growth-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="font-semibold text-lg mb-4">积分排名</h3>
+                        <div class="space-y-4 max-h-80 overflow-y-auto">
+                            <div id="top-users-container" class="space-y-3">
+                                <!-- 动态填充用户排名 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最近活动 -->
+                <div class="card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-lg">最近活动</h3>
+                        <button class="text-primary text-sm hover:underline">查看全部</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">时间</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">用户</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">活动</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">状态</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-activities">
+                                <!-- 动态填充最近活动 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 用户管理 -->
+            <section id="users" class="page-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">用户管理</h2>
+                    <p class="text-gray-500">管理所有使用机器人的用户</p>
+                </div>
+
+                <div class="card mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                        <div class="flex flex-1 max-w-md">
+                            <input type="text" id="user-search" placeholder="搜索用户..." class="input">
+                            <button id="search-users" class="btn btn-primary ml-2">
+                                <i class="fa fa-search"></i> 搜索
+                            </button>
+                        </div>
+                        <div>
+                            <button id="refresh-users" class="btn btn-secondary mr-2">
+                                <i class="fa fa-refresh"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">用户ID</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">用户名</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">显示名称</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">积分</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">最后签到</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <!-- 动态填充用户数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4 flex justify-between items-center">
+                        <p class="text-sm text-gray-500">显示 <span id="users-showing">0</span> 条，共 <span id="users-total">0</span> 条</p>
+                        <div class="flex gap-2">
+                            <button id="users-prev-page" class="btn btn-secondary py-1 px-3 text-sm" disabled>上一页</button>
+                            <button id="users-next-page" class="btn btn-secondary py-1 px-3 text-sm" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 老师管理 -->
+            <section id="teachers" class="page-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">老师管理</h2>
+                    <p class="text-gray-500">管理所有老师信息</p>
+                </div>
+
+                <div class="card mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                        <div class="flex flex-1 max-w-md">
+                            <input type="text" id="teacher-search" placeholder="搜索老师..." class="input">
+                            <button id="search-teachers" class="btn btn-primary ml-2">
+                                <i class="fa fa-search"></i> 搜索
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="add-teacher-btn" class="btn btn-primary">
+                                <i class="fa fa-plus"></i> 添加老师
+                            </button>
+                            <button id="refresh-teachers" class="btn btn-secondary">
+                                <i class="fa fa-refresh"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">ID</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">花名</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">年龄/地区</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">服务类型</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">修车费</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">状态</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teachers-table-body">
+                                <!-- 动态填充老师数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4 flex justify-between items-center">
+                        <p class="text-sm text-gray-500">显示 <span id="teachers-showing">0</span> 条，共 <span id="teachers-total">0</span> 条</p>
+                        <div class="flex gap-2">
+                            <button id="teachers-prev-page" class="btn btn-secondary py-1 px-3 text-sm" disabled>上一页</button>
+                            <button id="teachers-next-page" class="btn btn-secondary py-1 px-3 text-sm" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 关键词回复 -->
+            <section id="keywords" class="page-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">关键词回复</h2>
+                    <p class="text-gray-500">管理机器人的关键词自动回复</p>
+                </div>
+
+                <div class="card mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                        <div class="flex flex-1 max-w-md">
+                            <input type="text" id="keyword-search" placeholder="搜索关键词..." class="input">
+                            <button id="search-keywords" class="btn btn-primary ml-2">
+                                <i class="fa fa-search"></i> 搜索
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="add-keyword-btn" class="btn btn-primary">
+                                <i class="fa fa-plus"></i> 添加关键词
+                            </button>
+                            <button id="refresh-keywords" class="btn btn-secondary">
+                                <i class="fa fa-refresh"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">ID</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">关键词</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">回复内容</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">状态</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keywords-table-body">
+                                <!-- 动态填充关键词数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4 flex justify-between items-center">
+                        <p class="text-sm text-gray-500">显示 <span id="keywords-showing">0</span> 条，共 <span id="keywords-total">0</span> 条</p>
+                        <div class="flex gap-2">
+                            <button id="keywords-prev-page" class="btn btn-secondary py-1 px-3 text-sm" disabled>上一页</button>
+                            <button id="keywords-next-page" class="btn btn-secondary py-1 px-3 text-sm" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 禁言词管理 -->
+            <section id="banned" class="page-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">禁言词管理</h2>
+                    <p class="text-gray-500">管理会触发禁言的敏感词</p>
+                </div>
+
+                <div class="card mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                        <div class="flex flex-1 max-w-md">
+                            <input type="text" id="banned-search" placeholder="搜索禁言词..." class="input">
+                            <button id="search-banned" class="btn btn-primary ml-2">
+                                <i class="fa fa-search"></i> 搜索
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="add-banned-btn" class="btn btn-primary">
+                                <i class="fa fa-plus"></i> 添加禁言词
+                            </button>
+                            <button id="refresh-banned" class="btn btn-secondary">
+                                <i class="fa fa-refresh"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">ID</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">禁言词</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">添加时间</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="banned-table-body">
+                                <!-- 动态填充禁言词数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4 flex justify-between items-center">
+                        <p class="text-sm text-gray-500">显示 <span id="banned-showing">0</span> 条，共 <span id="banned-total">0</span> 条</p>
+                        <div class="flex gap-2">
+                            <button id="banned-prev-page" class="btn btn-secondary py-1 px-3 text-sm" disabled>上一页</button>
+                            <button id="banned-next-page" class="btn btn-secondary py-1 px-3 text-sm" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 系统设置 -->
+            <section id="settings" class="page-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">系统设置</h2>
+                    <p class="text-gray-500">配置机器人的系统参数</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="card">
+                        <h3 class="font-semibold text-lg mb-4">数据库配置</h3>
+                        <form id="db-settings-form" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">数据库URL</label>
+                                <input type="text" id="db-url" class="input" value="https://tekuxjnnwtqmygibvwux.supabase.co">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">数据库密钥</label>
+                                <input type="text" id="db-key" class="input" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRla3V4am5ud3RxbXlnaWJ2d3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzNDUzNjAsImV4cCI6MjA3MDkyMTM2MH0.RGmuF44husXoJP8y4U1Gx7HqQJ6MsYZVl6_vHtG-KJY">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">管理员密钥</label>
+                                <input type="text" id="admin-key" class="input" value="9712202273aA.">
+                            </div>
+                            <div class="pt-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-save"></i> 保存配置
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="font-semibold text-lg mb-4">Telegram配置</h3>
+                        <form id="telegram-settings-form" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Bot Token</label>
+                                <input type="text" id="bot-token" class="input" value="8341196303:AAFbT_px8I12_q2b7AI_c00N3nHzFwLb4pg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">管理员ID</label>
+                                <input type="text" id="admin-id" class="input" value="8392100400">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cloudflare Worker URL</label>
+                                <input type="text" id="worker-url" class="input" value="https://telegram-bot.jbk123jbk.workers.dev">
+                            </div>
+                            <div class="pt-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-save"></i> 保存配置
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="font-semibold text-lg mb-4">频道和群组设置</h3>
+                    <form id="channels-settings-form" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">频道ID列表 (每行一个)</label>
+                            <textarea id="channel-ids" class="input h-32" placeholder="-1002841497873&#10;-1002795304513&#10;-1002834136499&#10;-1002615160035">
+-1002841497873
+-1002795304513
+-1002834136499
+-1002615160035</textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">群组ID列表 (每行一个)</label>
+                            <textarea id="group-ids" class="input h-32" placeholder="-1002737769800&#10;-1002735235059">
+-1002737769800
+-1002735235059</textarea>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-save"></i> 保存配置
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 操作日志 -->
+            <section id="logs" class="page-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">操作日志</h2>
+                    <p class="text-gray-500">查看系统的操作记录</p>
+                </div>
+
+                <div class="card mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                        <div class="flex flex-1 max-w-md">
+                            <input type="text" id="log-search" placeholder="搜索日志..." class="input">
+                            <button id="search-logs" class="btn btn-primary ml-2">
+                                <i class="fa fa-search"></i> 搜索
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <select id="log-filter" class="input">
+                                <option value="all">所有日志</option>
+                                <option value="success">成功操作</option>
+                                <option value="error">错误日志</option>
+                            </select>
+                            <button id="refresh-logs" class="btn btn-secondary">
+                                <i class="fa fa-refresh"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">时间</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">操作用户</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">操作内容</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">状态</th>
+                                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">详情</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-table-body">
+                                <!-- 动态填充日志数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4 flex justify-between items-center">
+                        <p class="text-sm text-gray-500">显示 <span id="logs-showing">0</span> 条，共 <span id="logs-total">0</span> 条</p>
+                        <div class="flex gap-2">
+                            <button id="logs-prev-page" class="btn btn-secondary py-1 px-3 text-sm" disabled>上一页</button>
+                            <button id="logs-next-page" class="btn btn-secondary py-1 px-3 text-sm" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 数据库测试 -->
+            <section id="database" class="page-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">数据库测试</h2>
+                    <p class="text-gray-500">测试数据库连接和查询</p>
+                </div>
+
+                <div class="card mb-6">
+                    <h3 class="font-semibold text-lg mb-4">连接测试</h3>
+                    <div class="flex gap-2 mb-4">
+                        <button id="test-db-connection" class="btn btn-primary">
+                            <i class="fa fa-plug"></i> 测试数据库连接
+                        </button>
+                        <button id="fetch-test-data" class="btn btn-secondary">
+                            <i class="fa fa-database"></i> 获取测试数据
+                        </button>
+                    </div>
+                    <div id="db-test-result" class="p-4 rounded-lg bg-gray-50 border border-gray-200 min-h-[100px]">
+                        测试结果将显示在这里...
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="font-semibold text-lg mb-4">自定义查询</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">选择表</label>
+                            <select id="query-table" class="input">
+                                <option value="users">用户表 (users)</option>
+                                <option value="teachers">老师表 (teachers)</option>
+                                <option value="keywords">关键词表 (keywords)</option>
+                                <option value="banned_keywords">禁言词表 (banned_keywords)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">查询条件 (例如: id=eq.1)</label>
+                            <input type="text" id="query-filter" class="input" placeholder="id=eq.1 或 留空查询全部">
+                        </div>
+                        <div>
+                            <button id="run-query" class="btn btn-primary">
+                                <i class="fa fa-play"></i> 执行查询
+                            </button>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">查询结果</label>
+                            <pre id="query-result" class="p-4 rounded-lg bg-gray-800 text-gray-100 text-sm overflow-x-auto max-h-[400px]">// 查询结果将显示在这里</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 广播消息 -->
+            <section id="broadcast" class="page-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">广播消息</h2>
+                    <p class="text-gray-500">向所有用户或指定群组发送消息</p>
+                </div>
+
+                <div class="card">
+                    <form id="broadcast-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">发送对象</label>
+                            <select id="broadcast-target" class="input">
+                                <option value="all-users">所有用户</option>
+                                <option value="all-groups">所有群组</option>
+                                <option value="specific">指定ID</option>
+                            </select>
+                        </div>
+
+                        <div id="specific-target-container" class="hidden">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">目标ID (多个用逗号分隔)</label>
+                            <input type="text" id="specific-targets" class="input" placeholder="-1002841497873,8392100400">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">消息内容</label>
+                            <textarea id="broadcast-message" class="input h-32" placeholder="请输入要广播的消息内容..."></textarea>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input type="checkbox" id="broadcast-test" class="mr-2">
+                            <label for="broadcast-test" class="text-sm text-gray-700">测试发送 (仅发送给管理员)</label>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-paper-plane"></i> 发送广播
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="broadcast-result" class="mt-6 p-4 rounded-lg hidden"></div>
+                </div>
+            </section>
+
+            <!-- 发送老师资料 -->
+            <section id="send-teacher" class="page-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">发送老师资料</h2>
+                    <p class="text-gray-500">向频道和群组发送老师资料</p>
+                </div>
+
+                <div class="card mb-6">
+                    <h3 class="font-semibold text-lg mb-4">随机发送</h3>
+                    <p class="text-gray-600 mb-4">从已通过的老师中随机选择一位发送到所有频道和群组</p>
+                    <button id="send-random-teacher" class="btn btn-primary">
+                        <i class="fa fa-random"></i> 随机发送老师资料
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3 class="font-semibold text-lg mb-4">选择发送</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">选择老师</label>
+                            <select id="select-teacher" class="input">
+                                <option value="">-- 请先加载老师列表 --</option>
+                            </select>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button id="load-teachers-for-sending" class="btn btn-secondary">
+                                <i class="fa fa-refresh"></i> 加载老师列表
+                            </button>
+                        </div>
+
+                        <div class="pt-2">
+                            <button id="send-selected-teacher" class="btn btn-primary" disabled>
+                                <i class="fa fa-paper-plane"></i> 发送选中的老师资料
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="send-teacher-result" class="mt-6 p-4 rounded-lg hidden"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 添加/编辑老师的模态框 -->
+    <div id="teacher-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-5 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-xl font-bold" id="teacher-modal-title">添加老师</h3>
+                <button id="close-teacher-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="teacher-form" class="p-5 space-y-4">
+                <input type="hidden" id="teacher-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">花名 <span class="text-danger">*</span></label>
+                        <input type="text" id="teacher-nickname" class="input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">年龄 <span class="text-danger">*</span></label>
+                        <input type="number" id="teacher-age" class="input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">地区 <span class="text-danger">*</span></label>
+                        <input type="text" id="teacher-region" class="input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telegram账号 <span class="text-danger">*</span></label>
+                        <input type="text" id="teacher-telegram" class="input" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">频道链接</label>
+                        <input type="text" id="teacher-channel" class="input">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">服务类型 <span class="text-danger">*</span></label>
+                        <input type="text" id="teacher-service" class="input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">修车费 <span class="text-danger">*</span></label>
+                        <input type="text" id="teacher-cost" class="input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">状态 <span class="text-danger">*</span></label>
+                        <select id="teacher-status" class="input" required>
+                            <option value="pending">待审核</option>
+                            <option value="approved">已通过</option>
+                            <option value="rejected">已拒绝</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">自我介绍 <span class="text-danger">*</span></label>
+                        <textarea id="teacher-intro" class="input h-24" required></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">照片URL</label>
+                        <input type="text" id="teacher-photo" class="input">
+                        <p class="text-xs text-gray-500 mt-1">请输入有效的图片URL地址</p>
+                    </div>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" id="cancel-teacher" class="btn btn-secondary">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加/编辑关键词的模态框 -->
+    <div id="keyword-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+            <div class="p-5 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-xl font-bold" id="keyword-modal-title">添加关键词</h3>
+                <button id="close-keyword-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="keyword-form" class="p-5 space-y-4">
+                <input type="hidden" id="keyword-id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">关键词 <span class="text-danger">*</span></label>
+                    <input type="text" id="keyword-text" class="input" required>
+                    <p class="text-xs text-gray-500 mt-1">用户发送包含此关键词的消息时会触发自动回复</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">回复内容 <span class="text-danger">*</span></label>
+                    <textarea id="keyword-response" class="input h-32" required></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">状态</label>
+                    <select id="keyword-status" class="input">
+                        <option value="true">启用</option>
+                        <option value="false">禁用</option>
+                    </select>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" id="cancel-keyword" class="btn btn-secondary">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加禁言词的模态框 -->
+    <div id="banned-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="p-5 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-xl font-bold" id="banned-modal-title">添加禁言词</h3>
+                <button id="close-banned-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="banned-form" class="p-5 space-y-4">
+                <input type="hidden" id="banned-id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">禁言词 <span class="text-danger">*</span></label>
+                    <input type="text" id="banned-text" class="input" required>
+                    <p class="text-xs text-gray-500 mt-1">用户发送包含此词汇的消息时会被禁言</p>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" id="cancel-banned" class="btn btn-secondary">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 调整积分的模态框 -->
+    <div id="points-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="p-5 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-xl font-bold">调整积分</h3>
+                <button id="close-points-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="points-form" class="p-5 space-y-4">
+                <input type="hidden" id="points-user-id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">用户</label>
+                    <p id="points-user-name" class="p-2 bg-gray-50 rounded-lg border border-gray-200"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">当前积分</label>
+                    <p id="points-current" class="p-2 bg-gray-50 rounded-lg border border-gray-200"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">积分调整 <span class="text-danger">*</span></label>
+                    <input type="number" id="points-change" class="input" required placeholder="正数增加，负数减少">
+                    <p class="text-xs text-gray-500 mt-1">使用正数增加积分，负数减少积分（不会低于0）</p>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" id="cancel-points" class="btn btn-secondary">取消</button>
+                    <button type="submit" class="btn btn-primary">确认调整</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 确认删除的模态框 -->
+    <div id="confirm-delete-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-md">
+            <div class="p-5 border-b border-gray-200">
+                <h3 class="text-xl font-bold">确认删除</h3>
+            </div>
+            <div class="p-5">
+                <p id="delete-confirmation-text" class="mb-4">您确定要删除此项目吗？此操作不可撤销。</p>
+                <div class="flex justify-end gap-2">
+                    <button id="cancel-delete" class="btn btn-secondary">取消</button>
+                    <button id="confirm-delete" class="btn btn-danger">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知提示 -->
+    <div id="notification" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300 max-w-sm">
+        <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-4 flex items-start gap-3">
+            <div id="notification-icon" class="text-success mt-0.5">
+                <i class="fa fa-check-circle text-xl"></i>
+            </div>
+            <div class="flex-1">
+                <h4 id="notification-title" class="font-semibold text-gray-800">操作成功</h4>
+                <p id="notification-message" class="text-sm text-gray-600 mt-1">您的操作已成功完成</p>
+            </div>
+            <button id="close-notification" class="text-gray-400 hover:text-gray-600">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 配置信息
+        const config = {
+            supabaseUrl: 'https://tekuxjnnwtqmygibvwux.supabase.co',
+            supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRla3V4am5ud3RxbXlnaWJ2d3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzNDUzNjAsImV4cCI6MjA3MDkyMTM2MH0.RGmuF44husXoJP8y4U1Gx7HqQJ6MsYZVl6_vHtG-KJY',
+            adminKey: '9712202273aA.',
+            botToken: '8341196303:AAFbT_px8I12_q2b7AI_c00N3nHzFwLb4pg',
+            adminId: '8392100400',
+            workerUrl: 'https://telegram-bot.jbk123jbk.workers.dev',
+            channelIds: ["-1002841497873", "-1002795304513", "-1002834136499", "-1002615160035"],
+            groupIds: ["-1002737769800", "-1002735235059"]
+        };
+
+        // 分页参数
+        const pagination = {
+            users: { page: 1, limit: 10, total: 0 },
+            teachers: { page: 1, limit: 10, total: 0 },
+            keywords: { page: 1, limit: 10, total: 0 },
+            banned: { page: 1, limit: 10, total: 0 },
+            logs: { page: 1, limit: 10, total: 0 }
+        };
+
+        // 删除确认参数
+        const deleteParams = {
+            type: '',
+            id: null
+        };
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化侧边栏切换
+            initSidebar();
+            
+            // 初始化表单提交事件
+            initForms();
+            
+            // 初始化按钮点击事件
+            initButtons();
+            
+            // 加载初始数据
+            loadDashboardData();
+            
+            // 初始化图表
+            initCharts();
+        });
+
+        // 初始化侧边栏
+        function initSidebar() {
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            const pageContents = document.querySelectorAll('.page-content');
+            
+            // 移动端侧边栏切换
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('hidden');
+            });
+            
+            // 侧边栏项目点击切换页面
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除所有active类
+                    sidebarItems.forEach(i => i.classList.remove('active'));
+                    
+                    // 给当前点击项添加active类
+                    this.classList.add('active');
+                    
+                    // 隐藏所有页面内容
+                    pageContents.forEach(content => content.classList.add('hidden'));
+                    
+                    // 显示对应页面内容
+                    const target = this.getAttribute('data-target');
+                    document.getElementById(target).classList.remove('hidden');
+                    
+                    // 在移动设备上点击后隐藏侧边栏
+                    if (window.innerWidth < 1024) {
+                        sidebar.classList.add('hidden');
+                    }
+                    
+                    // 根据页面加载数据
+                    loadPageData(target);
+                });
+            });
+        }
+
+        // 初始化表单提交事件
+        function initForms() {
+            // 数据库设置表单
+            document.getElementById('db-settings-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveDbSettings();
+            });
+            
+            // Telegram设置表单
+            document.getElementById('telegram-settings-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveTelegramSettings();
+            });
+            
+            // 频道和群组设置表单
+            document.getElementById('channels-settings-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveChannelsSettings();
+            });
+            
+            // 老师表单
+            document.getElementById('teacher-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveTeacher();
+            });
+            
+            // 关键词表单
+            document.getElementById('keyword-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveKeyword();
+            });
+            
+            // 禁言词表单
+            document.getElementById('banned-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveBannedKeyword();
+            });
+            
+            // 积分调整表单
+            document.getElementById('points-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                adjustPoints();
+            });
+            
+            // 广播消息表单
+            document.getElementById('broadcast-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                sendBroadcast();
+            });
+            
+            // 广播目标选择变化
+            document.getElementById('broadcast-target').addEventListener('change', function() {
+                const specificContainer = document.getElementById('specific-target-container');
+                if (this.value === 'specific') {
+                    specificContainer.classList.remove('hidden');
+                } else {
+                    specificContainer.classList.add('hidden');
+                }
+            });
+        }
+
+        // 初始化按钮点击事件
+        function initButtons() {
+            // 关闭模态框按钮
+            document.getElementById('close-teacher-modal').addEventListener('click', () => {
+                document.getElementById('teacher-modal').classList.add('hidden');
+            });
+            document.getElementById('cancel-teacher').addEventListener('click', () => {
+                document.getElementById('teacher-modal').classList.add('hidden');
+            });
+            
+            document.getElementById('close-keyword-modal').addEventListener('click', () => {
+                document.getElementById('keyword-modal').classList.add('hidden');
+            });
+            document.getElementById('cancel-keyword').addEventListener('click', () => {
+                document.getElementById('keyword-modal').classList.add('hidden');
+            });
+            
+            document.getElementById('close-banned-modal').addEventListener('click', () => {
+                document.getElementById('banned-modal').classList.add('hidden');
+            });
+            document.getElementById('cancel-banned').addEventListener('click', () => {
+                document.getElementById('banned-modal').classList.add('hidden');
+            });
+            
+            document.getElementById('close-points-modal').addEventListener('click', () => {
+                document.getElementById('points-modal').classList.add('hidden');
+            });
+            document.getElementById('cancel-points').addEventListener('click', () => {
+                document.getElementById('points-modal').classList.add('hidden');
+            });
+            
+            document.getElementById('close-notification').addEventListener('click', () => {
+                hideNotification();
+            });
+            
+            // 取消删除按钮
+            document.getElementById('cancel-delete').addEventListener('click', () => {
+                document.getElementById('confirm-delete-modal').classList.add('hidden');
+            });
+            
+            // 确认删除按钮
+            document.getElementById('confirm-delete').addEventListener('click', () => {
+                confirmDelete();
+            });
+            
+            // 添加老师按钮
+            document.getElementById('add-teacher-btn').addEventListener('click', () => {
+                openTeacherModal();
+            });
+            
+            // 添加关键词按钮
+            document.getElementById('add-keyword-btn').addEventListener('click', () => {
+                openKeywordModal();
+            });
+            
+            // 添加禁言词按钮
+            document.getElementById('add-banned-btn').addEventListener('click', () => {
+                openBannedModal();
+            });
+            
+            // 刷新按钮
+            document.getElementById('refresh-users').addEventListener('click', () => {
+                pagination.users.page = 1;
+                pagination.users.page = 1;
+                loadUsers();
+            });
+            document.getElementById('refresh-teachers').addEventListener('click', () => {
+                pagination.teachers.page = 1;
+                loadTeachers();
+            });
+            document.getElementById('refresh-keywords').addEventListener('click', () => {
+                pagination.keywords.page = 1;
+                loadKeywords();
+            });
+            document.getElementById('refresh-banned').addEventListener('click', () => {
+                pagination.banned.page = 1;
+                loadBannedKeywords();
+            });
+            document.getElementById('refresh-logs').addEventListener('click', () => {
+                pagination.logs.page = 1;
+                loadLogs();
+            });
+            
+            // 搜索按钮
+            document.getElementById('search-users').addEventListener('click', () => {
+                pagination.users.page = 1;
+                loadUsers();
+            });
+            document.getElementById('search-teachers').addEventListener('click', () => {
+                pagination.teachers.page = 1;
+                loadTeachers();
+            });
+            document.getElementById('search-keywords').addEventListener('click', () => {
+                pagination.keywords.page = 1;
+                loadKeywords();
+            });
+            document.getElementById('search-banned').addEventListener('click', () => {
+                pagination.banned.page = 1;
+                loadBannedKeywords();
+            });
+            document.getElementById('search-logs').addEventListener('click', () => {
+                pagination.logs.page = 1;
+                loadLogs();
+            });
+            
+            // 分页按钮
+            document.getElementById('users-prev-page').addEventListener('click', () => {
+                if (pagination.users.page > 1) {
+                    pagination.users.page--;
+                    loadUsers();
+                }
+            });
+            document.getElementById('users-next-page').addEventListener('click', () => {
+                if (pagination.users.page * pagination.users.limit < pagination.users.total) {
+                    pagination.users.page++;
+                    loadUsers();
+                }
+            });
+            
+            document.getElementById('teachers-prev-page').addEventListener('click', () => {
+                if (pagination.teachers.page > 1) {
+                    pagination.teachers.page--;
+                    loadTeachers();
+                }
+            });
+            document.getElementById('teachers-next-page').addEventListener('click', () => {
+                if (pagination.teachers.page * pagination.teachers.limit < pagination.teachers.total) {
+                    pagination.teachers.page++;
+                    loadTeachers();
+                }
+            });
+            
+            document.getElementById('keywords-prev-page').addEventListener('click', () => {
+                if (pagination.keywords.page > 1) {
+                    pagination.keywords.page--;
+                    loadKeywords();
+                }
+            });
+            document.getElementById('keywords-next-page').addEventListener('click', () => {
+                if (pagination.keywords.page * pagination.keywords.limit < pagination.keywords.total) {
+                    pagination.keywords.page++;
+                    loadKeywords();
+                }
+            });
+            
+            document.getElementById('banned-prev-page').addEventListener('click', () => {
+                if (pagination.banned.page > 1) {
+                    pagination.banned.page--;
+                    loadBannedKeywords();
+                }
+            });
+            document.getElementById('banned-next-page').addEventListener('click', () => {
+                if (pagination.banned.page * pagination.banned.limit < pagination.banned.total) {
+                    pagination.banned.page++;
+                    loadBannedKeywords();
+                }
+            });
+            
+            // 数据库测试按钮
+            document.getElementById('test-db-connection').addEventListener('click', testDbConnection);
+            document.getElementById('fetch-test-data').addEventListener('click', fetchTestData);
+            document.getElementById('run-query').addEventListener('click', runCustomQuery);
+            
+            // 发送老师资料按钮
+            document.getElementById('send-random-teacher').addEventListener('click', sendRandomTeacher);
+            document.getElementById('load-teachers-for-sending').addEventListener('click', loadTeachersForSending);
+            document.getElementById('send-selected-teacher').addEventListener('click', sendSelectedTeacher);
+            document.getElementById('select-teacher').addEventListener('change', function() {
+                document.getElementById('send-selected-teacher').disabled = !this.value;
+            });
+        }
+
+        // 根据页面加载数据
+        function loadPageData(page) {
+            switch(page) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'teachers':
+                    loadTeachers();
+                    break;
+                case 'keywords':
+                    loadKeywords();
+                    break;
+                case 'banned':
+                    loadBannedKeywords();
+                    break;
+                case 'logs':
+                    loadLogs();
+                    break;
+                case 'database':
+                    // 数据库页面不需要预加载数据
+                    break;
+                case 'broadcast':
+                    // 广播页面不需要预加载数据
+                    break;
+                case 'send-teacher':
+                    // 发送老师页面不需要预加载数据
+                    break;
+            }
+        }
+
+        // 加载控制面板数据
+        function loadDashboardData() {
+            // 加载用户总数
+            fetchAdminApi('get', 'users')
+                .then(users => {
+                    document.getElementById('total-users').textContent = users.length;
+                    
+                    // 计算今日签到人数
+                    const today = new Date().toISOString().split('T')[0];
+                    const todayCheckins = users.filter(user => user.last_sign_date === today).length;
+                    document.getElementById('today-checkins').textContent = todayCheckins;
+                    
+                    // 准备积分排名
+                    const sortedUsers = [...users].sort((a, b) => (b.points || 0) - (a.points || 0));
+                    const topUsers = sortedUsers.slice(0, 5);
+                    const topUsersContainer = document.getElementById('top-users-container');
+                    topUsersContainer.innerHTML = '';
+                    
+                    topUsers.forEach((user, index) => {
+                        const displayName = user.display_name || 
+                                          `${user.first_name || ''} ${user.last_name || ''}`.trim() || 
+                                          user.username || '未知用户';
+                        
+                        const userEl = document.createElement('div');
+                        userEl.className = 'flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50';
+                        userEl.innerHTML = `
+                            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                ${index + 1}
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium">${displayName}</p>
+                                <p class="text-sm text-gray-500">ID: ${user.user_id}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-primary">${user.points || 0} 积分</p>
+                            </div>
+                        `;
+                        topUsersContainer.appendChild(userEl);
+                    });
+                })
+                .catch(error => {
+                    console.error('加载用户数据失败:', error);
+                    showNotification('错误', '加载用户数据失败', 'error');
+                });
+            
+            // 加载老师总数
+            fetchAdminApi('get', 'teachers')
+                .then(teachers => {
+                    document.getElementById('total-teachers').textContent = teachers.length;
+                })
+                .catch(error => {
+                    console.error('加载老师数据失败:', error);
+                    showNotification('错误', '加载老师数据失败', 'error');
+                });
+            
+            // 加载关键词总数
+            fetchAdminApi('get', 'keywords')
+                .then(keywords => {
+                    document.getElementById('total-keywords').textContent = keywords.length;
+                })
+                .catch(error => {
+                    console.error('加载关键词数据失败:', error);
+                    showNotification('错误', '加载关键词数据失败', 'error');
+                });
+            
+            // 加载最近活动
+            loadRecentActivities();
+        }
+
+        // 加载用户数据
+        function loadUsers() {
+            const searchTerm = document.getElementById('user-search').value.trim();
+            let filter = '';
+            
+            if (searchTerm) {
+                // 简单搜索逻辑，实际应用中可能需要更复杂的搜索
+                filter = `or(username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%,user_id.ilike.%${searchTerm}%)`;
+            }
+            
+            // 添加分页
+            const offset = (pagination.users.page - 1) * pagination.users.limit;
+            const paginationParams = `limit=${pagination.users.limit}&offset=${offset}&order=points.desc`;
+            
+            fetchAdminApi('get', 'users', filter ? `${filter}&${paginationParams}` : paginationParams)
+                .then(users => {
+                    // 获取总数
+                    return fetchAdminApi('get', 'users', filter)
+                        .then(allUsers => {
+                            pagination.users.total = allUsers.length;
+                            
+                            const tableBody = document.getElementById('users-table-body');
+                            tableBody.innerHTML = '';
+                            
+                            if (users.length === 0) {
+                                tableBody.innerHTML = `
+                                    <tr>
+                                        <td colspan="6" class="py-8 text-center text-gray-500">
+                                            没有找到匹配的用户
+                                        </td>
+                                    </tr>
+                                `;
+                            } else {
+                                users.forEach(user => {
+                                    const displayName = user.display_name || 
+                                              `${user.first_name || ''} ${user.last_name || ''}`.trim() || 
+                                              user.username || '未知用户';
+                                    
+                                    const row = document.createElement('tr');
+                                    row.className = 'border-b border-gray-100 hover:bg-gray-50';
+                                    row.innerHTML = `
+                                        <td class="py-3 px-4">${user.user_id}</td>
+                                        <td class="py-3 px-4">${user.username || '-'}</td>
+                                        <td class="py-3 px-4">${displayName}</td>
+                                        <td class="py-3 px-4">${user.points || 0}</td>
+                                        <td class="py-3 px-4">${user.last_sign_date || '-'}</td>
+                                        <td class="py-3 px-4">
+                                            <div class="flex gap-2">
+                                                <button class="text-primary hover:text-primary/80" 
+                                                        onclick="openPointsModal('${user.user_id}', '${displayName}', ${user.points || 0})">
+                                                    <i class="fa fa-coins"></i>
+                                                </button>
+                                                <button class="text-secondary hover:text-secondary/80"
+                                                        onclick="editUser('${user.user_id}')">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                                <button class="text-danger hover:text-danger/80"
+                                                        onclick="confirmDeleteItem('users', '${user.user_id}', '用户 ${displayName}')">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    `;
+                                    tableBody.appendChild(row);
+                                });
+                            }
+                            
+                            // 更新分页信息
+                            document.getElementById('users-showing').textContent = users.length;
+                            document.getElementById('users-total').textContent = pagination.users.total;
+                            
+                            // 更新分页按钮状态
+                            document.getElementById('users-prev-page').disabled = pagination.users.page === 1;
+                            document.getElementById('users-next-page').disabled = 
+                                pagination.users.page * pagination.users.limit >= pagination.users.total;
+                        });
+                })
+                .catch(error => {
+                    console.error('加载用户数据失败:', error);
+                    showNotification('错误', '加载用户数据失败', 'error');
+                });
+        }
+
+        // 加载老师数据
+        function loadTeachers() {
+            const searchTerm = document.getElementById('teacher-search').value.trim();
+            let filter = '';
+            
+            if (searchTerm) {
+                filter = `or(nickname.ilike.%${searchTerm}%,region.ilike.%${searchTerm}%,service_type.ilike.%${searchTerm}%)`;
+            }
+            
+            // 添加分页
+            const offset = (pagination.teachers.page - 1) * pagination.teachers.limit;
+            const paginationParams = `limit=${pagination.teachers.limit}&offset=${offset}&order=id.desc`;
+            
+            fetchAdminApi('get', 'teachers', filter ? `${filter}&${paginationParams}` : paginationParams)
+                .then(teachers => {
+                    // 获取总数
+                    return fetchAdminApi('get', 'teachers', filter)
+                        .then(allTeachers => {
+                            pagination.teachers.total = allTeachers.length;
+                            
+                            const tableBody = document.getElementById('teachers-table-body');
+                            tableBody.innerHTML = '';
+                            
+                            if (teachers.length === 0) {
+                                tableBody.innerHTML = `
+                                    <tr>
+                                        <td colspan="7" class="py-8 text-center text-gray-500">
+                                            没有找到匹配的老师
+                                        </td>
+                                    </tr>
+                                `;
+                            } else {
+                                teachers.forEach(teacher => {
+                                    let statusBadge = '';
+                                    switch(teacher.status) {
+                                        case 'approved':
+                                            statusBadge = '<span class="badge bg-success/10 text-success">已通过</span>';
+                                            break;
+                                        case 'pending':
+                                            statusBadge = '<span class="badge bg-warning/10 text-warning">待审核</span>';
+                                            break;
+                                        case 'rejected':
+                                            statusBadge = '<span class="badge bg-danger/10 text-danger">已拒绝</span>';
+                                            break;
+                                    }
+                                    
+                                    const row = document.createElement('tr');
+                                    row.className = 'border-b border-gray-100 hover:bg-gray-50';
+                                    row.innerHTML = `
+                                        <td class="py-3 px-4">${teacher.id}</td>
+                                        <td class="py-3 px-4">${teacher.nickname}</td>
+                                        <td class="py-3 px-4">${teacher.age || '-'} / ${teacher.region || '-'}</td>
+                                        <td class="py-3 px-4">${teacher.service_type || '-'}</td>
+                                        <td class="py-3 px-4">${teacher.repair_cost || '-'}</td>
+                                        <td class="py-3 px-4">${statusBadge}</td>
+                                        <td class="py-3 px-4">
+                                            <div class="flex gap-2">
+                                                <button class="text-secondary hover:text-secondary/80"
+                                                        onclick="editTeacher(${teacher.id})">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                                <button class="text-primary hover:text-primary/80"
+                                                        onclick="viewTeacherDetails(${teacher.id})">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                                <button class="text-danger hover:text-danger/80"
+                                                        onclick="confirmDeleteItem('teachers', ${teacher.id}, '老师 ${teacher.nickname}')">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    `;
+                                    tableBody.appendChild(row);
+                                });
+                            }
+                            
+                            // 更新分页信息
+                            document.getElementById('teachers-showing').textContent = teachers.length;
+                            document.getElementById('teachers-total').textContent = pagination.teachers.total;
+                            
+                            // 更新分页按钮状态
+                            document.getElementById('teachers-prev-page').disabled = pagination.teachers.page === 1;
+                            document.getElementById('teachers-next-page').disabled = 
+                                pagination.teachers.page * pagination.teachers.limit >= pagination.teachers.total;
+                        });
+                })
+                .catch(error => {
+                    console.error('加载老师数据失败:', error);
+                    showNotification('错误', '加载老师数据失败', 'error');
+                });
+        }
+
+        // 加载关键词数据
+        function loadKeywords() {
+            const searchTerm = document.getElementById('keyword-search').value.trim();
+            let filter = '';
+            
+            if (searchTerm) {
+                filter = `or(keyword.ilike.%${searchTerm}%,response.ilike.%${searchTerm}%)`;
+            }
+            
+            // 添加分页
+            const offset = (pagination.keywords.page - 1) * pagination.keywords.limit;
+            const paginationParams = `limit=${pagination.keywords.limit}&offset=${offset}&order=id.desc`;
+            
+            fetchAdminApi('get', 'keywords', filter ? `${filter}&${paginationParams}` : paginationParams)
+                .then(keywords => {
+                    // 获取总数
+                    return fetchAdminApi('get', 'keywords', filter)
+                        .then(allKeywords => {
+                            pagination.keywords.total = allKeywords.length;
+                            
+                            const tableBody = document.getElementById('keywords-table-body');
+                            tableBody.innerHTML = '';
+                            
+                            if (keywords.length === 0) {
+                                tableBody.innerHTML = `
+                                    <tr>
+                                        <td colspan="5" class="py-8 text-center text-gray-500">
+                                            没有找到匹配的关键词
+                                        </td>
+                                    </tr>
+                                `;
+                            } else {
+                                keywords.forEach(keyword => {
+                                    const status = keyword.is_active ? 
+                                        '<span class="badge bg-success/10 text-success">启用</span>' : 
+                                        '<span class="badge bg-gray-100 text-gray-500">禁用</span>';
+                                    
+                                    // 截断过长的回复内容
+                                    const shortResponse = keyword.response.length > 30 
+                                        ? keyword.response.substring(0, 30) + '...' 
+                                        : keyword.response;
+                                    
+                                    const row = document.createElement('tr');
+                                    row.className = 'border-b border-gray-100 hover:bg-gray-50';
+                                    row.innerHTML = `
+                                        <td class="py-3 px-4">${keyword.id}</td>
+                                        <td class="py-3 px-4 font-medium">${keyword.keyword}</td>
+                                        <td class="py-3 px-4">${shortResponse}</td>
+                                        <td class="py-3 px-4">${status}</td>
+                                        <td class="py-3 px-4">
+                                            <div class="flex gap-2">
+                                                <button class="text-secondary hover:text-secondary/80"
+                                                        onclick="editKeyword(${keyword.id})">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                                <button class="text-danger hover:text-danger/80"
+                                                        onclick="confirmDeleteItem('keywords', ${keyword.id}, '关键词 ${keyword.keyword}')">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    `;
+                                    tableBody.appendChild(row);
+                                });
+                            }
+                            
+                            // 更新分页信息
+                            document.getElementById('keywords-showing').textContent = keywords.length;
+                            document.getElementById('keywords-total').textContent = pagination.keywords.total;
+                            
+                            // 更新分页按钮状态
+                            document.getElementById('keywords-prev-page').disabled = pagination.keywords.page === 1;
+                            document.getElementById('keywords-next-page').disabled = 
+                                pagination.keywords.page * pagination.keywords.limit >= pagination.keywords.total;
+                        });
+                })
+                .catch(error => {
+                    console.error('加载关键词数据失败:', error);
+                    showNotification('错误', '加载关键词数据失败', 'error');
+                });
+        }
+
+        // 加载禁言词数据
+        function loadBannedKeywords() {
+            const searchTerm = document.getElementById('banned-search').value.trim();
+            let filter = '';
+            
+            if (searchTerm) {
+                filter = `keyword.ilike.%${searchTerm}%`;
+            }
+            
+            // 添加分页
+            const offset = (pagination.banned.page - 1) * pagination.banned.limit;
+            const paginationParams = `limit=${pagination.banned.limit}&offset=${offset}&order=id.desc`;
+            
+            fetchAdminApi('get', 'banned_keywords', filter ? `${filter}&${paginationParams}` : paginationParams)
+                .then(bannedKeywords => {
+                    // 获取总数
+                    return fetchAdminApi('get', 'banned_keywords', filter)
+                        .then(allBanned => {
+                            pagination.banned.total = allBanned.length;
+                            
+                            const tableBody = document.getElementById('banned-table-body');
+                            tableBody.innerHTML = '';
+                            
+                            if (bannedKeywords.length === 0) {
+                                tableBody.innerHTML = `
+                                    <tr>
+                                        <td colspan="4" class="py-8 text-center text-gray-500">
+                                            没有找到匹配的禁言词
+                                        </td>
+                                    </tr>
+                                `;
+                            } else {
+                                bannedKeywords.forEach(keyword => {
+                                    // 格式化日期
+                                    const date = keyword.created_at ? new Date(keyword.created_at) : new Date();
+                                    const formattedDate = date.toLocaleString();
+                                    
+                                    const row = document.createElement('tr');
+                                    row.className = 'border-b border-gray-100 hover:bg-gray-50';
+                                    row.innerHTML = `
+                                        <td class="py-3 px-4">${keyword.id}</td>
+                                        <td class="py-3 px-4 font-medium">${keyword.keyword}</td>
+                                        <td class="py-3 px-4">${formattedDate}</td>
+                                        <td class="py-3 px-4">
+                                            <div class="flex gap-2">
+                                                <button class="text-secondary hover:text-secondary/80"
+                                                        onclick="editBannedKeyword(${keyword.id})">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                                <button class="text-danger hover:text-danger/80"
+                                                        onclick="confirmDeleteItem('banned_keywords', ${keyword.id}, '禁言词 ${keyword.keyword}')">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    `;
+                                    tableBody.appendChild(row);
+                                });
+                            }
+                            
+                            // 更新分页信息
+                            document.getElementById('banned-showing').textContent = bannedKeywords.length;
+                            document.getElementById('banned-total').textContent = pagination.banned.total;
+                            
+                            // 更新分页按钮状态
+                            document.getElementById('banned-prev-page').disabled = pagination.banned.page === 1;
+                            document.getElementById('banned-next-page').disabled = 
+                                pagination.banned.page * pagination.banned.limit >= pagination.banned.total;
+                        });
+                })
+                .catch(error => {
+                    console.error('加载禁言词数据失败:', error);
+                    showNotification('错误', '加载禁言词数据失败', 'error');
+                });
+        }
+
+        // 加载日志数据
+        function loadLogs() {
+            // 这里只是模拟日志数据，实际应用中应该从服务器获取
+            const logFilter = document.getElementById('log-filter').value;
+            const searchTerm = document.getElementById('log-search').value.trim();
+            
+            // 模拟日志数据
+            const mockLogs = [
+                {
+                    id: 1,
+                    time: new Date(Date.now() - 300000).toLocaleString(),
+                    user: '管理员',
+                    action: '添加老师',
+                    status: 'success',
+                    details: '添加了老师 "甜甜"'
+                },
+                {
+                    id: 2,
+                    time: new Date(Date.now() - 900000).toLocaleString(),
+                    user: '系统',
+                    action: '定时发送老师资料',
+                    status: 'success',
+                    details: '成功发送老师资料到所有频道'
+                },
+                {
+                    id: 3,
+                    time: new Date(Date.now() - 1800000).toLocaleString(),
+                    user: '用户 (ID: 8392100400)',
+                    action: '签到',
+                    status: 'success',
+                    details: '获得10积分'
+                },
+                {
+                    id: 4,
+                    time: new Date(Date.now() - 3600000).toLocaleString(),
+                    user: '系统',
+                    action: '禁言用户',
+                    status: 'success',
+                    details: '用户因发送违禁词被禁言1小时'
+                },
+                {
+                    id: 5,
+                    time: new Date(Date.now() - 7200000).toLocaleString(),
+                    user: '管理员',
+                    action: '添加关键词',
+                    status: 'error',
+                    details: '添加关键词失败: 数据库连接错误'
+                }
+            ];
+            
+            // 应用筛选
+            let filteredLogs = mockLogs;
+            if (logFilter !== 'all') {
+                filteredLogs = filteredLogs.filter(log => log.status === logFilter);
+            }
+            
+            if (searchTerm) {
+                filteredLogs = filteredLogs.filter(log => 
+                    log.action.includes(searchTerm) || 
+                    log.details.includes(searchTerm) ||
+                    log.user.includes(searchTerm)
+                );
+            }
+            
+            // 分页处理
+            pagination.logs.total = filteredLogs.length;
+            const startIndex = (pagination.logs.page - 1) * pagination.logs.limit;
+            const paginatedLogs = filteredLogs.slice(startIndex, startIndex + pagination.logs.limit);
+            
+            const tableBody = document.getElementById('logs-table-body');
+            tableBody.innerHTML = '';
+            
+            if (paginatedLogs.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-gray-500">
+                            没有找到匹配的日志
+                        </td>
+                    </tr>
+                `;
+            } else {
+                paginatedLogs.forEach(log => {
+                    const statusBadge = log.status === 'success' 
+                        ? '<span class="badge bg-success/10 text-success">成功</span>' 
+                        : '<span class="badge bg-danger/10 text-danger">错误</span>';
+                    
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-100 hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="py-3 px-4">${log.time}</td>
+                        <td class="py-3 px-4">${log.user}</td>
+                        <td class="py-3 px-4">${log.action}</td>
+                        <td class="py-3 px-4">${statusBadge}</td>
+                        <td class="py-3 px-4">${log.details}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+            
+            // 更新分页信息
+            document.getElementById('logs-showing').textContent = paginatedLogs.length;
+            document.getElementById('logs-total').textContent = pagination.logs.total;
+            
+            // 更新分页按钮状态
+            document.getElementById('logs-prev-page').disabled = pagination.logs.page === 1;
+            document.getElementById('logs-next-page').disabled = 
+                pagination.logs.page * pagination.logs.limit >= pagination.logs.total;
+        }
+
+        // 加载最近活动
+        function loadRecentActivities() {
+            // 模拟最近活动数据
+            const activities = [
+                {
+                    time: '刚刚',
+                    user: '张三',
+                    action: '签到获得10积分',
+                    status: 'success'
+                },
+                {
+                    time: '5分钟前',
+                    user: '李四',
+                    action: '上传了新老师资料',
+                    status: 'success'
+                },
+                {
+                    time: '15分钟前',
+                    user: '王五',
+                    action: '查询了积分排名',
+                    status: 'success'
+                },
+                {
+                    time: '30分钟前',
+                    user: '系统',
+                    action: '自动发送了老师推荐',
+                    status: 'success'
+                },
+                {
+                    time: '1小时前',
+                    user: '赵六',
+                    action: '设置了显示名称',
+                    status: 'success'
+                }
+            ];
+            
+            const activitiesContainer = document.getElementById('recent-activities');
+            activitiesContainer.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const statusBadge = activity.status === 'success' 
+                    ? '<span class="badge bg-success/10 text-success">成功</span>' 
+                    : '<span class="badge bg-danger/10 text-danger">失败</span>';
+                
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-100 hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="py-3 px-4">${activity.time}</td>
+                    <td class="py-3 px-4">${activity.user}</td>
+                    <td class="py-3 px-4">${activity.action}</td>
+                    <td class="py-3 px-4">${statusBadge}</td>
+                `;
+                activitiesContainer.appendChild(row);
+            });
+        }
+
+        // 初始化图表
+        function initCharts() {
+            // 用户增长趋势图表
+            const ctx = document.getElementById('user-growth-chart').getContext('2d');
+            
+            // 生成过去30天的日期
+            const dates = [];
+            const today = new Date();
+            
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                dates.push(date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }));
+            }
+            
+            // 生成模拟数据
+            const userGrowthData = [];
+            let userCount = 100;
+            
+            for (let i = 0; i < 30; i++) {
+                // 随机增长 0-5 个用户
+                const growth = Math.floor(Math.random() * 6);
+                userCount += growth;
+                userGrowthData.push(userCount);
+            }
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: '用户总数',
+                        data: userGrowthData,
+                        borderColor: '#165DFF',
+                        backgroundColor: 'rgba(22, 93, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 打开老师模态框
+        function openTeacherModal(teacherId = null) {
+            const modal = document.getElementById('teacher-modal');
+            const title = document.getElementById('teacher-modal-title');
+            const form = document.getElementById('teacher-form');
+            
+            // 重置表单
+            form.reset();
+            document.getElementById('teacher-id').value = '';
+            
+            if (teacherId) {
+                // 编辑模式
+                title.textContent = '编辑老师';
+                
+                fetchAdminApi('get', 'teachers', `id=eq.${teacherId}`)
+                    .then(teachers => {
+                        if (teachers.length > 0) {
+                            const teacher = teachers[0];
+                            document.getElementById('teacher-id').value = teacher.id;
+                            document.getElementById('teacher-nickname').value = teacher.nickname || '';
+                            document.getElementById('teacher-age').value = teacher.age || '';
+                            document.getElementById('teacher-region').value = teacher.region || '';
+                            document.getElementById('teacher-telegram').value = teacher.telegram_account || '';
+                            document.getElementById('teacher-channel').value = teacher.channel || '';
+                            document.getElementById('teacher-service').value = teacher.service_type || '';
+                            document.getElementById('teacher-cost').value = teacher.repair_cost || '';
+                            document.getElementById('teacher-status').value = teacher.status || 'pending';
+                            document.getElementById('teacher-intro').value = teacher.intro || '';
+                            document.getElementById('teacher-photo').value = teacher.photo_url || '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('加载老师数据失败:', error);
+                        showNotification('错误', '加载老师数据失败', 'error');
+                    });
+            } else {
+                // 添加模式
+                title.textContent = '添加老师';
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        // 打开关键词模态框
+        function openKeywordModal(keywordId = null) {
+            const modal = document.getElementById('keyword-modal');
+            const title = document.getElementById('keyword-modal-title');
+            const form = document.getElementById('keyword-form');
+            
+            // 重置表单
+            form.reset();
+            document.getElementById('keyword-id').value = '';
+            
+            if (keywordId) {
+                // 编辑模式
+                title.textContent = '编辑关键词';
+                
+                fetchAdminApi('get', 'keywords', `id=eq.${keywordId}`)
+                    .then(keywords => {
+                        if (keywords.length > 0) {
+                            const keyword = keywords[0];
+                            document.getElementById('keyword-id').value = keyword.id;
+                            document.getElementById('keyword-text').value = keyword.keyword || '';
+                            document.getElementById('keyword-response').value = keyword.response || '';
+                            document.getElementById('keyword-status').value = keyword.is_active ? 'true' : 'false';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('加载关键词数据失败:', error);
+                        showNotification('错误', '加载关键词数据失败', 'error');
+                    });
+            } else {
+                // 添加模式
+                title.textContent = '添加关键词';
+                document.getElementById('keyword-status').value = 'true';
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        // 打开禁言词模态框
+        function openBannedModal(bannedId = null) {
+            const modal = document.getElementById('banned-modal');
+            const title = document.getElementById('banned-modal-title');
+            const form = document.getElementById('banned-form');
+            
+            // 重置表单
+            form.reset();
+            document.getElementById('banned-id').value = '';
+            
+            if (bannedId) {
+                // 编辑模式
+                title.textContent = '编辑禁言词';
+                
+                fetchAdminApi('get', 'banned_keywords', `id=eq.${bannedId}`)
+                    .then(keywords => {
+                        if (keywords.length > 0) {
+                            const keyword = keywords[0];
+                            document.getElementById('banned-id').value = keyword.id;
+                            document.getElementById('banned-text').value = keyword.keyword || '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('加载禁言词数据失败:', error);
+                        showNotification('错误', '加载禁言词数据失败', 'error');
+                    });
+            } else {
+                // 添加模式
+                title.textContent = '添加禁言词';
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        // 打开积分调整模态框
+        function openPointsModal(userId, userName, currentPoints) {
+            const modal = document.getElementById('points-modal');
+            
+            document.getElementById('points-user-id').value = userId;
+            document.getElementById('points-user-name').textContent = userName;
+            document.getElementById('points-current').textContent = currentPoints;
+            document.getElementById('points-change').value = '';
+            
+            modal.classList.remove('hidden');
+        }
+
+        // 保存老师信息
+        function saveTeacher() {
+            const teacherId = document.getElementById('teacher-id').value;
+            const data = {
+                nickname: document.getElementById('teacher-nickname').value.trim(),
+                age: parseInt(document.getElementById('teacher-age').value) || 0,
+                region: document.getElementById('teacher-region').value.trim(),
+                telegram_account: document.getElementById('teacher-telegram').value.trim(),
+                channel: document.getElementById('teacher-channel').value.trim(),
+                service_type: document.getElementById('teacher-service').value.trim(),
+                repair_cost: document.getElementById('teacher-cost').value.trim(),
+                status: document.getElementById('teacher-status').value,
+                intro: document.getElementById('teacher-intro').value.trim(),
+                photo_url: document.getElementById('teacher-photo').value.trim()
+            };
+            
+            const action = teacherId ? 'update' : 'insert';
+            
+            fetchAdminApi(action, 'teachers', '', data)
+                .then(response => {
+                    document.getElementById('teacher-modal').classList.add('hidden');
+                    loadTeachers();
+                    showNotification(
+                        '成功', 
+                        teacherId ? '老师信息已更新' : '新老师已添加'
+                    );
+                })
+                .catch(error => {
+                    console.error('保存老师信息失败:', error);
+                    showNotification('错误', '保存老师信息失败', 'error');
+                });
+        }
+
+        // 保存关键词
+        function saveKeyword() {
+            const keywordId = document.getElementById('keyword-id').value;
+            const data = {
+                keyword: document.getElementById('keyword-text').value.trim(),
+                response: document.getElementById('keyword-response').value.trim(),
+                is_active: document.getElementById('keyword-status').value === 'true'
+            };
+            
+            const action = keywordId ? 'update' : 'insert';
+            
+            fetchAdminApi(action, 'keywords', '', data)
+                .then(response => {
+                    document.getElementById('keyword-modal').classList.add('hidden');
+                    loadKeywords();
+                    showNotification(
+                        '成功', 
+                        keywordId ? '关键词已更新' : '新关键词已添加'
+                    );
+                })
+                .catch(error => {
+                    console.error('保存关键词失败:', error);
+                    showNotification('错误', '保存关键词失败', 'error');
+                });
+        }
+
+        // 保存禁言词
+        function saveBannedKeyword() {
+            const bannedId = document.getElementById('banned-id').value;
+            const data = {
+                keyword: document.getElementById('banned-text').value.trim()
+            };
+            
+            const action = bannedId ? 'update' : 'insert';
+            
+            fetchAdminApi(action, 'banned_keywords', '', data)
+                .then(response => {
+                    document.getElementById('banned-modal').classList.add('hidden');
+                    loadBannedKeywords();
+                    showNotification(
+                        '成功', 
+                        bannedId ? '禁言词已更新' : '新禁言词已添加'
+                    );
+                })
+                .catch(error => {
+                    console.error('保存禁言词失败:', error);
+                    showNotification('错误', '保存禁言词失败', 'error');
+                });
+        }
+
+        // 调整用户积分
+        function adjustPoints() {
+            const userId = document.getElementById('points-user-id').value;
+            const pointsChange = parseInt(document.getElementById('points-change').value) || 0;
+            
+            if (pointsChange === 0) {
+                showNotification('警告', '积分调整值不能为0', 'warning');
+                return;
+            }
+            
+            fetchAdminApi('adjust_points', 'users', '', {
+                user_id: userId,
+                points_change: pointsChange
+            })
+            .then(response => {
+                document.getElementById('points-modal').classList.add('hidden');
+                loadUsers();
+                showNotification(
+                    '成功', 
+                    `积分已调整，新积分为 ${response.new_points}`
+                );
+            })
+            .catch(error => {
+                console.error('调整积分失败:', error);
+                showNotification('错误', '调整积分失败', 'error');
+            });
+        }
+
+        // 确认删除项目
+        function confirmDeleteItem(type, id, name) {
+            deleteParams.type = type;
+            deleteParams.id = id;
+            
+            document.getElementById('delete-confirmation-text').textContent = 
+                `您确定要删除 ${name} 吗？此操作不可撤销。`;
+            
+            document.getElementById('confirm-delete-modal').classList.remove('hidden');
+        }
+
+        // 执行删除操作

@@ -1,100 +1,220 @@
-// 完整的loadAllData函数，带详细错误日志
-function loadAllData() {
-    // 显示加载指示器
-    showLoader();
-    
-    // 记录开始时间用于性能分析
-    const startTime = Date.now();
-    const startDateTime = new Date().toISOString();
-    console.log(`[${startDateTime}] 开始加载所有数据`);
-    
-    // 先加载用户数据，再并行加载其他数据
-    fetchUsersData()
-        .then(() => {
-            const userLoadTime = Date.now() - startTime;
-            console.log(`[${new Date().toISOString()}] 用户数据加载完成，耗时: ${userLoadTime}ms`);
-            
-            // 并行加载其他数据
-            return Promise.all([
-                fetchTeachersData(),
-                fetchKeywordsData(),
-                fetchBannedKeywordsData()
-            ]);
-        })
-        .then(() => {
-            const totalLoadTime = Date.now() - startTime;
-            console.log(`[${new Date().toISOString()}] 所有数据加载完成，总耗时: ${totalLoadTime}ms`);
-            
-            // 隐藏加载指示器并提示成功
-            hideLoader();
-            showDataLoadedAlert();
-        })
-        .catch(error => {
-            // 详细错误日志记录
-            const errorTime = new Date().toISOString();
-            const errorDuration = Date.now() - startTime;
-            
-            console.error(`===== [${errorTime}] 数据加载流程中断 (耗时: ${errorDuration}ms) =====`);
-            console.error('错误名称:', error.name);
-            console.error('错误消息:', error.message);
-            console.error('错误堆栈:', error.stack);
-            
-            // 检查是否有额外错误信息
-            if (error.response) {
-                console.error('响应状态:', error.response.status);
-                console.error('响应状态文本:', error.response.statusText);
-            }
-            
-            console.error('=============================================');
-            
-            // 确保隐藏加载指示器，避免一直显示"加载中"
-            hideLoader();
-            
-            // 显示用户友好的错误提示
-            showAlert(`数据加载失败: ${error.message}`, 'danger');
-        });
+// 1. 核心配置
+const LOADING_CONFIG = {
+    maxTotalTime: 15000, // 全局最大加载时间（15秒），超过强制结束
+    timeout: 10000, // 单个API请求超时时间
+};
+
+// 2. 超时处理工具函数
+function fetchWithTimeout(url, options, timeout = LOADING_CONFIG.timeout) {
+    return Promise.race([
+        fetch(url, options),
+        new Promise((_, reject) => 
+            setTimeout(() => reject(new Error(`请求超时 (${timeout}ms)，URL: ${url}`)), timeout)
+        )
+    ]);
 }
 
-// 辅助函数：显示加载指示器
+// 3. 加载指示器控制（确保100%能隐藏）
+let loaderTimer = null; // 全局加载计时器
+
 function showLoader() {
     const loader = document.getElementById('data-loader');
     if (loader) {
         loader.style.display = 'flex';
+        loader.setAttribute('data-loading', 'true');
     }
+    
+    // 强制超时兜底：无论任何情况，超过maxTotalTime必须隐藏
+    loaderTimer = setTimeout(() => {
+        if (isLoading()) {
+            console.error(`===== 全局加载超时 (${LOADING_CONFIG.maxTotalTime}ms)，强制结束 =====`);
+            hideLoader();
+            showAlert(`数据加载超时，请刷新页面重试`, 'danger');
+        }
+    }, LOADING_CONFIG.maxTotalTime);
 }
 
-// 辅助函数：隐藏加载指示器
 function hideLoader() {
+    // 清除强制超时计时器
+    if (loaderTimer) {
+        clearTimeout(loaderTimer);
+        loaderTimer = null;
+    }
+    
+    // 隐藏加载指示器
     const loader = document.getElementById('data-loader');
     if (loader) {
         loader.style.display = 'none';
+        loader.removeAttribute('data-loading');
     }
 }
 
-// 辅助函数：显示数据加载成功提示
-function showDataLoadedAlert() {
-    showAlert('所有数据加载完成', 'success');
+function isLoading() {
+    const loader = document.getElementById('data-loader');
+    return loader && loader.hasAttribute('data-loading');
 }
 
-// 通用提示框显示函数
-function showAlert(message, type = 'info') {
-    // 假设页面中有一个alert容器
-    const alertContainer = document.getElementById('alert-container');
-    if (alertContainer) {
-        alertContainer.innerHTML = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+// 4. 数据加载主函数（带完整异常捕获）
+function loadAllData() {
+    // 双重保险：先强制隐藏一次，防止之前的残留状态
+    hideLoader();
+    // 显示加载指示器
+    showLoader();
+    
+    const startTime = Date.now();
+    console.log(`[${new Date().toISOString()}] 开始加载所有数据`);
+    
+    // 全局异常捕获（防止内部未捕获的错误）
+    try {
+        fetchUsersData()
+            .then(() => {
+                console.log(`[${new Date().toISOString()}] 用户数据加载完成，耗时: ${Date.now() - startTime}ms`);
+                return Promise.allSettled([ // 使用allSettled确保所有请求完成后再处理
+                    fetchTeachersData(),
+                    fetchKeywordsData(),
+                    fetchBannedKeywordsData()
+                ]);
+            })
+            .then(results => {
+                // 检查是否有请求失败
+                const failed = results.filter(r => r.status === 'rejected');
+                if (failed.length > 0) {
+                    console.warn(`部分数据加载失败，共${failed.length}项`);
+                    failed.forEach((err, i) => {
+                        console.error(`失败项${i+1}:`, err.reason);
+                    });
+                }
+                
+                console.log(`[${new Date().toISOString()}] 所有数据加载流程完成，总耗时: ${Date.now() - startTime}ms`);
+                hideLoader();
+                showAlert(failed.length > 0 ? `部分数据加载失败，请查看控制台` : '所有数据加载完成', failed.length > 0 ? 'warning' : 'success');
+            })
+            .catch(error => {
+                console.error(`[${new Date().toISOString()}] 数据加载主流程出错:`);
+                console.error('错误详情:', error);
+                console.error('错误堆栈:', error.stack);
+                hideLoader();
+                showAlert(`数据加载失败: ${error.message}`, 'danger');
+            });
+    } catch (globalError) {
+        // 捕获函数内部任何未被处理的异常
+        console.error(`[${new Date().toISOString()}] 加载函数内部未捕获异常:`);
+        console.error(globalError);
+        hideLoader();
+        showAlert(`系统错误: ${globalError.message}`, 'danger');
+    }
+}
+
+// 5. 具体数据加载函数（每个都添加独立错误处理）
+function fetchUsersData() {
+    const url = config.apiUrl + '/api/users';
+    console.log(`[${new Date().toISOString()}] 开始加载用户数据: ${url}`);
+    
+    return fetchWithTimeout(url, {
+        headers: { 'Admin-Key': config.adminKey }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error(`用户数据请求失败 (状态码: ${response.status})`);
+        return response.json().catch(() => {
+            throw new Error('用户数据不是有效的JSON格式');
+        });
+    })
+    .then(users => {
+        if (!Array.isArray(users)) throw new Error('用户数据格式错误（预期数组）');
+        renderUsersData(users); // 渲染函数
+    })
+    .catch(error => {
+        console.error(`用户数据加载失败:`, error);
+        document.getElementById('users-container').innerHTML = `
+            <tr><td colspan="7" class="text-center py-3 text-danger">用户数据加载失败: ${error.message}</td></tr>
         `;
+        throw error; // 继续抛出，让上层感知
+    });
+}
+
+function fetchTeachersData() {
+    const url = config.apiUrl + '/api/teachers';
+    console.log(`[${new Date().toISOString()}] 开始加载老师数据: ${url}`);
+    
+    return fetchWithTimeout(url, {
+        headers: { 'Admin-Key': config.adminKey }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error(`老师数据请求失败 (状态码: ${response.status})`);
+        return response.json().catch(() => {
+            throw new Error('老师数据不是有效的JSON格式');
+        });
+    })
+    .then(teachers => {
+        if (!Array.isArray(teachers)) throw new Error('老师数据格式错误（预期数组）');
+        renderTeachersData(teachers); // 渲染函数
+    })
+    .catch(error => {
+        console.error(`老师数据加载失败:`, error);
+        document.getElementById('teachers-container').innerHTML = `
+            <tr><td colspan="8" class="text-center py-3 text-danger">老师数据加载失败: ${error.message}</td></tr>
+        `;
+        throw error;
+    });
+}
+
+// 其他数据加载函数（keywords、banned keywords）类似，此处省略
+
+// 6. 渲染函数（添加异常捕获）
+function renderUsersData(users) {
+    try {
+        const container = document.getElementById('users-container');
+        if (!container) throw new Error('未找到用户数据容器');
         
-        // 3秒后自动关闭提示
-        setTimeout(() => {
-            const alert = alertContainer.querySelector('.alert');
-            if (alert) {
-                alert.classList.remove('show');
-                alert.classList.add('fade');
-            }
-        }, 3000);
+        // 渲染逻辑（示例）
+        container.innerHTML = users.map(user => `
+            <tr>
+                <td>${user.id}</td>
+                <td>${user.name}</td>
+                <td>${user.email}</td>
+                <!-- 其他字段 -->
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('用户数据渲染失败:', error);
+        throw new Error(`渲染用户数据时出错: ${error.message}`);
     }
+}
+
+// 7. 全局异常捕获（最后一道防线）
+window.addEventListener('error', (event) => {
+    console.error(`===== 全局未捕获错误 =====`);
+    console.error('错误信息:', event.error);
+    console.error('错误位置:', event.filename, '行:', event.lineno);
+    
+    // 如果此时仍在加载中，强制结束
+    if (isLoading()) {
+        hideLoader();
+        showAlert(`系统异常: ${event.error.message}`, 'danger');
+    }
+});
+
+// 8. 提示框工具函数
+function showAlert(message, type = 'info') {
+    const alertContainer = document.getElementById('alert-container') || createAlertContainer();
+    alertContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    
+    setTimeout(() => {
+        const alert = alertContainer.querySelector('.alert');
+        if (alert) alert.classList.remove('show');
+    }, 5000);
+}
+
+// 自动创建提示框容器（如果页面中没有）
+function createAlertContainer() {
+    const container = document.createElement('div');
+    container.id = 'alert-container';
+    container.className = 'position-fixed top-3 right-3 z-50';
+    document.body.appendChild(container);
+    return container;
 }

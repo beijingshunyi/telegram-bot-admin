@@ -1,551 +1,531 @@
-// 当前编辑的项ID（用于区分新增和编辑操作）
-let currentEditId = null;
-let currentPointsUserId = null;
-
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', function () {
-  console.log('管理后台初始化');
-  // 检查配置是否加载
-  if (typeof config === 'undefined') {
-    showAlert('配置文件加载失败，请检查config.js', 'error');
-    return;
-  }
-  
-  loadRealData(); // 加载真实数据
-  setupEventListeners(); // 绑定按钮事件
-});
-
-// 加载所有数据（用户、老师、关键词、禁言词）
-async function loadRealData() {
-  try {
-    // 显示加载状态
-    showLoading(true);
+    // 全局变量
+    let currentEditId = null;
+    let currentDeleteInfo = null; // 存储当前要删除的信息 {type: 'user|teacher|keyword|banned', id: xxx}
     
-    const [users, teachers, keywords, bannedKeywords] = await Promise.all([
-      fetchData('users', 'get'),
-      fetchData('teachers', 'get'),
-      fetchData('keywords', 'get'),
-      fetchData('banned_keywords', 'get')
-    ]);
-
-    renderUsers(users);
-    renderTeachers(teachers);
-    renderKeywords(keywords);
-    renderBannedKeywords(bannedKeywords);
-
-    console.log('所有数据加载完成');
-  } catch (error) {
-    console.error('加载数据失败:', error);
-    showAlert('加载数据失败: ' + error.message, 'error');
-  } finally {
-    // 隐藏加载状态
-    showLoading(false);
-  }
-}
-
-// 绑定页面按钮事件
-function setupEventListeners() {
-  // 添加按钮事件
-  document.getElementById('add-user-btn')?.addEventListener('click', openUserModal);
-  document.getElementById('add-teacher-btn')?.addEventListener('click', openTeacherModal);
-  document.getElementById('add-keyword-btn')?.addEventListener('click', openKeywordModal);
-  document.getElementById('add-banned-btn')?.addEventListener('click', openBannedKeywordModal);
-  
-  // 刷新按钮事件
-  document.getElementById('refresh-data')?.addEventListener('click', loadRealData);
-  
-  // 表单提交事件
-  document.getElementById('points-form')?.addEventListener('submit', handlePointsAdjustment);
-  document.getElementById('user-form')?.addEventListener('submit', handleUserSubmit);
-  document.getElementById('teacher-form')?.addEventListener('submit', handleTeacherSubmit);
-  document.getElementById('keyword-form')?.addEventListener('submit', handleKeywordSubmit);
-  document.getElementById('banned-form')?.addEventListener('submit', handleBannedKeywordSubmit);
-  
-  // 模态框关闭事件（重置表单）
-  const modals = ['user-modal', 'teacher-modal', 'keyword-modal', 'banned-modal', 'points-modal'];
-  modals.forEach(modalId => {
-    const modal = document.getElementById(modalId);
-    modal?.addEventListener('hidden.bs.modal', function() {
-      const form = this.querySelector('form');
-      if (form) form.reset();
-      currentEditId = null; // 重置编辑ID
-      currentPointsUserId = null; // 重置积分调整用户ID
-    });
-  });
-}
-
-// 通用数据请求函数
-async function fetchData(table, action, data = null) {
-  try {
-    const requestData = { action, table };
-    if (data) requestData.data = data;
-
-    const response = await fetch(config.API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Admin-Key": config.ADMIN_KEY
-      },
-      body: JSON.stringify(requestData),
-      timeout: 10000
-    });
-
-    if (!response.ok) {
-      const errorMsg = await response.json().catch(() => ({ message: '未知错误' }));
-      throw new Error(`API 请求失败：${errorMsg.message || '服务器错误'}（状态码：${response.status}）`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('数据请求出错:', error);
-    showAlert('操作失败: ' + error.message, 'error');
-    throw error;
-  }
-}
-
-// 提示弹窗函数
-function showAlert(message, type = 'info') {
-  const alertDiv = document.createElement('div');
-  alertDiv.className = `alert alert-${type} alert-dismissible fade show fixed-top m-3 col-md-4 offset-md-4 z-50`;
-  alertDiv.role = "alert";
-  alertDiv.innerHTML = `
-    <strong>${type === 'error' ? '错误' : '提示'}</strong>：${message}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  `;
-  document.body.appendChild(alertDiv);
-
-  // 3秒后自动关闭
-  setTimeout(() => {
-    const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
-    bsAlert.close();
-  }, 3000);
-}
-
-// 显示/隐藏加载状态
-function showLoading(show) {
-  const loader = document.getElementById('data-loader');
-  if (loader) {
-    loader.style.display = show ? 'flex' : 'none';
-  }
-}
-
-// 渲染用户数据
-function renderUsers(users) {
-  const container = document.getElementById('users-container');
-  if (!container) return;
-
-  if (users.length === 0) {
-    container.innerHTML = `
-      <tr>
-        <td colspan="7" class="text-center py-3 text-muted">暂无用户数据，可通过机器人交互生成</td>
-      </tr>
-    `;
-    return;
-  }
-
-  container.innerHTML = users.map(user => `
-    <tr>
-      <td>${user.user_id}</td>
-      <td>${user.username || '-'}</td>
-      <td>${user.display_name || '-'}</td>
-      <td>${user.first_name || ''} ${user.last_name || ''}</td>
-      <td>${user.points || 0}</td>
-      <td>${user.last_sign_date || '-'}</td>
-      <td>
-        <div class="btn-group btn-group-sm">
-          <button class="btn btn-warning" onclick="editUser(${JSON.stringify(user)})">编辑</button>
-          <button class="btn btn-success" onclick="openPointsModal(${JSON.stringify(user)})">调整积分</button>
-          <button class="btn btn-danger" onclick="deleteUser(${user.user_id})">删除</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
-}
-
-// 渲染老师数据
-function renderTeachers(teachers) {
-  const container = document.getElementById('teachers-container');
-  if (!container) return;
-
-  if (teachers.length === 0) {
-    container.innerHTML = `
-      <tr>
-        <td colspan="8" class="text-center py-3 text-muted">暂无老师数据，可通过下方按钮添加</td>
-      </tr>
-    `;
-    return;
-  }
-
-  container.innerHTML = teachers.map(teacher => `
-    <tr>
-      <td>${teacher.id}</td>
-      <td>${teacher.nickname}</td>
-      <td>${teacher.age}</td>
-      <td>${teacher.region}</td>
-      <td>${teacher.service_type}</td>
-      <td>${teacher.price}</td>
-      <td>
-        <span class="badge bg-${teacher.status === 'approved' ? 'success' : teacher.status === 'pending' ? 'warning' : 'danger'}">
-          ${teacher.status === 'approved' ? '已认证' : teacher.status === 'pending' ? '待审核' : '已拒绝'}
-        </span>
-      </td>
-      <td>
-        <div class="btn-group btn-group-sm">
-          <button class="btn btn-warning" onclick="editTeacher(${JSON.stringify(teacher)})">编辑</button>
-          <button class="btn btn-danger" onclick="deleteTeacher(${teacher.id})">删除</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
-}
-
-// 渲染关键词数据
-function renderKeywords(keywords) {
-  const container = document.getElementById('keywords-container');
-  if (!container) return;
-
-  if (keywords.length === 0) {
-    container.innerHTML = `
-      <tr>
-        <td colspan="4" class="text-center py-3 text-muted">暂无关键词数据，点击“添加关键词”创建</td>
-      </tr>
-    `;
-    return;
-  }
-
-  container.innerHTML = keywords.map(keyword => `
-    <tr>
-      <td>${keyword.keyword}</td>
-      <td>${keyword.response}</td>
-      <td>
-        <span class="badge bg-${keyword.is_active ? 'success' : 'secondary'}">
-          ${keyword.is_active ? '启用' : '禁用'}
-        </span>
-      </td>
-      <td>
-        <div class="btn-group btn-group-sm">
-          <button class="btn btn-warning" onclick="editKeyword(${JSON.stringify(keyword)})">编辑</button>
-          <button class="btn btn-danger" onclick="deleteKeyword(${keyword.id})">删除</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
-}
-
-// 渲染禁言词数据
-function renderBannedKeywords(keywords) {
-  const container = document.getElementById('banned-keywords-container');
-  if (!container) return;
-
-  if (keywords.length === 0) {
-    container.innerHTML = `
-      <tr>
-        <td colspan="2" class="text-center py-3 text-muted">暂无禁言词数据，点击“添加禁言词”创建</td>
-      </tr>
-    `;
-    return;
-  }
-
-  container.innerHTML = keywords.map(keyword => `
-    <tr>
-      <td>${keyword.keyword}</td>
-      <td>
-        <button class="btn btn-danger btn-sm" onclick="deleteBannedKeyword(${keyword.id})">删除</button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-// 用户模态框操作
-function openUserModal() {
-  currentEditId = null;
-  document.getElementById('user-modal-title').textContent = '添加用户';
-  const userModal = new bootstrap.Modal(document.getElementById('user-modal'));
-  userModal.show();
-}
-
-function editUser(user) {
-  currentEditId = user.user_id;
-  document.getElementById('user-modal-title').textContent = '编辑用户';
-  
-  // 填充表单数据
-  document.getElementById('user_id').value = user.user_id;
-  document.getElementById('username').value = user.username || '';
-  document.getElementById('display_name').value = user.display_name || '';
-  document.getElementById('first_name').value = user.first_name || '';
-  document.getElementById('last_name').value = user.last_name || '';
-  document.getElementById('points').value = user.points || 0;
-  
-  const userModal = new bootstrap.Modal(document.getElementById('user-modal'));
-  userModal.show();
-}
-
-async function handleUserSubmit(e) {
-  e.preventDefault();
-  const formData = {
-    user_id: parseInt(document.getElementById('user_id').value),
-    username: document.getElementById('username').value,
-    display_name: document.getElementById('display_name').value,
-    first_name: document.getElementById('first_name').value,
-    last_name: document.getElementById('last_name').value,
-    points: parseInt(document.getElementById('points').value) || 0
-  };
-
-  try {
-    if (currentEditId) {
-      await fetchData('users', 'update', formData);
-      showAlert('用户更新成功', 'success');
-    } else {
-      await fetchData('users', 'insert', formData);
-      showAlert('用户添加成功', 'success');
-    }
+    // DOM元素
+    const userModal = new bootstrap.Modal(document.getElementById('user-modal'));
+    const teacherModal = new bootstrap.Modal(document.getElementById('teacher-modal'));
+    const keywordModal = new bootstrap.Modal(document.getElementById('keyword-modal'));
+    const bannedModal = new bootstrap.Modal(document.getElementById('banned-modal'));
+    const pointsModal = new bootstrap.Modal(document.getElementById('points-modal'));
+    const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirm-delete-modal'));
     
-    // 关闭模态框并刷新数据
-    const modal = bootstrap.Modal.getInstance(document.getElementById('user-modal'));
-    modal.hide();
-    loadRealData();
-  } catch (error) {
-    console.error('用户操作失败:', error);
-  }
-}
-
-async function deleteUser(userId) {
-  if (confirm('确定要删除这个用户吗？此操作不可恢复！')) {
-    try {
-      await fetchData('users', 'delete', { user_id: userId });
-      showAlert('用户删除成功', 'success');
-      loadRealData();
-    } catch (error) {
-      console.error('删除用户失败:', error);
-    }
-  }
-}
-
-// 积分调整模态框
-function openPointsModal(user) {
-  currentPointsUserId = user.user_id;
-  
-  // 填充表单数据
-  document.getElementById('points_user_id').value = user.user_id;
-  document.getElementById('points_username').value = user.display_name || user.username || `${user.first_name} ${user.last_name}`;
-  document.getElementById('current_points').value = user.points || 0;
-  document.getElementById('points_change').value = '';
-  
-  const pointsModal = new bootstrap.Modal(document.getElementById('points-modal'));
-  pointsModal.show();
-}
-
-async function handlePointsAdjustment(e) {
-  e.preventDefault();
-  
-  if (!currentPointsUserId) return;
-  
-  const pointsChange = parseInt(document.getElementById('points_change').value) || 0;
-  
-  if (pointsChange === 0) {
-    showAlert('请输入积分变动值', 'warning');
-    return;
-  }
-  
-  try {
-    const result = await fetchData('users', 'adjust_points', {
-      user_id: currentPointsUserId,
-      points_change: pointsChange
+    // 初始化函数
+    document.addEventListener('DOMContentLoaded', function() {
+        // 加载所有数据
+        loadAllData();
+        
+        // 绑定事件处理程序
+        bindEventHandlers();
     });
     
-    showAlert(`积分调整成功！新积分: ${result.new_points}`, 'success');
-    
-    // 关闭模态框并刷新数据
-    const modal = bootstrap.Modal.getInstance(document.getElementById('points-modal'));
-    modal.hide();
-    loadRealData();
-  } catch (error) {
-    console.error('积分调整失败:', error);
-  }
-}
-
-// 老师模态框操作
-function openTeacherModal() {
-  currentEditId = null;
-  document.getElementById('teacher-modal-title').textContent = '添加老师';
-  // 清空ID输入框，新增时不需要ID
-  document.getElementById('teacher_id').value = '';
-  const teacherModal = new bootstrap.Modal(document.getElementById('teacher-modal'));
-  teacherModal.show();
-}
-
-function editTeacher(teacher) {
-  currentEditId = teacher.id;
-  document.getElementById('teacher-modal-title').textContent = '编辑老师';
-  
-  // 填充表单数据
-  document.getElementById('teacher_id').value = teacher.id;
-  document.getElementById('nickname').value = teacher.nickname;
-  document.getElementById('age').value = teacher.age;
-  document.getElementById('region').value = teacher.region;
-  document.getElementById('telegram_account').value = teacher.telegram_account || '';
-  document.getElementById('channel').value = teacher.channel || '';
-  document.getElementById('service_type').value = teacher.service_type;
-  document.getElementById('price').value = teacher.price;
-  document.getElementById('intro').value = teacher.intro || '';
-  document.getElementById('status').value = teacher.status;
-  
-  const teacherModal = new bootstrap.Modal(document.getElementById('teacher-modal'));
-  teacherModal.show();
-}
-
-async function handleTeacherSubmit(e) {
-  e.preventDefault();
-  const formData = {
-    id: currentEditId ? parseInt(document.getElementById('teacher_id').value) : null,
-    nickname: document.getElementById('nickname').value,
-    age: parseInt(document.getElementById('age').value),
-    region: document.getElementById('region').value,
-    telegram_account: document.getElementById('telegram_account').value,
-    channel: document.getElementById('channel').value,
-    service_type: document.getElementById('service_type').value,
-    price: document.getElementById('price').value,
-    intro: document.getElementById('intro').value,
-    status: document.getElementById('status').value
-  };
-
-  try {
-    if (currentEditId) {
-      await fetchData('teachers', 'update', formData);
-      showAlert('老师信息更新成功', 'success');
-    } else {
-      await fetchData('teachers', 'insert', formData);
-      showAlert('老师添加成功', 'success');
+    // 绑定所有事件处理程序
+    function bindEventHandlers() {
+        // 移动端侧边栏切换
+        document.getElementById('menu-toggle').addEventListener('click', toggleMobileSidebar);
+        document.getElementById('mobile-sidebar').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeMobileSidebar();
+            }
+        });
+        
+        // 刷新数据按钮
+        document.getElementById('refresh-data').addEventListener('click', refreshAllData);
+        
+        // 添加按钮点击事件
+        document.getElementById('add-user-btn').addEventListener('click', openAddUserModal);
+        document.getElementById('add-teacher-btn').addEventListener('click', openAddTeacherModal);
+        document.getElementById('add-keyword-btn').addEventListener('click', openAddKeywordModal);
+        document.getElementById('add-banned-btn').addEventListener('click', openAddBannedModal);
+        
+        // 表单提交事件
+        document.getElementById('user-form').addEventListener('submit', handleUserFormSubmit);
+        document.getElementById('teacher-form').addEventListener('submit', handleTeacherFormSubmit);
+        document.getElementById('keyword-form').addEventListener('submit', handleKeywordFormSubmit);
+        document.getElementById('banned-form').addEventListener('submit', handleBannedFormSubmit);
+        document.getElementById('points-form').addEventListener('submit', handlePointsFormSubmit);
+        
+        // 确认删除按钮
+        document.getElementById('confirm-delete-btn').addEventListener('click', confirmDelete);
     }
     
-    // 关闭模态框并刷新数据
-    const modal = bootstrap.Modal.getInstance(document.getElementById('teacher-modal'));
-    modal.hide();
-    loadRealData();
-  } catch (error) {
-    console.error('老师操作失败:', error);
-  }
-}
-
-async function deleteTeacher(teacherId) {
-  if (confirm('确定要删除这位老师吗？此操作不可恢复！')) {
-    try {
-      await fetchData('teachers', 'delete', { id: teacherId });
-      showAlert('老师删除成功', 'success');
-      loadRealData();
-    } catch (error) {
-      console.error('删除老师失败:', error);
-    }
-  }
-}
-
-// 关键词模态框操作
-function openKeywordModal() {
-  currentEditId = null;
-  document.getElementById('keyword-modal-title').textContent = '添加关键词';
-  document.getElementById('keyword_id').value = '';
-  const keywordModal = new bootstrap.Modal(document.getElementById('keyword-modal'));
-  keywordModal.show();
-}
-
-function editKeyword(keyword) {
-  currentEditId = keyword.id;
-  document.getElementById('keyword-modal-title').textContent = '编辑关键词';
-  
-  // 填充表单数据
-  document.getElementById('keyword_id').value = keyword.id;
-  document.getElementById('keyword_text').value = keyword.keyword;
-  document.getElementById('response_text').value = keyword.response;
-  document.getElementById('is_active').checked = keyword.is_active;
-  
-  const keywordModal = new bootstrap.Modal(document.getElementById('keyword-modal'));
-  keywordModal.show();
-}
-
-async function handleKeywordSubmit(e) {
-  e.preventDefault();
-  const formData = {
-    id: currentEditId ? parseInt(document.getElementById('keyword_id').value) : null,
-    keyword: document.getElementById('keyword_text').value,
-    response: document.getElementById('response_text').value,
-    is_active: document.getElementById('is_active').checked
-  };
-
-  try {
-    if (currentEditId) {
-      await fetchData('keywords', 'update', formData);
-      showAlert('关键词更新成功', 'success');
-    } else {
-      await fetchData('keywords', 'insert', formData);
-      showAlert('关键词添加成功', 'success');
+    // 加载所有数据
+    function loadAllData() {
+        showLoader();
+        
+        // 并行加载所有数据
+        Promise.all([
+            fetchUsersData(),
+            fetchTeachersData(),
+            fetchKeywordsData(),
+            fetchBannedKeywordsData()
+        ]).then(() => {
+            hideLoader();
+            showDataLoadedAlert();
+        }).catch(error => {
+            hideLoader();
+            showAlert('数据加载失败: ' + error.message, 'danger');
+            console.error('数据加载错误:', error);
+        });
     }
     
-    // 关闭模态框并刷新数据
-    const modal = bootstrap.Modal.getInstance(document.getElementById('keyword-modal'));
-    modal.hide();
-    loadRealData();
-  } catch (error) {
-    console.error('关键词操作失败:', error);
-  }
-}
-
-async function deleteKeyword(keywordId) {
-  if (confirm('确定要删除这个关键词吗？')) {
-    try {
-      await fetchData('keywords', 'delete', { id: keywordId });
-      showAlert('关键词删除成功', 'success');
-      loadRealData();
-    } catch (error) {
-      console.error('删除关键词失败:', error);
+    // 刷新所有数据
+    function refreshAllData() {
+        loadAllData();
     }
-  }
-}
-
-// 禁言词模态框操作
-function openBannedKeywordModal() {
-  currentEditId = null;
-  document.getElementById('banned-modal-title').textContent = '添加禁言词';
-  const bannedModal = new bootstrap.Modal(document.getElementById('banned-modal'));
-  bannedModal.show();
-}
-
-async function handleBannedKeywordSubmit(e) {
-  e.preventDefault();
-  const formData = {
-    keyword: document.getElementById('banned_text').value
-  };
-
-  try {
-    await fetchData('banned_keywords', 'insert', formData);
-    showAlert('禁言词添加成功', 'success');
     
-    // 关闭模态框并刷新数据
-    const modal = bootstrap.Modal.getInstance(document.getElementById('banned-modal'));
-    modal.hide();
-    loadRealData();
-  } catch (error) {
-    console.error('禁言词操作失败:', error);
-  }
-}
-
-async function deleteBannedKeyword(id) {
-  if (confirm('确定删除该禁言词吗？')) {
-    try {
-      await fetchData('banned_keywords', 'delete', { id });
-      showAlert('禁言词删除成功', 'success');
-      loadRealData();
-    } catch (error) {
-      console.error('删除禁言词失败:', error);
+    // 从API获取用户数据
+    function fetchUsersData() {
+        return fetch(config.apiUrl + '/users')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('获取用户数据失败');
+                }
+                return response.json();
+            })
+            .then(users => {
+                renderUsersData(users);
+            });
     }
-  }
-}
-
-// 暴露函数到全局，使HTML中onclick可以调用
-window.editUser = editUser;
-window.editTeacher = editTeacher;
-window.editKeyword = editKeyword;
-window.deleteUser = deleteUser;
-window.deleteTeacher = deleteTeacher;
-window.deleteKeyword = deleteKeyword;
-window.deleteBannedKeyword = deleteBannedKeyword;
-window.openPointsModal = openPointsModal;
+    
+    // 渲染用户数据
+    function renderUsersData(users) {
+        const container = document.getElementById('users-container');
+        container.innerHTML = '';
+        
+        if (!users || users.length === 0) {
+            container.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-3 text-muted">暂无用户数据</td>
+                </tr>
+            `;
+            return;
+        }
+        
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.className = 'fade-in';
+            row.innerHTML = `
+                <td>${user.id}</td>
+                <td>${user.username || '-'}</td>
+                <td>${user.display_name || '-'}</td>
+                <td>${user.last_name}${user.first_name}</td>
+                <td>${user.points}</td>
+                <td>${user.last_checkin || '-'}</td>
+                <td>
+                    <div class="flex space-x-1">
+                        <button class="btn-action btn-edit edit-user" data-id="${user.id}" title="编辑">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="btn-action btn-points adjust-points" data-id="${user.id}" data-name="${user.last_name}${user.first_name}" data-points="${user.points}" title="调整积分">
+                            <i class="fa fa-credit-card"></i>
+                        </button>
+                        <button class="btn-action btn-delete delete-item" data-type="user" data-id="${user.id}" title="删除">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            container.appendChild(row);
+        });
+        
+        // 绑定用户相关按钮事件
+        document.querySelectorAll('.edit-user').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-id');
+                openEditUserModal(userId);
+            });
+        });
+        
+        document.querySelectorAll('.adjust-points').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-id');
+                const userName = this.getAttribute('data-name');
+                const userPoints = this.getAttribute('data-points');
+                openPointsModal(userId, userName, userPoints);
+            });
+        });
+        
+        document.querySelectorAll('.delete-item[data-type="user"]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                currentDeleteInfo = { type: 'user', id: id };
+                confirmDeleteModal.show();
+            });
+        });
+    }
+    
+    // 从API获取老师数据
+    function fetchTeachersData() {
+        return fetch(config.apiUrl + '/teachers')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('获取老师数据失败');
+                }
+                return response.json();
+            })
+            .then(teachers => {
+                renderTeachersData(teachers);
+            });
+    }
+    
+    // 渲染老师数据
+    function renderTeachersData(teachers) {
+        const container = document.getElementById('teachers-container');
+        container.innerHTML = '';
+        
+        if (!teachers || teachers.length === 0) {
+            container.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-3 text-muted">暂无老师数据</td>
+                </tr>
+            `;
+            return;
+        }
+        
+        teachers.forEach(teacher => {
+            let statusClass = '';
+            let statusText = '';
+            
+            switch(teacher.status) {
+                case 'approved':
+                    statusClass = 'text-green-600 bg-green-100';
+                    statusText = '已认证';
+                    break;
+                case 'pending':
+                    statusClass = 'text-yellow-600 bg-yellow-100';
+                    statusText = '待审核';
+                    break;
+                case 'rejected':
+                    statusClass = 'text-red-600 bg-red-100';
+                    statusText = '已拒绝';
+                    break;
+            }
+            
+            const row = document.createElement('tr');
+            row.className = 'fade-in';
+            row.innerHTML = `
+                <td>${teacher.id}</td>
+                <td>${teacher.nickname}</td>
+                <td>${teacher.age}</td>
+                <td>${teacher.region}</td>
+                <td>${teacher.service_type}</td>
+                <td>${teacher.price}</td>
+                <td><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${statusText}</span></td>
+                <td>
+                    <div class="flex space-x-1">
+                        <button class="btn-action btn-edit edit-teacher" data-id="${teacher.id}" title="编辑">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="btn-action btn-delete delete-item" data-type="teacher" data-id="${teacher.id}" title="删除">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            container.appendChild(row);
+        });
+        
+        // 绑定老师相关按钮事件
+        document.querySelectorAll('.edit-teacher').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const teacherId = this.getAttribute('data-id');
+                openEditTeacherModal(teacherId);
+            });
+        });
+        
+        document.querySelectorAll('.delete-item[data-type="teacher"]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                currentDeleteInfo = { type: 'teacher', id: id };
+                confirmDeleteModal.show();
+            });
+        });
+    }
+    
+    // 从API获取关键词数据
+    function fetchKeywordsData() {
+        return fetch(config.apiUrl + '/keywords')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('获取关键词数据失败');
+                }
+                return response.json();
+            })
+            .then(keywords => {
+                renderKeywordsData(keywords);
+            });
+    }
+    
+    // 渲染关键词数据
+    function renderKeywordsData(keywords) {
+        const container = document.getElementById('keywords-container');
+        container.innerHTML = '';
+        
+        if (!keywords || keywords.length === 0) {
+            container.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center py-3 text-muted">暂无关键词数据</td>
+                </tr>
+            `;
+            return;
+        }
+        
+        keywords.forEach(keyword => {
+            const statusClass = keyword.is_active ? 'text-green-600' : 'text-gray-400';
+            const statusText = keyword.is_active ? '启用' : '禁用';
+            
+            const row = document.createElement('tr');
+            row.className = 'fade-in';
+            row.innerHTML = `
+                <td>${keyword.keyword}</td>
+                <td>${keyword.response.substring(0, 30)}${keyword.response.length > 30 ? '...' : ''}</td>
+                <td><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${statusText}</span></td>
+                <td>
+                    <div class="flex space-x-1">
+                        <button class="btn-action btn-edit edit-keyword" data-id="${keyword.id}" title="编辑">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="btn-action btn-delete delete-item" data-type="keyword" data-id="${keyword.id}" title="删除">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            container.appendChild(row);
+        });
+        
+        // 绑定关键词相关按钮事件
+        document.querySelectorAll('.edit-keyword').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const keywordId = this.getAttribute('data-id');
+                openEditKeywordModal(keywordId);
+            });
+        });
+        
+        document.querySelectorAll('.delete-item[data-type="keyword"]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                currentDeleteInfo = { type: 'keyword', id: id };
+                confirmDeleteModal.show();
+            });
+        });
+    }
+    
+    // 从API获取禁言词数据
+    function fetchBannedKeywordsData() {
+        return fetch(config.apiUrl + '/banned-words')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('获取禁言词数据失败');
+                }
+                return response.json();
+            })
+            .then(bannedKeywords => {
+                renderBannedKeywordsData(bannedKeywords);
+            });
+    }
+    
+    // 渲染禁言词数据
+    function renderBannedKeywordsData(bannedKeywords) {
+        const container = document.getElementById('banned-keywords-container');
+        container.innerHTML = '';
+        
+        if (!bannedKeywords || bannedKeywords.length === 0) {
+            container.innerHTML = `
+                <tr>
+                    <td colspan="2" class="text-center py-3 text-muted">暂无禁言词数据</td>
+                </tr>
+            `;
+            return;
+        }
+        
+        bannedKeywords.forEach(keyword => {
+            const row = document.createElement('tr');
+            row.className = 'fade-in';
+            row.innerHTML = `
+                <td>${keyword.text}</td>
+                <td>
+                    <div class="flex space-x-1">
+                        <button class="btn-action btn-edit edit-banned" data-id="${keyword.id}" data-text="${keyword.text}" title="编辑">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="btn-action btn-delete delete-item" data-type="banned" data-id="${keyword.id}" title="删除">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            container.appendChild(row);
+        });
+        
+        // 绑定禁言词相关按钮事件
+        document.querySelectorAll('.edit-banned').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const bannedId = this.getAttribute('data-id');
+                const bannedText = this.getAttribute('data-text');
+                openEditBannedModal(bannedId, bannedText);
+            });
+        });
+        
+        document.querySelectorAll('.delete-item[data-type="banned"]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                currentDeleteInfo = { type: 'banned', id: id };
+                confirmDeleteModal.show();
+            });
+        });
+    }
+    
+    // 打开添加用户模态框
+    function openAddUserModal() {
+        document.getElementById('user-modal-title').textContent = '添加用户';
+        document.getElementById('user-form').reset();
+        userModal.show();
+    }
+    
+    // 打开编辑用户模态框
+    function openEditUserModal(userId) {
+        // 从API获取单个用户数据
+        fetch(config.apiUrl + '/users/' + userId)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('获取用户数据失败');
+                }
+                return response.json();
+            })
+            .then(user => {
+                document.getElementById('user-modal-title').textContent = '编辑用户';
+                document.getElementById('user_id').value = user.id;
+                document.getElementById('username').value = user.username;
+                document.getElementById('display_name').value = user.display_name;
+                document.getElementById('first_name').value = user.first_name;
+                document.getElementById('last_name').value = user.last_name;
+                document.getElementById('points').value = user.points;
+                
+                currentEditId = userId;
+                userModal.show();
+            })
+            .catch(error => {
+                showAlert('加载用户数据失败: ' + error.message, 'danger');
+            });
+    }
+    
+    // 处理用户表单提交
+    function handleUserFormSubmit(e) {
+        e.preventDefault();
+        
+        const userData = {
+            id: document.getElementById('user_id').value,
+            username: document.getElementById('username').value,
+            display_name: document.getElementById('display_name').value,
+            first_name: document.getElementById('first_name').value,
+            last_name: document.getElementById('last_name').value,
+            points: document.getElementById('points').value
+        };
+        
+        let url = config.apiUrl + '/users';
+        let method = 'POST';
+        
+        // 如果是编辑模式
+        if (currentEditId) {
+            url = config.apiUrl + '/users/' + currentEditId;
+            method = 'PUT';
+        }
+        
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('保存用户数据失败');
+            }
+            return response.json();
+        })
+        .then(data => {
+            userModal.hide();
+            fetchUsersData();
+            showAlert(currentEditId ? '用户编辑成功' : '用户添加成功', 'success');
+            currentEditId = null;
+        })
+        .catch(error => {
+            showAlert('操作失败: ' + error.message, 'danger');
+        });
+    }
+    
+    // 其他模态框和表单处理函数...
+    // (老师、关键词、禁言词的处理逻辑类似，都需要修改为实际API调用)
+    
+    // 显示加载指示器
+    function showLoader() {
+        document.getElementById('data-loader').classList.remove('hidden');
+    }
+    
+    // 隐藏加载指示器
+    function hideLoader() {
+        document.getElementById('data-loader').classList.add('hidden');
+    }
+    
+    // 显示数据加载完成提示
+    function showDataLoadedAlert() {
+        const alert = document.getElementById('data-loaded-alert');
+        alert.classList.remove('hidden');
+        
+        // 3秒后自动隐藏
+        setTimeout(() => {
+            alert.classList.add('hidden');
+        }, 3000);
+    }
+    
+    // 显示提示信息
+    function showAlert(message, type = 'info') {
+        // 创建临时提示元素
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} fixed top-20 right-5 z-50 fade-in`;
+        alert.role = 'alert';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        // 3秒后自动移除
+        setTimeout(() => {
+            alert.classList.add('fade-out');
+            setTimeout(() => {
+                document.body.removeChild(alert);
+            }, 500);
+        }, 3000);
+        
+        // 点击关闭按钮移除
+        alert.querySelector('.btn-close').addEventListener('click', () => {
+            document.body.removeChild(alert);
+        });
+    }
+    
+    // 移动端侧边栏相关函数...
+    function toggleMobileSidebar() {
+        const sidebar = document.getElementById('mobile-sidebar');
+        const panel = document.getElementById('sidebar-panel');
+        
+        sidebar.classList.toggle('hidden');
+        setTimeout(() => {
+            panel.classList.toggle('-translate-x-full');
+        }, 10);
+    }
+    
+    function closeMobileSidebar() {
+        const sidebar = document.getElementById('mobile-sidebar');
+        const panel = document.getElementById('sidebar-panel');
+        
+        panel.classList.add('-translate-x-full');
+        setTimeout(() => {
+            sidebar.classList.add('hidden');
+        }, 300);
+    }
+    

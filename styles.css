@@ -1,0 +1,87 @@
+/* 通用样式 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* 导航链接样式 */
+.nav-link.active {
+    background-color: #4a5568;
+    font-weight: 500;
+}
+
+/* 表格行悬停效果 */
+tbody tr:hover {
+    background-color: #f7fafc;
+}
+
+/* 按钮样式 */
+button {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* 模态框动画 */
+#user-modal, #teacher-modal, #keyword-modal, #banned-modal {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#user-modal.show, #teacher-modal.show, #keyword-modal.show, #banned-modal.show {
+    opacity: 1;
+}
+
+/* 通知样式 */
+#notification.success {
+    background-color: #48bb78;
+    color: white;
+}
+
+#notification.error {
+    background-color: #f56565;
+    color: white;
+}
+
+#notification.info {
+    background-color: #3182ce;
+    color: white;
+}
+
+#notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* 响应式侧边栏 */
+@media (max-width: 768px) {
+    #sidebar {
+        position: fixed;
+        height: 100%;
+        z-index: 100;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    #sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 99;
+        display: none;
+    }
+    
+    .overlay.show {
+        display: block;
+    }
+}
+
+/* 图片预览样式 */
+img[src=""] {
+    display: none !important;
+}

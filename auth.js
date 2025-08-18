@@ -1,89 +1,42 @@
-// 登录状态管理
-let isAuthenticated = false;
+// 管理员密钥（这里可以自定义，建议修改为复杂密码）
+const ADMIN_KEY = "9712202273aA."; // 你可以修改这个密钥
 
-// 检查登录状态
-function checkAuthStatus() {
-    const authToken = localStorage.getItem('botAdminAuth');
-    isAuthenticated = !!authToken;
-    
-    // 根据登录状态显示不同界面
-    if (isAuthenticated) {
-        document.getElementById('login-section').classList.add('hidden');
-        showSection('dashboard');
+// 检查是否已登录
+function checkLogin() {
+    const isLoggedIn = localStorage.getItem('telegram_bot_admin_logged_in') === 'true';
+    if (isLoggedIn) {
+        document.getElementById('login-page').classList.add('hidden');
+        document.getElementById('admin-panel').classList.remove('hidden');
     } else {
-        document.querySelectorAll('section[id$="-section"]').forEach(section => {
-            section.classList.add('hidden');
-        });
-        document.getElementById('login-section').classList.remove('hidden');
-    }
-    
-    return isAuthenticated;
-}
-
-// 登录
-async function login(adminKey) {
-    try {
-        // 验证管理员密钥
-        if (adminKey !== API.getSettings().adminKey) {
-            throw new Error('管理员密钥不正确');
-        }
-        
-        // 保存登录状态
-        localStorage.setItem('botAdminAuth', 'true');
-        isAuthenticated = true;
-        
-        // 刷新界面
-        checkAuthStatus();
-        
-        // 显示成功通知
-        showNotification('登录成功', 'success');
-        
-        return true;
-    } catch (error) {
-        console.error('登录失败:', error);
-        showNotification(error.message, 'error');
-        return false;
+        document.getElementById('login-page').classList.remove('hidden');
+        document.getElementById('admin-panel').classList.add('hidden');
     }
 }
 
-// 登出
-function logout() {
-    // 清除登录状态
-    localStorage.removeItem('botAdminAuth');
-    isAuthenticated = false;
+// 登录功能
+document.getElementById('login-btn').addEventListener('click', () => {
+    const inputKey = document.getElementById('admin-key').value;
+    const errorElement = document.getElementById('login-error');
     
-    // 刷新界面
-    checkAuthStatus();
-    
-    // 显示通知
-    showNotification('已成功退出登录', 'info');
-}
+    if (inputKey === ADMIN_KEY) {
+        localStorage.setItem('telegram_bot_admin_logged_in', 'true');
+        checkLogin();
+        errorElement.classList.add('hidden');
+        // 登录后加载数据
+        loadAllData();
+    } else {
+        errorElement.classList.remove('hidden');
+        setTimeout(() => {
+            errorElement.classList.add('hidden');
+        }, 3000);
+    }
+});
 
-// 初始化登录事件监听
-function initAuthEvents() {
-    // 登录按钮点击事件
-    document.getElementById('login-btn').addEventListener('click', () => {
-        const adminKey = document.getElementById('admin-key').value;
-        login(adminKey);
-    });
-    
-    // 回车键登录
-    document.getElementById('admin-key').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            const adminKey = document.getElementById('admin-key').value;
-            login(adminKey);
-        }
-    });
-    
-    // 登出按钮点击事件
-    document.getElementById('logout-btn').addEventListener('click', logout);
-}
+// 退出登录
+document.getElementById('logout-btn').addEventListener('click', () => {
+    localStorage.removeItem('telegram_bot_admin_logged_in');
+    checkLogin();
+});
 
-// 导出认证相关函数
-window.Auth = {
-    checkAuthStatus,
-    login,
-    logout,
-    initAuthEvents,
-    isAuthenticated: () => isAuthenticated
-};
+// 初始化检查登录状态
+checkLogin();

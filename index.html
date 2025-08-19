@@ -471,6 +471,15 @@
 	            gap: 15px;
 	            flex-wrap: wrap;
 	        }
+	        /* 积分调整表单样式 */
+	        .points-adjust-form {
+	            display: flex;
+	            align-items: center;
+	            gap: 10px;
+	        }
+	        .points-input {
+	            width: 100px;
+	        }
 	        /* 响应式设计 */
 	        @media (max-width: 768px) {
 	            .sidebar {
@@ -841,15 +850,6 @@
 	                // 随机选择一个老师
 	                const randomIndex = Math.floor(Math.random() * approvedTeachers.length);
 	                const teacher = approvedTeachers[randomIndex];
-	                // 构建发送内容
-	                const caption = `🌟 每日推荐老师 🌟\n\n` +
-	                    `花名: ${teacher.nickname}\n` +
-	                    `年龄: ${teacher.age}\n` +
-	                    `地区: ${teacher.region}\n` +
-	                    `服务类型: ${teacher.service_type}\n` +
-	                    `修车费: ${teacher.repair_cost}\n` +
-	                    `自我介绍: ${teacher.intro}\n\n` +
-	                    `联系老师: ${teacher.telegram_account}`;
 	                // 调用API发送到群组
 	                const result = await apiRequest('/send-random-teacher', 'GET');
 	                showNotification('随机老师已发送到群组', 'success');
@@ -897,11 +897,8 @@
 	                                                <td>${user.last_sign_date || '-'}</td>
 	                                                <td>
 	                                                    <div class="action-buttons">
-	                                                        <button class="btn btn-success btn-sm" onclick="adjustUserPoints(${user.user_id}, 10)">
-	                                                            <i class="fas fa-plus"></i> +10
-	                                                        </button>
-	                                                        <button class="btn btn-warning btn-sm" onclick="adjustUserPoints(${user.user_id}, -10)">
-	                                                            <i class="fas fa-minus"></i> -10
+	                                                        <button class="btn btn-success btn-sm" onclick="showAdjustPointsForm(${user.user_id})">
+	                                                            <i class="fas fa-plus"></i> 调整积分
 	                                                        </button>
 	                                                        <button class="btn btn-primary btn-sm" onclick="editUser(${user.user_id})">
 	                                                            <i class="fas fa-edit"></i> 编辑
@@ -931,15 +928,45 @@
 	            loadUsers();
 	            showNotification('用户列表已刷新', 'info');
 	        }
+	        // 显示调整积分表单
+	        function showAdjustPointsForm(userId) {
+	            const content = document.getElementById('content');
+	            content.innerHTML = `
+	                <div class="card">
+	                    <div class="card-header">
+	                        <h2 class="card-title">调整用户积分</h2>
+	                        <div class="action-buttons">
+	                            <button class="btn btn-primary" onclick="adjustUserPoints(${userId})">
+	                                <i class="fas fa-save"></i> 保存
+	                            </button>
+	                            <button class="btn btn-secondary" onclick="loadUsers()">
+	                                <i class="fas fa-times"></i> 取消
+	                            </button>
+	                        </div>
+	                    </div>
+	                    <div class="card-body">
+	                        <div class="form-group">
+	                            <label for="points-value">积分变化值（正数为增加，负数为减少）</label>
+	                            <input type="number" id="points-value" class="form-control" placeholder="请输入积分变化值">
+	                        </div>
+	                    </div>
+	                </div>
+	            `;
+	        }
 	        // 调整用户积分
-	        async function adjustUserPoints(userId, pointsChange) {
+	        async function adjustUserPoints(userId) {
 	            try {
+	                const pointsChange = parseInt(document.getElementById('points-value').value);
+	                if (isNaN(pointsChange)) {
+	                    showNotification('请输入有效的积分值', 'error');
+	                    return;
+	                }
 	                const result = await executeAdminAPI('adjust_points', 'users', {
 	                    user_id: userId,
 	                    points_change: pointsChange
 	                });
 	                showNotification(`积分调整成功，新积分: ${result.new_points}`, 'success');
-	                refreshUsers();
+	                loadUsers();
 	            } catch (error) {
 	                showNotification(`调整失败: ${error.message}`, 'error');
 	            }

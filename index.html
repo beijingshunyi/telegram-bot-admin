@@ -1,2323 +1,1641 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>系统管理后台</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#2563eb',
-                        secondary: '#10b981',
-                        danger: '#ef4444',
-                        dark: '#1e293b',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
-    
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
-            .sidebar-link {
-                @apply flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200;
-            }
-            .sidebar-link.active {
-                @apply bg-gray-700 text-white;
-            }
-            .btn {
-                @apply px-4 py-2 rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
-            }
-            .btn-primary {
-                @apply bg-primary text-white hover:bg-primary/90 focus:ring-primary;
-            }
-            .btn-danger {
-                @apply bg-danger text-white hover:bg-danger/90 focus:ring-danger;
-            }
-            .btn-success {
-                @apply bg-secondary text-white hover:bg-secondary/90 focus:ring-secondary;
-            }
-            .btn-outline {
-                @apply border border-gray-300 text-gray-700 hover:bg-gray-100 focus:ring-gray-500;
-            }
-            .badge {
-                @apply px-2 py-1 text-xs font-medium rounded-full;
-            }
-            .fade-in {
-                animation: fadeIn 0.3s ease-in-out;
-            }
-            .pulse {
-                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-            }
-            @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-            @keyframes pulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.5; }
-            }
-        }
-    </style>
-</head>
-<body class="bg-gray-100 font-sans text-gray-800 min-h-screen">
-    <!-- 登录界面 -->
-    <div id="login-container" class="flex items-center justify-center min-h-screen p-4">
-        <div class="w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden">
-            <div class="p-6 sm:p-8">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">系统管理后台</h2>
-                    <p class="mt-2 text-gray-500">请输入管理员密码登录</p>
-                </div>
-                
-                <div class="mb-4">
-                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">管理员密码</label>
-                    <input type="password" id="login-password" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                           placeholder="请输入管理员密码">
-                </div>
-                
-                <div id="login-error" class="mb-4 text-red-500 text-sm hidden"></div>
-                
-                <button id="login-button" class="w-full btn btn-primary">
-                    登录系统
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 数据库配置界面 -->
-    <div id="db-config-container" class="hidden flex items-center justify-center min-h-screen p-4">
-        <div class="w-full max-w-2xl bg-white rounded-lg shadow-xl overflow-hidden">
-            <div class="p-6 sm:p-8">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">数据库配置</h2>
-                    <p class="mt-2 text-gray-500">请配置数据库连接信息以继续</p>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label for="db-url" class="block text-sm font-medium text-gray-700 mb-1">数据库URL <span class="text-red-500">*</span></label>
-                        <input type="text" id="db-url" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                               placeholder="例如: https://your-project.supabase.co">
-                        <p class="mt-1 text-xs text-gray-500">Supabase项目URL，可在项目设置中获取</p>
-                    </div>
-                    
-                    <div>
-                        <label for="db-key" class="block text-sm font-medium text-gray-700 mb-1">服务密钥 <span class="text-red-500">*</span></label>
-                        <input type="text" id="db-key" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                               placeholder="输入Supabase服务密钥">
-                        <p class="mt-1 text-xs text-red-500">
-                            请使用服务密钥（service_role）而非匿名密钥，可在Supabase项目的API设置中找到
-                        </p>
-                    </div>
-                </div>
-                
-                <div id="db-config-error" class="mt-4 mb-4 text-red-500 text-sm hidden"></div>
-                
-                <div class="flex flex-col space-y-3 mt-6">
-                    <button id="test-db-connection" class="w-full btn btn-outline">
-                        <i class="fa fa-check-circle mr-1"></i> 测试连接
-                    </button>
-                    <div id="db-test-result" class="text-sm hidden"></div>
-                    
-                    <button id="save-db-config" class="w-full btn btn-primary">
-                        保存配置并进入系统
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 主应用界面 -->
-    <div id="app-container" class="hidden flex h-screen overflow-hidden">
-        <!-- 侧边栏 -->
-        <aside class="bg-dark text-white w-64 flex-shrink-0 hidden md:block">
-            <div class="p-4 border-b border-gray-700">
-                <h1 class="text-xl font-bold">管理后台</h1>
-            </div>
-            <nav class="p-2">
-                <ul class="space-y-1">
-                    <li>
-                        <a href="#dashboard" class="sidebar-link active">
-                            <i class="fa fa-tachometer w-5 text-center mr-3"></i> 仪表盘
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#users" class="sidebar-link">
-                            <i class="fa fa-users w-5 text-center mr-3"></i> 用户管理
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#teachers" class="sidebar-link">
-                            <i class="fa fa-user-md w-5 text-center mr-3"></i> 老师管理
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#keywords" class="sidebar-link">
-                            <i class="fa fa-key w-5 text-center mr-3"></i> 关键词回复
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#banned" class="sidebar-link">
-                            <i class="fa fa-ban w-5 text-center mr-3"></i> 禁言词管理
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#database" class="sidebar-link">
-                            <i class="fa fa-database w-5 text-center mr-3"></i> 数据库工具
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#settings" class="sidebar-link">
-                            <i class="fa fa-cog w-5 text-center mr-3"></i> 系统设置
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            <div class="absolute bottom-4 left-0 right-0 px-4">
-                <button id="logout-button" class="w-full flex items-center justify-center p-3 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
-                    <i class="fa fa-sign-out w-5 text-center mr-3"></i> 退出登录
-                </button>
-            </div>
-        </aside>
-
-        <!-- 主内容区 -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- 顶部导航 -->
-            <header class="bg-white shadow-sm p-4 flex justify-between items-center">
-                <button id="mobile-menu-button" class="md:hidden text-gray-500 focus:outline-none">
-                    <i class="fa fa-bars text-xl"></i>
-                </button>
-                <div class="text-lg font-semibold">管理中心</div>
-                <div class="flex items-center">
-                    <span id="db-connection-status" class="mr-4 text-sm flex items-center">
-                        <span class="w-2 h-2 rounded-full bg-yellow-500 mr-1"></span>
-                        连接状态
-                    </span>
-                    <div class="relative">
-                        <button id="user-menu-button" class="flex items-center text-gray-700 focus:outline-none">
-                            <i class="fa fa-user-circle text-xl mr-1"></i>
-                            <span class="hidden sm:inline">管理员</span>
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            <!-- 移动端侧边栏 -->
-            <div id="mobile-sidebar" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden md:hidden">
-                <div class="bg-dark text-white w-64 h-full p-4 transform transition-transform duration-300">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-bold">菜单</h2>
-                        <button id="close-mobile-menu" class="text-gray-300 hover:text-white">
-                            <i class="fa fa-times text-xl"></i>
-                        </button>
-                    </div>
-                    <nav>
-                        <ul class="space-y-1">
-                            <li>
-                                <a href="#dashboard" class="sidebar-link mobile-sidebar-link active">
-                                    <i class="fa fa-tachometer w-5 text-center mr-3"></i> 仪表盘
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#users" class="sidebar-link mobile-sidebar-link">
-                                    <i class="fa fa-users w-5 text-center mr-3"></i> 用户管理
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#teachers" class="sidebar-link mobile-sidebar-link">
-                                    <i class="fa fa-user-md w-5 text-center mr-3"></i> 老师管理
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#keywords" class="sidebar-link mobile-sidebar-link">
-                                    <i class="fa fa-key w-5 text-center mr-3"></i> 关键词回复
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#banned" class="sidebar-link mobile-sidebar-link">
-                                    <i class="fa fa-ban w-5 text-center mr-3"></i> 禁言词管理
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#database" class="sidebar-link mobile-sidebar-link">
-                                    <i class="fa fa-database w-5 text-center mr-3"></i> 数据库工具
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#settings" class="sidebar-link mobile-sidebar-link">
-                                    <i class="fa fa-cog w-5 text-center mr-3"></i> 系统设置
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-
-            <!-- 内容区域 -->
-            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
-                <!-- 仪表盘 -->
-                <div id="dashboard-view" class="view-content fade-in">
-                    <div class="mb-6">
-                        <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-900">仪表盘</h1>
-                        <p class="text-gray-600">系统概览和关键数据统计</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                        <div class="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-500">总用户数</p>
-                                    <h3 id="stat-total-users" class="mt-1 text-3xl font-bold text-gray-900">0</h3>
-                                </div>
-                                <div class="p-3 bg-blue-100 rounded-full">
-                                    <i class="fa fa-users text-primary text-xl"></i>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-500">老师总数</p>
-                                    <h3 id="stat-total-teachers" class="mt-1 text-3xl font-bold text-gray-900">0</h3>
-                                </div>
-                                <div class="p-3 bg-green-100 rounded-full">
-                                    <i class="fa fa-user-md text-secondary text-xl"></i>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-500">关键词数量</p>
-                                    <h3 id="stat-total-keywords" class="mt-1 text-3xl font-bold text-gray-900">0</h3>
-                                </div>
-                                <div class="p-3 bg-purple-100 rounded-full">
-                                    <i class="fa fa-key text-purple-600 text-xl"></i>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-500">禁言词数量</p>
-                                    <h3 id="stat-total-banned" class="mt-1 text-3xl font-bold text-gray-900">0</h3>
-                                </div>
-                                <div class="p-3 bg-red-100 rounded-full">
-                                    <i class="fa fa-ban text-red-600 text-xl"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-lg font-semibold text-gray-900">活跃用户 (积分前10)</h2>
-                            </div>
-                            <div id="top-users-list" class="space-y-3">
-                                <div class="flex items-center justify-center py-10 text-gray-500">
-                                    <i class="fa fa-spinner fa-spin mr-2"></i> 加载中...
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-lg font-semibold text-gray-900">最近添加的老师</h2>
-                            </div>
-                            <div id="recent-teachers-list" class="space-y-3">
-                                <div class="flex items-center justify-center py-10 text-gray-500">
-                                    <i class="fa fa-spinner fa-spin mr-2"></i> 加载中...
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 用户管理 -->
-                <div id="users-view" class="view-content hidden">
-                    <div class="mb-6">
-                        <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-900">用户管理</h1>
-                        <p class="text-gray-600">管理系统中的所有用户</p>
-                    </div>
-
-                    <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
-                        <div class="p-4 border-b border-gray-200">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div class="relative w-full sm:w-64">
-                                    <input type="text" id="user-search" placeholder="搜索用户..."
-                                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                                    <i class="fa fa-search absolute left-3 top-3 text-gray-400"></i>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div id="users-loading" class="p-10 text-center text-gray-500">
-                            <i class="fa fa-spinner fa-spin mr-2"></i> 加载用户数据中...
-                        </div>
-                        
-                        <div id="users-error" class="p-6 text-red-500 hidden">
-                            <div class="flex items-start">
-                                <i class="fa fa-exclamation-circle mt-1 mr-3 text-xl"></i>
-                                <div>
-                                    <h3 class="font-medium">加载用户失败</h3>
-                                    <p id="users-error-message" class="mt-1 text-sm">错误信息将显示在这里</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div id="users-table-container" class="hidden">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户名</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">显示名称</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">积分</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最后签到</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
-                                    <!-- 用户数据将在这里动态加载 -->
-                                </tbody>
-                            </table>
-                            
-                            <div id="users-empty-state" class="p-10 text-center text-gray-500 hidden">
-                                <i class="fa fa-users text-4xl mb-3 opacity-30"></i>
-                                <p>没有找到用户数据</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 老师管理 -->
-                <div id="teachers-view" class="view-content hidden">
-                    <div class="mb-6">
-                        <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-900">老师管理</h1>
-                        <p class="text-gray-600">管理系统中的老师信息</p>
-                    </div>
-
-                    <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
-                        <div class="p-4 border-b border-gray-200">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div class="text-sm text-gray-500">
-                                    共 <span id="teachers-count">0</span> 位老师
-                                </div>
-                                <button id="add-teacher-button" class="btn btn-success">
-                                    <i class="fa fa-plus mr-1"></i> 添加老师
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div id="teachers-loading" class="p-10 text-center text-gray-500">
-                            <i class="fa fa-spinner fa-spin mr-2"></i> 加载老师数据中...
-                        </div>
-                        
-                        <div id="teachers-error" class="p-6 text-red-500 hidden">
-                            <div class="flex items-start">
-                                <i class="fa fa-exclamation-circle mt-1 mr-3 text-xl"></i>
-                                <div>
-                                    <h3 class="font-medium">加载老师失败</h3>
-                                    <p id="teachers-error-message" class="mt-1 text-sm">错误信息将显示在这里</p>
-                                    <div class="mt-3">
-                                        <button onclick="fixTablePermissions('teachers')" class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded hover:bg-blue-200">
-                                            <i class="fa fa-wrench mr-1"></i> 修复权限问题
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div id="teachers-table-container" class="hidden">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">花名</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">年龄</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">地区</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="teachers-table-body" class="bg-white divide-y divide-gray-200">
-                                    <!-- 老师数据将在这里动态加载 -->
-                                </tbody>
-                            </table>
-                            
-                            <div id="teachers-empty-state" class="p-10 text-center text-gray-500 hidden">
-                                <i class="fa fa-user-md text-4xl mb-3 opacity-30"></i>
-                                <p>没有找到老师数据</p>
-                                <button id="add-first-teacher" class="mt-3 btn btn-success">
-                                    <i class="fa fa-plus mr-1"></i> 添加第一位老师
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 关键词回复管理 -->
-                <div id="keywords-view" class="view-content hidden">
-                    <div class="mb-6">
-                        <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-900">关键词回复管理</h1>
-                        <p class="text-gray-600">管理系统的关键词自动回复</p>
-                    </div>
-
-                    <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
-                        <div class="p-4 border-b border-gray-200">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div class="text-sm text-gray-500">
-                                    共 <span id="keywords-count">0</span> 个关键词
-                                </div>
-                                <button id="add-keyword-button" class="btn btn-success">
-                                    <i class="fa fa-plus mr-1"></i> 添加关键词
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div id="keywords-loading" class="p-10 text-center text-gray-500">
-                            <i class="fa fa-spinner fa-spin mr-2"></i> 加载关键词数据中...
-                        </div>
-                        
-                        <div id="keywords-error" class="p-6 text-red-500 hidden">
-                            <div class="flex items-start">
-                                <i class="fa fa-exclamation-circle mt-1 mr-3 text-xl"></i>
-                                <div>
-                                    <h3 class="font-medium">加载关键词失败</h3>
-                                    <p id="keywords-error-message" class="mt-1 text-sm">错误信息将显示在这里</p>
-                                    <div class="mt-3">
-                                        <button onclick="fixTablePermissions('keywords')" class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded hover:bg-blue-200">
-                                            <i class="fa fa-wrench mr-1"></i> 修复权限问题
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div id="keywords-table-container" class="hidden">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">关键词</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">回复内容</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="keywords-table-body" class="bg-white divide-y divide-gray-200">
-                                    <!-- 关键词数据将在这里动态加载 -->
-                                </tbody>
-                            </table>
-                            
-                            <div id="keywords-empty-state" class="p-10 text-center text-gray-500 hidden">
-                                <i class="fa fa-key text-4xl mb-3 opacity-30"></i>
-                                <p>没有找到关键词数据</p>
-                                <button id="add-first-keyword" class="mt-3 btn btn-success">
-                                    <i class="fa fa-plus mr-1"></i> 添加第一个关键词
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 禁言词管理 -->
-                <div id="banned-view" class="view-content hidden">
-                    <div class="mb-6">
-                        <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-900">禁言词管理</h1>
-                        <p class="text-gray-600">管理系统的禁言词列表</p>
-                    </div>
-
-                    <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
-                        <div class="p-4 border-b border-gray-200">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div class="text-sm text-gray-500">
-                                    共 <span id="banned-count">0</span> 个禁言词
-                                </div>
-                                <button id="add-banned-button" class="btn btn-success">
-                                    <i class="fa fa-plus mr-1"></i> 添加禁言词
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div id="banned-loading" class="p-10 text-center text-gray-500">
-                            <i class="fa fa-spinner fa-spin mr-2"></i> 加载禁言词数据中...
-                        </div>
-                        
-                        <div id="banned-error" class="p-6 text-red-500 hidden">
-                            <div class="flex items-start">
-                                <i class="fa fa-exclamation-circle mt-1 mr-3 text-xl"></i>
-                                <div>
-                                    <h3 class="font-medium">加载禁言词失败</h3>
-                                    <p id="banned-error-message" class="mt-1 text-sm">错误信息将显示在这里</p>
-                                    <div class="mt-3 flex gap-2">
-                                        <button onclick="createBannedWordsTable()" class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded hover:bg-blue-200">
-                                            <i class="fa fa-table mr-1"></i> 创建禁言词表
-                                        </button>
-                                        <button onclick="fixTablePermissions('banned_words')" class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded hover:bg-blue-200">
-                                            <i class="fa fa-wrench mr-1"></i> 修复权限
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div id="banned-table-container" class="hidden">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">禁言词</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="banned-table-body" class="bg-white divide-y divide-gray-200">
-                                    <!-- 禁言词数据将在这里动态加载 -->
-                                </tbody>
-                            </table>
-                            
-                            <div id="banned-empty-state" class="p-10 text-center text-gray-500 hidden">
-                                <i class="fa fa-ban text-4xl mb-3 opacity-30"></i>
-                                <p>没有找到禁言词数据</p>
-                                <button id="add-first-banned" class="mt-3 btn btn-success">
-                                    <i class="fa fa-plus mr-1"></i> 添加第一个禁言词
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 数据库工具 -->
-                <div id="database-view" class="view-content hidden">
-                    <div class="mb-6">
-                        <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-900">数据库工具</h1>
-                        <p class="text-gray-600">数据库修复和维护工具</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <h2 class="text-lg font-semibold mb-4 flex items-center">
-                                <i class="fa fa-magic text-purple-500 mr-2"></i> 一键修复
-                            </h2>
-                            <p class="text-gray-600 mb-4">自动检测并修复所有数据库问题，包括表缺失和权限问题</p>
-                            <button id="one-click-fix" class="btn btn-primary">
-                                <i class="fa fa-wrench mr-1"></i> 执行一键修复
-                            </button>
-                        </div>
-                        
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <h2 class="text-lg font-semibold mb-4 flex items-center">
-                                <i class="fa fa-database text-blue-500 mr-2"></i> 连接状态
-                            </h2>
-                            <div id="database-connection-info" class="space-y-2 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">数据库URL:</span>
-                                    <span id="db-url-display" class="truncate max-w-[200px]">未配置</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">连接状态:</span>
-                                    <span id="db-status-display" class="text-yellow-500">未知</span>
-                                </div>
-                            </div>
-                            <button id="test-connection-again" class="mt-4 btn btn-outline">
-                                <i class="fa fa-refresh mr-1"></i> 重新测试连接
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-lg shadow p-6 mb-6">
-                        <h2 class="text-lg font-semibold mb-4 flex items-center">
-                            <i class="fa fa-table text-green-500 mr-2"></i> 表修复工具
-                        </h2>
-                        <p class="text-gray-600 mb-4">创建或修复系统所需的数据库表</p>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="p-4 border border-gray-200 rounded-lg">
-                                <h3 class="font-medium mb-2">banned_words 表</h3>
-                                <p class="text-sm text-gray-600 mb-3">创建或修复禁言词表结构</p>
-                                <button onclick="createBannedWordsTable(true)" class="btn btn-outline text-sm">
-                                    <i class="fa fa-wrench mr-1"></i> 创建/修复表
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h2 class="text-lg font-semibold mb-4 flex items-center">
-                            <i class="fa fa-key text-orange-500 mr-2"></i> 权限修复工具
-                        </h2>
-                        <p class="text-gray-600 mb-4">修复数据库表的访问权限问题</p>
-                        
-                        <div class="mb-4">
-                            <h3 class="font-medium mb-3">批量修复</h3>
-                            <button onclick="fixTablePermissions('all')" class="btn btn-outline">
-                                <i class="fa fa-shield mr-1"></i> 修复所有表权限
-                            </button>
-                        </div>
-                        
-                        <div>
-                            <h3 class="font-medium mb-3">单独修复</h3>
-                            <div class="flex flex-wrap gap-2">
-                                <button onclick="fixTablePermissions('users')" class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-100">
-                                    users 表
-                                </button>
-                                <button onclick="fixTablePermissions('teachers')" class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-100">
-                                    teachers 表
-                                </button>
-                                <button onclick="fixTablePermissions('keywords')" class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-100">
-                                    keywords 表
-                                </button>
-                                <button onclick="fixTablePermissions('banned_words')" class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-100">
-                                    banned_words 表
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 系统设置 -->
-                <div id="settings-view" class="view-content hidden">
-                    <div class="mb-6">
-                        <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-900">系统设置</h1>
-                        <p class="text-gray-600">管理系统的配置选项</p>
-                    </div>
-
-                    <div class="bg-white rounded-lg shadow p-6 mb-6">
-                        <h2 class="text-lg font-semibold mb-4">数据库配置</h2>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label for="settings-db-url" class="block text-sm font-medium text-gray-700 mb-1">数据库URL <span class="text-red-500">*</span></label>
-                                <input type="text" id="settings-db-url" 
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                       placeholder="例如: https://your-project.supabase.co">
-                            </div>
-                            
-                            <div>
-                                <label for="settings-db-key" class="block text-sm font-medium text-gray-700 mb-1">服务密钥 <span class="text-red-500">*</span></label>
-                                <input type="text" id="settings-db-key" 
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                       placeholder="输入Supabase服务密钥">
-                            </div>
-                        </div>
-                        
-                        <div class="mt-4">
-                            <button id="test-settings-connection" class="btn btn-outline mr-2">
-                                <i class="fa fa-check-circle mr-1"></i> 测试连接
-                            </button>
-                            <div id="settings-test-result" class="text-sm hidden mt-2"></div>
-                        </div>
-                        
-                        <button id="save-settings-button" class="mt-6 btn btn-primary">
-                            <i class="fa fa-save mr-1"></i> 保存配置
-                        </button>
-                    </div>
-
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h2 class="text-lg font-semibold mb-4">系统维护</h2>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <h3 class="font-medium mb-2">清除本地数据</h3>
-                                <p class="text-sm text-gray-600 mb-3">清除所有本地存储的配置和缓存数据，需要重新登录和配置</p>
-                                <button id="clear-local-data" class="btn btn-danger">
-                                    <i class="fa fa-trash mr-1"></i> 清除本地数据
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- 通用模态框背景 -->
-    <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <!-- 模态框内容将通过JS动态插入 -->
-    </div>
-
-    <!-- 通知组件 -->
-    <div id="notification" class="fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center z-50">
-        <i id="notification-icon" class="fa fa-check-circle mr-2"></i>
-        <span id="notification-message">操作成功</span>
-    </div>
-
-    <script>
-        // 系统状态管理
-        const appState = {
-            isAuthenticated: false,
-            dbConfigured: false,
-            supabase: null,
-            currentView: 'dashboard',
-            dbSettings: {
-                url: '',
-                key: ''
-            },
-            // 数据缓存
-            users: [],
-            teachers: [],
-            keywords: [],
-            bannedWords: [],
-            // 表字段映射 - 解决字段名不匹配问题
-            fieldMappings: {
-                users: {
-                    id: ['id', 'user_id', 'uid'],
-                    username: ['username', 'user_name', 'name'],
-                    displayName: ['display_name', 'nickname', 'real_name', 'full_name'],
-                    points: ['points', 'score', 'credits'],
-                    lastSignIn: ['last_sign_in', 'last_login', 'updated_at']
-                }
-            }
-        };
-
-        // DOM加载完成后初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            // 尝试从本地存储加载数据
-            loadFromLocalStorage();
-            
-            // 初始化事件监听
-            initEventListeners();
-            
-            // 根据状态决定显示哪个界面
-            if (appState.isAuthenticated) {
-                if (appState.dbConfigured) {
-                    // 已登录且数据库已配置 - 显示主应用
-                    showAppContainer();
-                    initSupabase();
-                    loadDashboardData();
-                } else {
-                    // 已登录但数据库未配置 - 显示数据库配置界面
-                    showDbConfigContainer();
-                }
-            } else {
-                // 未登录 - 显示登录界面
-                showLoginContainer();
-            }
-        });
-
-        // 从本地存储加载数据
-        function loadFromLocalStorage() {
-            try {
-                // 检查登录状态
-                const authStatus = localStorage.getItem('adminAuthenticated');
-                appState.isAuthenticated = authStatus === 'true';
-                
-                // 加载数据库设置
-                const dbSettings = localStorage.getItem('dbSettings');
-                if (dbSettings) {
-                    const parsed = JSON.parse(dbSettings);
-                    appState.dbSettings = parsed;
-                    appState.dbConfigured = !!parsed.url && !!parsed.key;
-                    
-                    // 填充到设置表单
-                    if (document.getElementById('settings-db-url')) {
-                        document.getElementById('settings-db-url').value = parsed.url || '';
-                        document.getElementById('settings-db-key').value = parsed.key || '';
-                    }
-                    
-                    if (document.getElementById('db-url')) {
-                        document.getElementById('db-url').value = parsed.url || '';
-                        document.getElementById('db-key').value = parsed.key || '';
-                    }
-                }
-            } catch (error) {
-                console.error('加载本地存储数据失败:', error);
-                // 发生错误时重置状态
-                resetLocalStorage();
-            }
-        }
-
-        // 保存数据到本地存储
-        function saveToLocalStorage() {
-            try {
-                localStorage.setItem('adminAuthenticated', appState.isAuthenticated);
-                
-                if (appState.dbSettings.url && appState.dbSettings.key) {
-                    localStorage.setItem('dbSettings', JSON.stringify(appState.dbSettings));
-                }
-            } catch (error) {
-                console.error('保存到本地存储失败:', error);
-            }
-        }
-
-        // 重置本地存储
-        function resetLocalStorage() {
-            try {
-                localStorage.removeItem('adminAuthenticated');
-                localStorage.removeItem('dbSettings');
-                appState.isAuthenticated = false;
-                appState.dbConfigured = false;
-                appState.dbSettings = { url: '', key: '' };
-            } catch (error) {
-                console.error('重置本地存储失败:', error);
-            }
-        }
-
-        // 显示登录界面
-        function showLoginContainer() {
-            document.getElementById('login-container').classList.remove('hidden');
-            document.getElementById('db-config-container').classList.add('hidden');
-            document.getElementById('app-container').classList.add('hidden');
-        }
-
-        // 显示数据库配置界面
-        function showDbConfigContainer() {
-            document.getElementById('login-container').classList.add('hidden');
-            document.getElementById('db-config-container').classList.remove('hidden');
-            document.getElementById('app-container').classList.add('hidden');
-        }
-
-        // 显示主应用界面
-        function showAppContainer() {
-            document.getElementById('login-container').classList.add('hidden');
-            document.getElementById('db-config-container').classList.add('hidden');
-            document.getElementById('app-container').classList.remove('hidden');
-            
-            // 更新数据库信息显示
-            document.getElementById('db-url-display').textContent = appState.dbSettings.url 
-                ? appState.dbSettings.url.replace('https://', '').split('.')[0] + '...' 
-                : '未配置';
-        }
-
-        // 初始化Supabase连接
-        function initSupabase() {
-            if (appState.dbSettings.url && appState.dbSettings.key && window.supabase) {
-                try {
-                    appState.supabase = window.supabase.createClient(
-                        appState.dbSettings.url,
-                        appState.dbSettings.key
-                    );
-                    
-                    // 更新连接状态显示
-                    updateConnectionStatus('connecting');
-                    
-                    // 测试连接
-                    testConnection().then(success => {
-                        updateConnectionStatus(success ? 'connected' : 'error');
-                    });
-                    
-                    return true;
-                } catch (error) {
-                    console.error('初始化Supabase失败:', error);
-                    updateConnectionStatus('error');
-                    return false;
-                }
-            }
-            
-            updateConnectionStatus('disconnected');
-            return false;
-        }
-
-        // 更新连接状态显示
-        function updateConnectionStatus(status) {
-            const statusElement = document.getElementById('db-connection-status');
-            const statusDisplay = document.getElementById('db-status-display');
-            
-            if (!statusElement || !statusDisplay) return;
-            
-            switch (status) {
-                case 'connected':
-                    statusElement.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 mr-1"></span> 已连接';
-                    statusDisplay.textContent = '已连接';
-                    statusDisplay.className = 'text-green-500';
-                    break;
-                case 'connecting':
-                    statusElement.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 mr-1 pulse"></span> 连接中';
-                    statusDisplay.textContent = '连接中';
-                    statusDisplay.className = 'text-yellow-500';
-                    break;
-                case 'error':
-                    statusElement.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500 mr-1"></span> 连接错误';
-                    statusDisplay.textContent = '连接错误';
-                    statusDisplay.className = 'text-red-500';
-                    break;
-                default:
-                    statusElement.innerHTML = '<span class="w-2 h-2 rounded-full bg-gray-500 mr-1"></span> 未连接';
-                    statusDisplay.textContent = '未连接';
-                    statusDisplay.className = 'text-gray-500';
-            }
-        }
-
-        // 测试数据库连接
-        async function testConnection() {
-            if (!appState.supabase) return false;
-            
-            try {
-                // 尝试查询一个表来测试连接
-                const { error } = await appState.supabase
-                    .from('users')
-                    .select('count', { count: 'exact', head: true });
-                
-                // 即使users表不存在也视为连接成功，因为可能是权限问题
-                return !error || error.message.includes('permission denied') || error.message.includes('Could not find the table');
-            } catch (error) {
-                console.error('测试连接失败:', error);
-                return false;
-            }
-        }
-
-        // 初始化所有事件监听
-        function initEventListeners() {
-            // 登录按钮
-            document.getElementById('login-button').addEventListener('click', handleLogin);
-            
-            // 数据库配置按钮
-            document.getElementById('test-db-connection').addEventListener('click', () => testDbConnection('db-test-result'));
-            document.getElementById('save-db-config').addEventListener('click', saveDbConfiguration);
-            
-            // 系统设置中的数据库按钮
-            document.getElementById('test-settings-connection').addEventListener('click', () => testDbConnection('settings-test-result'));
-            document.getElementById('save-settings-button').addEventListener('click', saveDbConfigurationFromSettings);
-            
-            // 数据库工具中的连接测试
-            document.getElementById('test-connection-again').addEventListener('click', async () => {
-                updateConnectionStatus('connecting');
-                const success = await testConnection();
-                updateConnectionStatus(success ? 'connected' : 'error');
-                
-                showNotification(success ? '数据库连接正常' : '数据库连接失败', success ? 'success' : 'error');
-            });
-            
-            // 退出按钮
-            document.getElementById('logout-button').addEventListener('click', handleLogout);
-            
-            // 清除本地数据按钮
-            document.getElementById('clear-local-data').addEventListener('click', handleClearLocalData);
-            
-            // 移动端菜单按钮
-            document.getElementById('mobile-menu-button').addEventListener('click', () => {
-                document.getElementById('mobile-sidebar').classList.remove('hidden');
-            });
-            
-            document.getElementById('close-mobile-menu').addEventListener('click', () => {
-                document.getElementById('mobile-sidebar').classList.add('hidden');
-            });
-            
-            // 侧边栏导航
-            document.querySelectorAll('.sidebar-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const viewId = this.getAttribute('href').substring(1);
-                    navigateToView(viewId);
-                    
-                    // 关闭移动菜单
-                    document.getElementById('mobile-sidebar').classList.add('hidden');
-                });
-            });
-            
-            // 老师管理相关按钮
-            document.getElementById('add-teacher-button').addEventListener('click', () => openTeacherModal());
-            document.getElementById('add-first-teacher').addEventListener('click', () => openTeacherModal());
-            
-            // 关键词管理相关按钮
-            document.getElementById('add-keyword-button').addEventListener('click', () => openKeywordModal());
-            document.getElementById('add-first-keyword').addEventListener('click', () => openKeywordModal());
-            
-            // 禁言词管理相关按钮
-            document.getElementById('add-banned-button').addEventListener('click', () => openBannedModal());
-            document.getElementById('add-first-banned').addEventListener('click', () => openBannedModal());
-            
-            // 用户搜索
-            document.getElementById('user-search').addEventListener('input', filterUsers);
-            
-            // 一键修复按钮
-            document.getElementById('one-click-fix').addEventListener('click', runOneClickFix);
-        }
-
-        // 处理登录
-        function handleLogin() {
-            const passwordInput = document.getElementById('login-password');
-            const password = passwordInput.value.trim();
-            const errorElement = document.getElementById('login-error');
-            
-            // 简单密码验证（实际应用中应使用更安全的验证方式）
-            if (password === 'admin123') {  // 请根据需要修改管理员密码
-                appState.isAuthenticated = true;
-                saveToLocalStorage();
-                
-                // 登录成功后显示数据库配置界面
-                showDbConfigContainer();
-                passwordInput.value = '';
-                errorElement.classList.add('hidden');
-                
-                showNotification('登录成功，请配置数据库连接');
-            } else {
-                errorElement.textContent = '密码不正确，请重试';
-                errorElement.classList.remove('hidden');
-                passwordInput.focus();
-            }
-        }
-
-        // 处理退出登录
-        function handleLogout() {
-            if (confirm('确定要退出登录吗？')) {
-                appState.isAuthenticated = false;
-                saveToLocalStorage();
-                showLoginContainer();
-                showNotification('已成功退出登录');
-            }
-        }
-
-        // 处理清除本地数据
-        function handleClearLocalData() {
-            if (confirm('确定要清除所有本地数据吗？这将重置所有设置，需要重新登录和配置数据库。')) {
-                resetLocalStorage();
-                appState.supabase = null;
-                showLoginContainer();
-                showNotification('所有本地数据已清除');
-            }
-        }
-
-        // 测试数据库连接
-        async function testDbConnection(resultElementId) {
-            const resultElement = document.getElementById(resultElementId);
-            const dbUrl = document.getElementById(resultElementId === 'db-test-result' ? 'db-url' : 'settings-db-url').value.trim();
-            const dbKey = document.getElementById(resultElementId === 'db-test-result' ? 'db-key' : 'settings-db-key').value.trim();
-            
-            if (!dbUrl || !dbKey) {
-                showTestResult(resultElement, false, '请填写数据库URL和密钥');
-                return false;
-            }
-            
-            // 显示测试中状态
-            showTestResult(resultElement, 'loading', '正在测试连接...');
-            
-            try {
-                // 创建临时连接进行测试
-                const tempSupabase = window.supabase.createClient(dbUrl, dbKey);
-                
-                // 尝试查询表结构来验证连接
-                const { error } = await tempSupabase
-                    .from('users')
-                    .select('count', { count: 'exact', head: true });
-                
-                if (!error) {
-                    showTestResult(resultElement, true, '连接成功！');
-                    return true;
-                } else if (error.message.includes('permission denied') || error.message.includes('Could not find the table')) {
-                    // 即使表不存在或没有权限，也视为连接成功
-                    showTestResult(resultElement, true, '连接成功，但可能存在权限或表结构问题');
-                    return true;
-                } else {
-                    showTestResult(resultElement, false, `连接失败: ${error.message}`);
-                    return false;
-                }
-            } catch (error) {
-                console.error('测试数据库连接失败:', error);
-                showTestResult(resultElement, false, `连接失败: ${error.message || '未知错误'}`);
-                return false;
-            }
-        }
-
-        // 显示测试结果
-        function showTestResult(element, status, message) {
-            if (!element) return;
-            
-            element.classList.remove('hidden', 'text-green-500', 'text-red-500', 'text-yellow-500');
-            
-            if (status === 'loading') {
-                element.classList.add('text-yellow-500');
-                element.innerHTML = `<i class="fa fa-spinner fa-spin mr-1"></i> ${message}`;
-            } else if (status) {
-                element.classList.add('text-green-500');
-                element.innerHTML = `<i class="fa fa-check-circle mr-1"></i> ${message}`;
-            } else {
-                element.classList.add('text-red-500');
-                element.innerHTML = `<i class="fa fa-exclamation-circle mr-1"></i> ${message}`;
-            }
-        }
-
-        // 保存数据库配置
-        function saveDbConfiguration() {
-            const dbUrl = document.getElementById('db-url').value.trim();
-            const dbKey = document.getElementById('db-key').value.trim();
-            const errorElement = document.getElementById('db-config-error');
-            
-            // 验证输入
-            if (!dbUrl) {
-                errorElement.textContent = '请输入数据库URL';
-                errorElement.classList.remove('hidden');
-                return;
-            }
-            
-            if (!dbKey) {
-                errorElement.textContent = '请输入数据库密钥';
-                errorElement.classList.remove('hidden');
-                return;
-            }
-            
-            // 检查是否是服务密钥
-            if (!dbKey.startsWith('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9')) {
-                if (!confirm('您输入的似乎不是服务密钥，这可能导致权限问题。是否继续？')) {
-                    return;
-                }
-            }
-            
-            // 保存配置
-            appState.dbSettings = { url: dbUrl, key: dbKey };
-            appState.dbConfigured = true;
-            saveToLocalStorage();
-            
-            // 初始化数据库连接
-            const initSuccess = initSupabase();
-            
-            if (initSuccess) {
-                // 连接成功，进入主应用
-                showAppContainer();
-                loadDashboardData();
-                showNotification('数据库配置已保存，连接成功');
-            } else {
-                errorElement.textContent = '数据库连接初始化失败，请检查配置';
-                errorElement.classList.remove('hidden');
-            }
-        }
-
-        // 从系统设置保存数据库配置
-        function saveDbConfigurationFromSettings() {
-            const dbUrl = document.getElementById('settings-db-url').value.trim();
-            const dbKey = document.getElementById('settings-db-key').value.trim();
-            
-            // 验证输入
-            if (!dbUrl || !dbKey) {
-                showNotification('请填写完整的数据库配置信息', 'error');
-                return;
-            }
-            
-            // 保存配置
-            appState.dbSettings = { url: dbUrl, key: dbKey };
-            appState.dbConfigured = true;
-            saveToLocalStorage();
-            
-            // 重新初始化数据库连接
-            const initSuccess = initSupabase();
-            
-            if (initSuccess) {
-                // 刷新当前视图数据
-                loadCurrentViewData();
-                showNotification('数据库配置已更新');
-            } else {
-                showNotification('数据库配置更新失败，请检查配置', 'error');
-            }
-        }
-
-        // 导航到指定视图
-        function navigateToView(viewId) {
-            // 隐藏所有视图
-            document.querySelectorAll('.view-content').forEach(view => {
-                view.classList.add('hidden');
-            });
-            
-            // 显示目标视图
-            const targetView = document.getElementById(`${viewId}-view`);
-            if (targetView) {
-                targetView.classList.remove('hidden');
-                appState.currentView = viewId;
-                
-                // 更新导航链接的活跃状态
-                document.querySelectorAll('.sidebar-link').forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === `#${viewId}`) {
-                        link.classList.add('active');
-                    }
-                });
-                
-                // 加载视图数据
-                loadViewData(viewId);
-            }
-        }
-
-        // 加载当前视图的数据
-        function loadCurrentViewData() {
-            loadViewData(appState.currentView);
-        }
-
-        // 加载指定视图的数据
-        function loadViewData(viewId) {
-            switch (viewId) {
-                case 'dashboard':
-                    loadDashboardData();
-                    break;
-                case 'users':
-                    loadUsersData();
-                    break;
-                case 'teachers':
-                    loadTeachersData();
-                    break;
-                case 'keywords':
-                    loadKeywordsData();
-                    break;
-                case 'banned':
-                    loadBannedWordsData();
-                    break;
-                // 其他视图可能不需要初始数据加载
-            }
-        }
-
-        // 显示通知
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            const iconElement = document.getElementById('notification-icon');
-            const messageElement = document.getElementById('notification-message');
-            
-            // 设置通知类型
-            notification.className = 'fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center z-50';
-            iconElement.className = '';
-            
-            if (type === 'success') {
-                notification.classList.add('bg-green-500', 'text-white');
-                iconElement.classList.add('fa', 'fa-check-circle', 'mr-2');
-            } else if (type === 'error') {
-                notification.classList.add('bg-red-500', 'text-white');
-                iconElement.classList.add('fa', 'fa-exclamation-circle', 'mr-2');
-            } else if (type === 'info') {
-                notification.classList.add('bg-blue-500', 'text-white');
-                iconElement.classList.add('fa', 'fa-info-circle', 'mr-2');
-            } else if (type === 'warning') {
-                notification.classList.add('bg-yellow-500', 'text-white');
-                iconElement.classList.add('fa', 'fa-exclamation-triangle', 'mr-2');
-            }
-            
-            // 设置消息并显示
-            messageElement.textContent = message;
-            notification.classList.remove('translate-y-20', 'opacity-0');
-            
-            // 3秒后隐藏
-            setTimeout(() => {
-                notification.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
-
-        // 获取用户字段值（支持多种可能的字段名）
-        function getUserField(user, fieldType) {
-            const possibleFields = appState.fieldMappings.users[fieldType];
-            if (!possibleFields || !user) return null;
-            
-            for (const field of possibleFields) {
-                if (user.hasOwnProperty(field)) {
-                    return user[field];
-                }
-            }
-            return null;
-        }
-
-        // 格式化日期
-        function formatDate(dateString) {
-            if (!dateString) return '从未';
-            
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleString('zh-CN', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            } catch (error) {
-                return dateString;
-            }
-        }
-
-        // 截断文本
-        function truncateText(text, maxLength) {
-            if (!text || text.length <= maxLength) return text;
-            return text.substring(0, maxLength) + '...';
-        }
-
-        // 加载仪表盘数据
-        async function loadDashboardData() {
-            if (!appState.supabase) {
-                showNotification('数据库未连接，请检查配置', 'error');
-                return;
-            }
-            
-            try {
-                // 并行加载所有需要的数据
-                const [
-                    usersResult,
-                    teachersResult,
-                    keywordsResult,
-                    bannedResult
-                ] = await Promise.all([
-                    appState.supabase.from('users').select('*'),
-                    appState.supabase.from('teachers').select('*').catch(err => ({ data: [], error: err })),
-                    appState.supabase.from('keywords').select('*').catch(err => ({ data: [], error: err })),
-                    appState.supabase.from('banned_words').select('*').catch(err => ({ data: [], error: err }))
-                ]);
-                
-                // 处理用户数据
-                if (usersResult.error) {
-                    console.warn('获取用户数据时出错:', usersResult.error);
-                    appState.users = [];
-                } else {
-                    appState.users = usersResult.data || [];
-                }
-                
-                // 处理老师数据
-                if (teachersResult.error) {
-                    console.warn('获取老师数据时出错:', teachersResult.error);
-                    appState.teachers = [];
-                } else {
-                    appState.teachers = teachersResult.data || [];
-                }
-                
-                // 处理关键词数据
-                if (keywordsResult.error) {
-                    console.warn('获取关键词数据时出错:', keywordsResult.error);
-                    appState.keywords = [];
-                } else {
-                    appState.keywords = keywordsResult.data || [];
-                }
-                
-                // 处理禁言词数据
-                if (bannedResult.error) {
-                    console.warn('获取禁言词数据时出错:', bannedResult.error);
-                    appState.bannedWords = [];
-                } else {
-                    appState.bannedWords = bannedResult.data || [];
-                }
-                
-                // 更新统计数据
-                updateDashboardStats();
-                
-                // 更新排行榜和最近列表
-                updateTopUsersList();
-                updateRecentTeachersList();
-                
-            } catch (error) {
-                console.error('加载仪表盘数据失败:', error);
-                showNotification('加载数据失败，请稍后重试', 'error');
-            }
-        }
-
-        // 更新仪表盘统计数据
-        function updateDashboardStats() {
-            document.getElementById('stat-total-users').textContent = appState.users.length;
-            document.getElementById('stat-total-teachers').textContent = appState.teachers.length;
-            document.getElementById('stat-total-keywords').textContent = appState.keywords.length;
-            document.getElementById('stat-total-banned').textContent = appState.bannedWords.length;
-        }
-
-        // 更新积分排名前10用户列表
-        function updateTopUsersList() {
-            const container = document.getElementById('top-users-list');
-            
-            // 按积分排序
-            const sortedUsers = [...appState.users].sort((a, b) => {
-                const pointsA = getUserField(a, 'points') || 0;
-                const pointsB = getUserField(b, 'points') || 0;
-                return pointsB - pointsA;
-            }).slice(0, 10);
-            
-            if (sortedUsers.length === 0) {
-                container.innerHTML = '<div class="text-center py-6 text-gray-500">没有用户数据</div>';
-                return;
-            }
-            
-            container.innerHTML = sortedUsers.map((user, index) => {
-                // 前三名显示特殊样式
-                let badgeClass = 'bg-gray-100 text-gray-800';
-                if (index === 0) badgeClass = 'bg-yellow-100 text-yellow-800';
-                else if (index === 1) badgeClass = 'bg-gray-200 text-gray-800';
-                else if (index === 2) badgeClass = 'bg-orange-100 text-orange-800';
-                
-                return `
-                <div class="flex items-center p-3 border-b last:border-0">
-                    <div class="badge ${badgeClass} w-6 h-6 flex items-center justify-center mr-3">
-                        ${index + 1}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="font-medium truncate">${getUserField(user, 'username') || '未知用户'}</div>
-                        <div class="text-sm text-gray-500 truncate">${getUserField(user, 'displayName') || '-'}</div>
-                    </div>
-                    <div class="ml-4 font-medium">${getUserField(user, 'points') || 0} 积分</div>
-                </div>
-                `;
-            }).join('');
-        }
-
-        // 更新最近添加的老师列表
-        function updateRecentTeachersList() {
-            const container = document.getElementById('recent-teachers-list');
-            
-            // 按创建时间排序
-            const sortedTeachers = [...appState.teachers].sort((a, b) => {
-                return new Date(b.created_at || 0) - new Date(a.created_at || 0);
-            }).slice(0, 5);
-            
-            if (sortedTeachers.length === 0) {
-                container.innerHTML = '<div class="text-center py-6 text-gray-500">没有老师数据</div>';
-                return;
-            }
-            
-            container.innerHTML = sortedTeachers.map(teacher => {
-                let statusClass = 'bg-gray-100 text-gray-800';
-                let statusText = '未知';
-                
-                if (teacher.status === 'approved') {
-                    statusClass = 'bg-green-100 text-green-800';
-                    statusText = '已通过';
-                } else if (teacher.status === 'pending') {
-                    statusClass = 'bg-yellow-100 text-yellow-800';
-                    statusText = '待审核';
-                } else if (teacher.status === 'rejected') {
-                    statusClass = 'bg-red-100 text-red-800';
-                    statusText = '已拒绝';
-                }
-                
-                return `
-                <div class="flex items-center p-3 border-b last:border-0">
-                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                        <i class="fa fa-user-md text-blue-600"></i>
-                    </div>
-                    <div class="flex-1">
-                        <div class="font-medium">${teacher.nickname || '未知'}</div>
-                        <div class="text-sm text-gray-500">${teacher.region || '未知地区'} · ${formatDate(teacher.created_at)}</div>
-                    </div>
-                    <span class="badge ${statusClass}">${statusText}</span>
-                </div>
-                `;
-            }).join('');
-        }
-
-        // 加载用户数据
-        async function loadUsersData() {
-            if (!appState.supabase) {
-                showNotification('数据库未连接，请检查配置', 'error');
-                return;
-            }
-            
-            // 显示加载状态
-            document.getElementById('users-loading').classList.remove('hidden');
-            document.getElementById('users-table-container').classList.add('hidden');
-            document.getElementById('users-error').classList.add('hidden');
-            document.getElementById('users-empty-state').classList.add('hidden');
-            
-            try {
-                // 尝试按积分排序，如果失败则按ID排序
-                let { data, error } = await appState.supabase
-                    .from('users')
-                    .select('*')
-                    .order('points', { ascending: false });
-                
-                // 如果按积分排序失败，尝试按ID排序
-                if (error) {
-                    ({ data, error } = await appState.supabase
-                        .from('users')
-                        .select('*')
-                        .order('id', { ascending: false }));
-                }
-                
-                if (error) throw error;
-                
-                appState.users = data || [];
-                
-                // 隐藏加载状态，显示表格
-                document.getElementById('users-loading').classList.add('hidden');
-                
-                if (appState.users.length === 0) {
-                    document.getElementById('users-empty-state').classList.remove('hidden');
-                } else {
-                    document.getElementById('users-table-container').classList.remove('hidden');
-                    renderUsersTable();
-                }
-                
-            } catch (error) {
-                console.error('加载用户数据失败:', error);
-                
-                // 显示错误状态
-                document.getElementById('users-loading').classList.add('hidden');
-                document.getElementById('users-error').classList.remove('hidden');
-                document.getElementById('users-error-message').textContent = error.message;
-            }
-        }
-
-        // 渲染用户表格
-        function renderUsersTable(users = null) {
-            const usersToRender = users || appState.users;
-            const tableBody = document.getElementById('users-table-body');
-            
-            if (usersToRender.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="px-6 py-10 text-center text-gray-500">
-                            没有找到用户数据
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tableBody.innerHTML = usersToRender.map(user => `
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap">${getUserField(user, 'id') || 'N/A'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${getUserField(user, 'username') || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${getUserField(user, 'displayName') || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${getUserField(user, 'points') || 0}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${formatDate(getUserField(user, 'lastSignIn'))}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <button onclick="openUserModal('${getUserField(user, 'id') || ''}')" class="text-blue-500 hover:text-blue-700 mr-3">
-                            <i class="fa fa-pencil"></i> 编辑
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // 过滤用户
-        function filterUsers() {
-            const searchTerm = document.getElementById('user-search').value.toLowerCase().trim();
-            
-            if (!searchTerm) {
-                renderUsersTable();
-                return;
-            }
-            
-            const filteredUsers = appState.users.filter(user => {
-                const username = getUserField(user, 'username') || '';
-                const displayName = getUserField(user, 'displayName') || '';
-                return username.toLowerCase().includes(searchTerm) || 
-                       displayName.toLowerCase().includes(searchTerm);
-            });
-            
-            renderUsersTable(filteredUsers);
-        }
-
-        // 加载老师数据
-        async function loadTeachersData() {
-            if (!appState.supabase) {
-                showNotification('数据库未连接，请检查配置', 'error');
-                return;
-            }
-            
-            // 显示加载状态
-            document.getElementById('teachers-loading').classList.remove('hidden');
-            document.getElementById('teachers-table-container').classList.add('hidden');
-            document.getElementById('teachers-error').classList.add('hidden');
-            document.getElementById('teachers-empty-state').classList.add('hidden');
-            
-            try {
-                const { data, error } = await appState.supabase
-                    .from('teachers')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (error) throw error;
-                
-                appState.teachers = data || [];
-                
-                // 更新计数
-                document.getElementById('teachers-count').textContent = appState.teachers.length;
-                
-                // 隐藏加载状态，显示表格
-                document.getElementById('teachers-loading').classList.add('hidden');
-                
-                if (appState.teachers.length === 0) {
-                    document.getElementById('teachers-empty-state').classList.remove('hidden');
-                } else {
-                    document.getElementById('teachers-table-container').classList.remove('hidden');
-                    renderTeachersTable();
-                }
-                
-            } catch (error) {
-                console.error('加载老师数据失败:', error);
-                
-                // 显示错误状态
-                document.getElementById('teachers-loading').classList.add('hidden');
-                document.getElementById('teachers-error').classList.remove('hidden');
-                document.getElementById('teachers-error-message').textContent = error.message;
-                document.getElementById('teachers-count').textContent = '0';
-            }
-        }
-
-        // 渲染老师表格
-        function renderTeachersTable() {
-            const tableBody = document.getElementById('teachers-table-body');
-            
-            if (appState.teachers.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="px-6 py-10 text-center text-gray-500">
-                            没有找到老师数据
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tableBody.innerHTML = appState.teachers.map(teacher => {
-                let statusClass = 'bg-gray-100 text-gray-800';
-                let statusText = '未知';
-                
-                switch (teacher.status) {
-                    case 'pending':
-                        statusClass = 'bg-yellow-100 text-yellow-800';
-                        statusText = '待审核';
-                        break;
-                    case 'approved':
-                        statusClass = 'bg-green-100 text-green-800';
-                        statusText = '已通过';
-                        break;
-                    case 'rejected':
-                        statusClass = 'bg-red-100 text-red-800';
-                        statusText = '已拒绝';
-                        break;
-                }
-                
-                return `
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap">${teacher.id || 'N/A'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${teacher.nickname || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${teacher.age || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${teacher.region || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="badge ${statusClass}">${statusText}</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <button onclick="openTeacherModal('${teacher.id || ''}')" class="text-blue-500 hover:text-blue-700 mr-3">
-                            <i class="fa fa-pencil"></i> 编辑
-                        </button>
-                        <button onclick="deleteTeacher('${teacher.id || ''}')" class="text-red-500 hover:text-red-700">
-                            <i class="fa fa-trash"></i> 删除
-                        </button>
-                    </td>
-                </tr>
-                `;
-            }).join('');
-        }
-
-        // 打开老师编辑模态框
-        function openTeacherModal(teacherId = null) {
-            const modalBackdrop = document.getElementById('modal-backdrop');
-            let title = '添加老师';
-            let isEdit = false;
-            let teacher = null;
-            
-            if (teacherId) {
-                title = '编辑老师';
-                isEdit = true;
-                teacher = appState.teachers.find(t => t.id === teacherId);
-            }
-            
-            // 构建模态框内容
-            const modalContent = `
-            <div class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                <div class="p-6 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold">${title}</h3>
-                </div>
-                <div class="p-6">
-                    <input type="hidden" id="teacher-id" value="${teacherId || ''}">
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label for="teacher-nickname" class="block text-sm font-medium text-gray-700 mb-1">花名 <span class="text-red-500">*</span></label>
-                            <input type="text" id="teacher-nickname" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                   value="${teacher ? teacher.nickname || '' : ''}" placeholder="请输入老师花名">
-                        </div>
-                        
-                        <div>
-                            <label for="teacher-age" class="block text-sm font-medium text-gray-700 mb-1">年龄</label>
-                            <input type="number" id="teacher-age" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                   value="${teacher ? teacher.age || '' : ''}" placeholder="请输入年龄">
-                        </div>
-                        
-                        <div>
-                            <label for="teacher-region" class="block text-sm font-medium text-gray-700 mb-1">地区</label>
-                            <input type="text" id="teacher-region" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                   value="${teacher ? teacher.region || '' : ''}" placeholder="请输入地区">
-                        </div>
-                        
-                        <div>
-                            <label for="teacher-telegram" class="block text-sm font-medium text-gray-700 mb-1">Telegram账号</label>
-                            <input type="text" id="teacher-telegram" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                   value="${teacher ? teacher.telegram || '' : ''}" placeholder="请输入Telegram账号">
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="teacher-channel" class="block text-sm font-medium text-gray-700 mb-1">频道链接</label>
-                        <input type="text" id="teacher-channel" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                               value="${teacher ? teacher.channel || '' : ''}" placeholder="请输入频道链接">
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="teacher-status" class="block text-sm font-medium text-gray-700 mb-1">状态</label>
-                        <select id="teacher-status" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                            <option value="pending" ${(!isEdit || (teacher && teacher.status === 'pending')) ? 'selected' : ''}>待审核</option>
-                            <option value="approved" ${(teacher && teacher.status === 'approved') ? 'selected' : ''}>已通过</option>
-                            <option value="rejected" ${(teacher && teacher.status === 'rejected') ? 'selected' : ''}>已拒绝</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label for="teacher-intro" class="block text-sm font-medium text-gray-700 mb-1">自我介绍</label>
-                        <textarea id="teacher-intro" rows="4"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                  placeholder="请输入老师的自我介绍">${teacher ? teacher.intro || '' : ''}</textarea>
-                    </div>
-                    
-                    <div class="flex justify-end space-x-3">
-                        <button onclick="closeModal()" class="btn btn-outline">
-                            取消
-                        </button>
-                        <button onclick="saveTeacher()" class="btn btn-primary">
-                            保存
-                        </button>
-                    </div>
-                </div>
-            </div>
-            `;
-            
-            // 显示模态框
-            modalBackdrop.innerHTML = modalContent;
-            modalBackdrop.classList.remove('hidden');
-        }
-
-        // 保存老师信息
-        async function saveTeacher() {
-            if (!appState.supabase) {
-                showNotification('数据库未连接，请检查配置', 'error');
-                closeModal();
-                return;
-            }
-            
-            const teacherId = document.getElementById('teacher-id').value;
-            const nickname = document.getElementById('teacher-nickname').value.trim();
-            const age = document.getElementById('teacher-age').value.trim();
-            const region = document.getElementById('teacher-region').value.trim();
-            const telegram = document.getElementById('teacher-telegram').value.trim();
-            const channel = document.getElementById('teacher-channel').value.trim();
-            const status = document.getElementById('teacher-status').value;
-            const intro = document.getElementById('teacher-intro').value.trim();
-            
-            // 验证必要字段
-            if (!nickname) {
-                showNotification('请输入老师花名', 'error');
-                return;
-            }
-            
-            // 构建老师数据
-            const teacherData = {
-                nickname,
-                age: age ? parseInt(age) : null,
-                region,
-                telegram,
-                channel,
-                status,
-                intro,
-                updated_at: new Date().toISOString()
-            };
-            
-            try {
-                if (teacherId) {
-                    // 更新现有老师
-                    const { error } = await appState.supabase
-                        .from('teachers')
-                        .update(teacherData)
-                        .eq('id', teacherId);
-                        
-                    if (error) throw error;
-                    
-                    // 更新本地缓存
-                    const index = appState.teachers.findIndex(t => t.id === teacherId);
-                    if (index !== -1) {
-                        appState.teachers[index] = { ...appState.teachers[index], ...teacherData };
-                    }
-                    
-                    showNotification('老师信息已更新');
-                } else {
-                    // 添加新老师
-                    const newTeacher = {
-                        ...teacherData,
-                        id: Date.now().toString(),
-                        created_at: new Date().toISOString()
-                    };
-                    
-                    const { error } = await appState.supabase
-                        .from('teachers')
-                        .insert([newTeacher]);
-                        
-                    if (error) throw error;
-                    
-                    // 更新本地缓存
-                    appState.teachers.unshift(newTeacher);
-                    showNotification('新老师已添加');
-                }
-                
-                // 关闭模态框并刷新数据
-                closeModal();
-                loadTeachersData();
-                updateDashboardStats();
-                updateRecentTeachersList();
-                
-            } catch (error) {
-                console.error('保存老师信息失败:', error);
-                let message = `保存失败: ${error.message}`;
-                
-                if (error.message.includes('permission denied')) {
-                    message += '，请使用数据库工具修复权限';
-                }
-                
-                showNotification(message, 'error');
-            }
-        }
-
-        // 删除老师
-        async function deleteTeacher(teacherId) {
-            if (!confirm('确定要删除这位老师吗？此操作不可恢复。')) {
-                return;
-            }
-            
-            if (!appState.supabase) {
-                showNotification('数据库未连接，请检查配置', 'error');
-                return;
-            }
-            
-            try {
-                const { error } = await appState.supabase
-                    .from('teachers')
-                    .delete()
-                    .eq('id', teacherId);
-                    
-                if (error) throw error;
-                
-                // 更新本地缓存
-                appState.teachers = appState.teachers.filter(t => t.id !== teacherId);
-                
-                // 刷新数据
-                renderTeachersTable();
-                document.getElementById('teachers-count').textContent = appState.teachers.length;
-                
-                // 如果没有数据了，显示空状态
-                if (appState.teachers.length === 0) {
-                    document.getElementById('teachers-table-container').classList.add('hidden');
-                    document.getElementById('teachers-empty-state').classList.remove('hidden');
-                }
-                
-                showNotification('老师已删除');
-                updateDashboardStats();
-                updateRecentTeachersList();
-                
-            } catch (error) {
-                console.error('删除老师失败:', error);
-                showNotification(`删除失败: ${error.message}`, 'error');
-            }
-        }
-
-        // 加载关键词数据
-        async function loadKeywordsData() {
-            if (!appState.supabase) {
-                showNotification('数据库未连接，请检查配置', 'error');
-                return;
-            }
-            
-            // 显示加载状态
-            document.getElementById('keywords-loading').classList.remove('hidden');
-            document.getElementById('keywords-table-container').classList.add('hidden');
-            document.getElementById('keywords-error').classList.add('hidden');
-            document.getElementById('keywords-empty-state').classList.add('hidden');
-            
-            try {
-                const { data, error } = await appState.supabase
-                    .from('keywords')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (error) throw error;
-                
-                appState.keywords = data || [];
-                
-                // 更新计数
-                document.getElementById('keywords-count').textContent = appState.keywords.length;
-                
-                // 隐藏加载状态，显示表格
-                document.getElementById('keywords-loading').classList.add('hidden');
-                
-                if (appState.keywords.length === 0) {
-                    document.getElementById('keywords-empty-state').classList.remove('hidden');
-                } else {
-                    document.getElementById('keywords-table-container').classList.remove('hidden');
-                    renderKeywordsTable();
-                }
-                
-            } catch (error) {
-                console.error('加载关键词数据失败:', error);
-                
-                // 显示错误状态
-                document.getElementById('keywords-loading').classList.add('hidden');
-                document.getElementById('keywords-error').classList.remove('hidden');
-                document.getElementById('keywords-error-message').textContent = error.message;
-                document.getElementById('keywords-count').textContent = '0';
-            }
-        }
-
-        // 渲染关键词表格
-        function renderKeywordsTable() {
-            const tableBody = document.getElementById('keywords-table-body');
-            
-            if (appState.keywords.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="px-6 py-10 text-center text-gray-500">
-                            没有找到关键词数据
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tableBody.innerHTML = appState.keywords.map(keyword => {
-                const statusClass = keyword.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
-                const statusText = keyword.active ? '启用' : '禁用';
-                
-                return `
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap font-medium">${keyword.text || '-'}</td>
-                    <td class="px-6 py-4">${truncateText(keyword.response || '', 60)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="badge ${statusClass}">${statusText}</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <button onclick="openKeywordModal('${keyword.id || ''}')" class="text-blue-500 hover:text-blue-700 mr-3">
-                            <i class="fa fa-pencil"></i> 编辑
-                        </button>
-                        <button onclick="deleteKeyword('${keyword.id || ''}')" class="text-red-500 hover:text-red-700">
-                            <i class="fa fa-trash"></i> 删除
-                        </button>
-                    </td>
-                </tr>
-                `;
-            }).join('');
-        }
-
-        // 打开关键词编辑模态框
-        function openKeywordModal(keywordId = null) {
-            const modalBackdrop = document.getElementById('modal-backdrop');
-            let title = '添加关键词';
-            let isEdit = false;
-            let keyword = null;
-            
-            if (keywordId) {
-                title = '编辑关键词';
-                isEdit = true;
-                keyword = appState.keywords.find(k => k.id === keywordId);
-            }
-            
-            // 构建模态框内容
-            const modalContent = `
-            <div class="bg-white rounded-lg w-full max-w-2xl">
-                <div class="p-6 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold">${title}</h3>
-                </div>
-                <div class="p-6">
-                    <input type="hidden" id="keyword-id" value="${keywordId || ''}">
-                    
-                    <div class="mb-4">
-                        <label for="keyword-text" class="block text-sm font-medium text-gray-700 mb-1">关键词 <span class="text-red-500">*</span></label>
-                        <input type="text" id="keyword-text" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                               value="${keyword ? keyword.text || '' : ''}" placeholder="请输入关键词">
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="keyword-response" class="block text-sm font-medium text-gray-700 mb-1">回复内容 <span class="text-red-500">*</span></label>
-                        <textarea id="keyword-response" rows="4"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                  placeholder="请输入回复内容">${keyword ? keyword.response || '' : ''}</textarea>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" id="keyword-active" class="form-checkbox text-primary h-5 w-5" 
-                                   ${(!isEdit || (keyword && keyword.active !== false)) ? 'checked' : ''}>
-                            <span class="ml-2 text-gray-700">启用这个关键词</span>
-                        </label>
-                    </div>
-                    
-                    <div class="flex justify-end space-x-3">
-                        <button onclick="closeModal()" class="btn btn-outline">
-                            取消
-                        </button>
-                        <button onclick="saveKeyword()" class="btn btn-primary">
-                            保存
-                        </button>
-                    </div>
-                </div>
-            </div>
-            `;
-            
-            // 显示模态框
-            modalBackdrop.innerHTML = modalContent;
-            modalBackdrop.classList.remove('hidden');
-        }
-
-        // 保存关键词
-        async function saveKeyword() {
-            if (!appState.supabase) {
-                showNotification('数据库未连接，请检查配置', 'error');
-                closeModal();
-                return;
-            }
-            
-            const keywordId = document.getElementById('keyword-id').value;
-            const text = document.getElementById('keyword-text').value.trim();
-            const response = document.getElementById('keyword-response').value.trim();
-            const active = document.getElementById('keyword-active').checked;
-            
-            // 验证必要字段
-            if (!text) {
-                showNotification('请输入关键词', 'error');
-                return;
-            }
-            
-            if (!response) {
-                showNotification('请输入回复内容', 'error');
-                return;
-            }
-            
-            // 构建关键词数据
-            const keywordData = {
-                text,
-                response,
-                active,
-                updated_at: new Date().toISOString()
-            };
-            
-            try {
-                if (keywordId) {
-                    // 更新现有关键词
-                    const { error } = await appState.supabase
-                        .from('keywords')
-                        .update(keywordData)
-                        .eq('id', keywordId);
-                        
-                    if (error) throw error;
-                    
-                    // 更新本地缓存
-                    const index = appState.keywords.findIndex(k => k.id === keywordId);
-                    if (index !== -1) {
-                        appState.keywords[index] = { ...appState.keywords[index], ...keywordData };
-                    }
-                    
-                    showNotification('关键词已更新');
-                } else {
-                    // 添加新关键词
-                    const newKeyword = {
-                        ...keywordData,
-                        id: Date.now().toString(),
-                        created_at: new Date().toISOString()
-                    };
-                    
-                    const { error } = await appState.supabase
-                        .from('keywords')
-                        .insert([newKeyword]);
-                        
-                    if (error) throw error;
-                    
-                    // 更新本地缓存
-                    appState.keywords.unshift(newKeyword);
-                    showNotification('新关键词已添加');
-                }
-                
-                // 关闭模态框并刷新数据
-                closeModal();
-                loadKeywordsData();
-                updateDashboardStats();
-                
-            } catch (error) {
-                console.error('保存关键词失败:', error);
-                let message = `保存失败: ${error.message}`;
-                
-                if (error.message.includes('permission denied')) {
-                    message += '，请使用数据库工具修复权限';
-                }
-                
-                showNotification(message, 'error');
-            }
-        }
-
-        // 删除关键词
-        async function deleteKeyword(keywordId) {
-            if (!confirm('确定要删除这个关键词吗？此操作不可恢复。')) {
-                return;
-            }
-            
-            if (!appState.supabase) {
-                showNotification('数据库未连接，请检查配置', 'error');
-                return;
-            }
-            
-            try {
-                const { error } = await appState.supabase
-                    .from('keywords')
-                    .delete()
-                    .eq('id', keywordId);
-                    
-                if (error) throw error;
-                
-                // 更新本地缓存
-                appState.keywords = appState.keywords.filter(k => k.id !== keywordId);
-                
-                // 刷新数据
-                renderKeywordsTable();
-                document.getElementById('keywords-count').textContent = appState.keywords.length;
-                
-                // 如果没有数据了，显示空状态
-                if (appState.keywords.length === 0) {
-                    document.getElementById('keywords-table-container').classList.add('hidden');
-                    document.getElementById('keywords-empty-state').classList.remove('hidden');
-                }
-                
-                showNotification('关键词已删除');
-                updateDashboardStats();
-                
-            } catch (error) {
-                console.error('删除关键词失败:', error);
-                showNotification(`删除失败: ${error.message}`, 'error');
-            }
-        }
-
-        // 加载禁言词数据
-        async function loadBannedWordsData() {
-            if (!appState.supabase) {
-                showNotification('数据库未连接，请检查配置', 'error');
-                return;
-            }
-            
-            // 显示加载状态
-            document.getElementById('banned-loading').classList.remove('hidden');
-            document.getElementById('banned-table-container').classList.add('hidden');
-            document.getElementById('banned-error').classList.add('hidden');
-            document.getElementById('banned-empty-state').classList.add('hidden');
-            
-            try {
-                const { data, error } = await appState.supabase
-                    .from('banned_words')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (error) {
-                    // 如果是表不存在的错误，特殊处理
-                    if (error.message.includes('Could not find the table')) {
-                        document.getElementById('banned-loading').classList.add('hidden');
-                        document.getElementById('banned-error').classList.remove('hidden');
-                        document.getElementById('banned-error-message').textContent = error.message;
-                        document.getElementById('banned-count').textContent = '0';
-                        return;
-                    } else {
-                        throw error;
-                    }
-                }
-                
-                appState.bannedWords = data || [];
-                
-                // 更新计数
-                document.getElementById('banned-count').textContent = appState.bannedWords.length;
-                
-                // 隐藏加载状态，显示表格
-                document.getElementById('banned-loading').classList.add('hidden');
-                
-                if (appState.bannedWords.length === 0) {
-                    document.getElementById('banned-empty-state').classList.remove('hidden');
-                } else {
-                    document.getElementById('banned-table-container').classList.remove('hidden');
-                    renderBannedWordsTable();
-                }
-                
-            } catch (error) {
-                console.error('加载禁言词数据失败:', error);
-                
-                // 显示错误状态
-                document.getElementById('banned-loading').classList.add('hidden');
-                document.getElementById('banned-error').classList.remove('hidden');
-                document.getElementById('banned-error-message').textContent = error.message;
-                document.getElementById('banned-count').textContent = '0';
-            }
-        }
-
-        // 渲染禁言词表格
-        function renderBannedWordsTable() {
-            const tableBody = document.getElementById('banned-table-body');
-            
-            if (appState.bannedWords.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="2" class="px-6 py-10 text-center text-gray-500">
-                            没有找到禁言词数据
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tableBody.innerHTML = appState.bannedWords.map(banned => `
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap font-medium">${banned.word || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <button onclick="openBannedModal('${banned.id || ''}')" class="text-blue-500 hover:text-blue-700 mr-3">
-                            <i class="fa fa-pencil"></i> 编辑
-                        </button>
-                        <button onclick="deleteBannedWord('${banned.id || ''}')" class="text-red-500 hover:text-red-700">
-                            <i class="fa fa-trash"></i> 删除
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // 打开禁言词编辑模态框
-        function openBannedModal(bannedId = null) {
-            const modalBackdrop = document.getElementById('modal-backdrop');
-            let title = '添加禁言词';
-            let isEdit = false;
-            let bannedWord = null;
-            
-            if (bannedId) {
-                title = '编辑禁言词';
-                isEdit = true;
-                bannedWord = appState.bannedWords.find(b => b.id === bannedId);
-            }
-            
-            // 构建模态框内容
-            const modalContent = `
-            <div class="bg-white rounded-lg w-full max-w-md">
-                <div class="p-6 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold">${title}</h3>
-                </div>
-                <div class="p-6">
-                    <input type="hidden" id="banned-id" value="${bannedId || ''}">
-                    
-                    <div class="mb-6">
-                        <label for="banned-word" class="block text-sm font-medium text-gray-700 mb-1">禁言词 <span class="text-red-500">*</span></label>
-                        <input type="text" id="banned-word" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                               value="${bannedWord ? bannedWord.word || '' : ''}" placeholder="请输入禁言词">
-                        <p class="mt-1 text-xs text-gray-500">添加后，包含该词的消息将被拦截</p>
-                    </div>
-                    
-                    <div class="flex justify-end space-x-3">
-                        <button onclick="
+	<!DOCTYPE html>
+	<html lang="zh-CN">
+	<head>
+	    <meta charset="UTF-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	    <title>Telegram北京修车超级机器人管理后台</title>
+	    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	    <style>
+	        /* 全局样式 */
+	        * {
+	            margin: 0;
+	            padding: 0;
+	            box-sizing: border-box;
+	            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	        }
+	        body {
+	            background-color: #f5f7fa;
+	            color: #333;
+	        }
+	        .container {
+	            display: flex;
+	            min-height: 100vh;
+	        }
+	        /* 侧边栏样式 */
+	        .sidebar {
+	            width: 250px;
+	            background-color: #2c3e50;
+	            color: #ecf0f1;
+	            flex-shrink: 0;
+	            transition: all 0.3s ease;
+	        }
+	        .sidebar-header {
+	            padding: 20px;
+	            border-bottom: 1px solid #34495e;
+	        }
+	        .sidebar-header h2 {
+	            font-size: 20px;
+	            text-align: center;
+	        }
+	        .nav-menu {
+	            list-style: none;
+	            padding: 20px 0;
+	        }
+	        .nav-item {
+	            padding: 12px 20px;
+	            border-bottom: 1px solid #34495e;
+	        }
+	        .nav-item a {
+	            color: #ecf0f1;
+	            text-decoration: none;
+	            display: flex;
+	            align-items: center;
+	            transition: all 0.3s ease;
+	        }
+	        .nav-item i {
+	            margin-right: 10px;
+	            width: 20px;
+	            text-align: center;
+	        }
+	        .nav-item:hover {
+	            background-color: #34495e;
+	        }
+	        .nav-item.active {
+	            background-color: #3498db;
+	            border-left: 4px solid #2980b9;
+	        }
+	        .nav-item.logout {
+	            margin-top: auto;
+	            border-top: 1px solid #34495e;
+	            border-bottom: none;
+	        }
+	        /* 主内容区样式 */
+	        .main-content {
+	            flex: 1;
+	            display: flex;
+	            flex-direction: column;
+	        }
+	        .header {
+	            background-color: #fff;
+	            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	            padding: 15px 30px;
+	            display: flex;
+	            justify-content: space-between;
+	            align-items: center;
+	        }
+	        .header-title h1 {
+	            font-size: 24px;
+	            color: #2c3e50;
+	        }
+	        .user-info {
+	            font-size: 16px;
+	            color: #7f8c8d;
+	        }
+	        .content {
+	            flex: 1;
+	            padding: 30px;
+	            overflow-y: auto;
+	        }
+	        /* 卡片样式 */
+	        .card {
+	            background-color: #fff;
+	            border-radius: 8px;
+	            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+	            padding: 25px;
+	            margin-bottom: 20px;
+	        }
+	        .card-header {
+	            display: flex;
+	            justify-content: space-between;
+	            align-items: center;
+	            margin-bottom: 20px;
+	            padding-bottom: 15px;
+	            border-bottom: 1px solid #eee;
+	        }
+	        .card-title {
+	            font-size: 20px;
+	            font-weight: 600;
+	            color: #2c3e50;
+	        }
+	        /* 按钮样式 */
+	        .btn {
+	            padding: 10px 15px;
+	            border: none;
+	            border-radius: 4px;
+	            cursor: pointer;
+	            font-size: 14px;
+	            font-weight: 500;
+	            transition: all 0.3s ease;
+	            display: inline-flex;
+	            align-items: center;
+	        }
+	        .btn i {
+	            margin-right: 5px;
+	        }
+	        .btn-primary {
+	            background-color: #3498db;
+	            color: white;
+	        }
+	        .btn-primary:hover {
+	            background-color: #2980b9;
+	        }
+	        .btn-success {
+	            background-color: #2ecc71;
+	            color: white;
+	        }
+	        .btn-success:hover {
+	            background-color: #27ae60;
+	        }
+	        .btn-danger {
+	            background-color: #e74c3c;
+	            color: white;
+	        }
+	        .btn-danger:hover {
+	            background-color: #c0392b;
+	        }
+	        .btn-warning {
+	            background-color: #f39c12;
+	            color: white;
+	        }
+	        .btn-warning:hover {
+	            background-color: #d35400;
+	        }
+	        .btn-secondary {
+	            background-color: #95a5a6;
+	            color: white;
+	        }
+	        .btn-secondary:hover {
+	            background-color: #7f8c8d;
+	        }
+	        .btn-sm {
+	            padding: 5px 10px;
+	            font-size: 12px;
+	        }
+	        /* 表格样式 */
+	        .table-container {
+	            overflow-x: auto;
+	        }
+	        table {
+	            width: 100%;
+	            border-collapse: collapse;
+	        }
+	        th, td {
+	            padding: 12px 15px;
+	            text-align: left;
+	            border-bottom: 1px solid #eee;
+	        }
+	        th {
+	            background-color: #f8f9fa;
+	            font-weight: 600;
+	            color: #2c3e50;
+	        }
+	        tr:hover {
+	            background-color: #f8f9fa;
+	        }
+	        /* 表单样式 */
+	        .form-group {
+	            margin-bottom: 20px;
+	        }
+	        .form-group label {
+	            display: block;
+	            margin-bottom: 8px;
+	            font-weight: 500;
+	        }
+	        .form-control {
+	            width: 100%;
+	            padding: 10px 15px;
+	            border: 1px solid #ddd;
+	            border-radius: 4px;
+	            font-size: 14px;
+	        }
+	        .form-control:focus {
+	            outline: none;
+	            border-color: #3498db;
+	            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+	        }
+	        .form-actions {
+	            display: flex;
+	            justify-content: flex-end;
+	            gap: 10px;
+	        }
+	        /* 模态框样式 */
+	        .modal {
+	            display: none;
+	            position: fixed;
+	            top: 0;
+	            left: 0;
+	            width: 100%;
+	            height: 100%;
+	            background-color: rgba(0, 0, 0, 0.5);
+	            justify-content: center;
+	            align-items: center;
+	            z-index: 1000;
+	        }
+	        .modal-content {
+	            background-color: #fff;
+	            border-radius: 8px;
+	            width: 90%;
+	            max-width: 500px;
+	            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+	        }
+	        .modal-header {
+	            padding: 20px;
+	            border-bottom: 1px solid #eee;
+	        }
+	        .modal-header h2 {
+	            font-size: 20px;
+	            color: #2c3e50;
+	        }
+	        .modal-body {
+	            padding: 20px;
+	        }
+	        /* 加载样式 */
+	        .loading {
+	            display: flex;
+	            flex-direction: column;
+	            justify-content: center;
+	            align-items: center;
+	            height: 200px;
+	        }
+	        .spinner {
+	            width: 40px;
+	            height: 40px;
+	            border: 4px solid rgba(0, 0, 0, 0.1);
+	            border-radius: 50%;
+	            border-top-color: #3498db;
+	            animation: spin 1s ease-in-out infinite;
+	        }
+	        @keyframes spin {
+	            to { transform: rotate(360deg); }
+	        }
+	        /* 通知样式 */
+	        .notification-container {
+	            position: fixed;
+	            top: 20px;
+	            right: 20px;
+	            z-index: 2000;
+	        }
+	        .notification {
+	            background-color: #fff;
+	            border-radius: 4px;
+	            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+	            margin-bottom: 10px;
+	            overflow: hidden;
+	            animation: slideIn 0.3s ease-out;
+	        }
+	        .notification.fade-out {
+	            animation: fadeOut 0.3s ease-out forwards;
+	        }
+	        @keyframes slideIn {
+	            from {
+	                transform: translateX(100%);
+	                opacity: 0;
+	            }
+	            to {
+	                transform: translateX(0);
+	                opacity: 1;
+	            }
+	        }
+	        @keyframes fadeOut {
+	            from {
+	                opacity: 1;
+	            }
+	            to {
+	                opacity: 0;
+	            }
+	        }
+	        .notification-content {
+	            display: flex;
+	            justify-content: space-between;
+	            align-items: center;
+	            padding: 15px 20px;
+	        }
+	        .notification-message {
+	            flex: 1;
+	        }
+	        .notification-close {
+	            background: none;
+	            border: none;
+	            font-size: 20px;
+	            cursor: pointer;
+	            color: #7f8c8d;
+	            margin-left: 15px;
+	        }
+	        .notification-info {
+	            border-left: 4px solid #3498db;
+	        }
+	        .notification-success {
+	            border-left: 4px solid #2ecc71;
+	        }
+	        .notification-warning {
+	            border-left: 4px solid #f39c12;
+	        }
+	        .notification-error {
+	            border-left: 4px solid #e74c3c;
+	        }
+	        /* 统计卡片样式 */
+	        .stats-grid {
+	            display: grid;
+	            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+	            gap: 20px;
+	            margin-bottom: 30px;
+	        }
+	        .stat-card {
+	            background-color: #fff;
+	            border-radius: 8px;
+	            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+	            padding: 20px;
+	            display: flex;
+	            align-items: center;
+	        }
+	        .stat-icon {
+	            width: 60px;
+	            height: 60px;
+	            border-radius: 50%;
+	            display: flex;
+	            align-items: center;
+	            justify-content: center;
+	            margin-right: 20px;
+	            font-size: 24px;
+	            color: white;
+	        }
+	        .stat-card.users .stat-icon {
+	            background-color: #3498db;
+	        }
+	        .stat-card.teachers .stat-icon {
+	            background-color: #2ecc71;
+	        }
+	        .stat-card.keywords .stat-icon {
+	            background-color: #f39c12;
+	        }
+	        .stat-card.banned .stat-icon {
+	            background-color: #e74c3c;
+	        }
+	        .stat-info h3 {
+	            font-size: 28px;
+	            margin-bottom: 5px;
+	            color: #2c3e50;
+	        }
+	        .stat-info p {
+	            color: #7f8c8d;
+	            font-size: 14px;
+	        }
+	        /* 操作按钮组 */
+	        .action-buttons {
+	            display: flex;
+	            gap: 10px;
+	        }
+	        /* 状态样式 */
+	        .status-item {
+	            display: flex;
+	            margin-bottom: 15px;
+	        }
+	        .status-label {
+	            width: 150px;
+	            font-weight: 500;
+	        }
+	        .status-value {
+	            flex: 1;
+	        }
+	        .status-success {
+	            color: #2ecc71;
+	            font-weight: 500;
+	        }
+	        .status-error {
+	            color: #e74c3c;
+	            font-weight: 500;
+	        }
+	        /* 老师详情样式 */
+	        .teacher-details {
+	            display: flex;
+	            flex-direction: column;
+	            gap: 15px;
+	        }
+	        .detail-row {
+	            display: flex;
+	            align-items: flex-start;
+	        }
+	        .detail-label {
+	            width: 120px;
+	            font-weight: 500;
+	        }
+	        .detail-value {
+	            flex: 1;
+	        }
+	        .teacher-photo {
+	            max-width: 300px;
+	            max-height: 300px;
+	            border-radius: 4px;
+	        }
+	        .teacher-video {
+	            max-width: 400px;
+	            border-radius: 4px;
+	        }
+	        /* 状态徽章 */
+	        .status-badge {
+	            padding: 4px 8px;
+	            border-radius: 4px;
+	            font-size: 12px;
+	            font-weight: 500;
+	        }
+	        .status-approved {
+	            background-color: #d4edda;
+	            color: #155724;
+	        }
+	        .status-pending {
+	            background-color: #fff3cd;
+	            color: #856404;
+	        }
+	        .status-active {
+	            background-color: #d4edda;
+	            color: #155724;
+	        }
+	        .status-inactive {
+	            background-color: #f8d7da;
+	            color: #721c24;
+	        }
+	        /* 错误样式 */
+	        .error {
+	            background-color: #f8d7da;
+	            color: #721c24;
+	            padding: 20px;
+	            border-radius: 4px;
+	            text-align: center;
+	        }
+	        .error h3 {
+	            margin-bottom: 10px;
+	        }
+	        /* 快捷操作样式 */
+	        .quick-actions {
+	            display: flex;
+	            gap: 15px;
+	            flex-wrap: wrap;
+	        }
+	        /* 响应式设计 */
+	        @media (max-width: 768px) {
+	            .sidebar {
+	                width: 70px;
+	            }
+	            .sidebar-header h2,
+	            .nav-item span {
+	                display: none;
+	            }
+	            .nav-item i {
+	                margin: 0;
+	                font-size: 18px;
+	            }
+	            .header {
+	                padding: 10px 15px;
+	            }
+	            .content {
+	                padding: 15px;
+	            }
+	            .stats-grid {
+	                grid-template-columns: 1fr;
+	            }
+	            .table-container {
+	                font-size: 14px;
+	            }
+	            th, td {
+	                padding: 8px 10px;
+	            }
+	            .action-buttons {
+	                flex-direction: column;
+	            }
+	        }
+	    </style>
+	</head>
+	<body>
+	    <div class="container">
+	        <!-- 侧边栏 -->
+	        <div class="sidebar">
+	            <div class="sidebar-header">
+	                <h2>管理后台</h2>
+	            </div>
+	            <ul class="nav-menu">
+	                <li class="nav-item active" data-page="dashboard">
+	                    <a href="#"><i class="fas fa-tachometer-alt"></i> 仪表盘</a>
+	                </li>
+	                <li class="nav-item" data-page="users">
+	                    <a href="#"><i class="fas fa-users"></i> 用户管理</a>
+	                </li>
+	                <li class="nav-item" data-page="teachers">
+	                    <a href="#"><i class="fas fa-user-tie"></i> 老师管理</a>
+	                </li>
+	                <li class="nav-item" data-page="keywords">
+	                    <a href="#"><i class="fas fa-key"></i> 关键词管理</a>
+	                </li>
+	                <li class="nav-item" data-page="banned">
+	                    <a href="#"><i class="fas fa-ban"></i> 禁言词管理</a>
+	                </li>
+	                <li class="nav-item logout">
+	                    <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
+	                </li>
+	            </ul>
+	        </div>
+	        <!-- 主内容区 -->
+	        <div class="main-content">
+	            <!-- 顶部栏 -->
+	            <div class="header">
+	                <div class="header-title">
+	                    <h1 id="page-title">仪表盘</h1>
+	                </div>
+	                <div class="user-info">
+	                    <span id="current-user">管理员</span>
+	                </div>
+	            </div>
+	            <!-- 页面内容 -->
+	            <div class="content" id="content">
+	                <!-- 内容将通过JS动态加载 -->
+	            </div>
+	        </div>
+	    </div>
+	    <!-- 登录模态框 -->
+	    <div class="modal" id="login-modal">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h2>管理员登录</h2>
+	            </div>
+	            <div class="modal-body">
+	                <div class="form-group">
+	                    <label for="admin-key">管理密钥</label>
+	                    <input type="password" id="admin-key" class="form-control" placeholder="请输入管理密钥">
+	                </div>
+	                <div class="form-actions">
+	                    <button id="login-btn" class="btn btn-primary">登录</button>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    <!-- 加载提示 -->
+	    <div class="loading" id="loading">
+	        <div class="spinner"></div>
+	        <p>加载中...</p>
+	    </div>
+	    <!-- 通知容器 -->
+	    <div class="notification-container" id="notification-container"></div>
+	    <script>
+	        // API配置 - 直接写入提供的密钥和URL
+	        const SUPABASE_URL = "https://tekuxjnnwtqmygibvwux.supabase.co";
+	        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRla3V4am5ud3RxbXlnaWJ2d3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzNDUzNjAsImV4cCI6MjA3MDkyMTM2MH0.RGmuF44husXoJP8y4U1Gx7HqQJ6MsYZVl6_vHtG-KJY";
+	        const WORKER_URL = "https://telegram-bot.jbk123jbk.workers.dev";
+	        const ADMIN_API_KEY = "9712202273aA.";
+	        // 通用API请求函数
+	        async function apiRequest(endpoint, method = 'GET', data = null, headers = {}) {
+	            const url = `${WORKER_URL}${endpoint}`;
+	            const options = {
+	                method,
+	                headers: {
+	                    'Content-Type': 'application/json',
+	                    'Admin-Key': ADMIN_API_KEY,
+	                    ...headers
+	                }
+	            };
+	            if (data) {
+	                options.body = JSON.stringify(data);
+	            }
+	            try {
+	                const response = await fetch(url, options);
+	                if (!response.ok) {
+	                    const errorData = await response.json();
+	                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+	                }
+	                return await response.json();
+	            } catch (error) {
+	                console.error('API请求错误:', error);
+	                throw error;
+	            }
+	        }
+	        // 直接Supabase请求函数
+	        async function supabaseRequest(table, method = 'GET', data = null, filter = '') {
+	            let url = `${SUPABASE_URL}/rest/v1/${table}`;
+	            if (filter) {
+	                url += `?${filter}`;
+	            }
+	            const options = {
+	                method,
+	                headers: {
+	                    'apikey': SUPABASE_KEY,
+	                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+	                    'Content-Type': 'application/json'
+	                }
+	            };
+	            if (data) {
+	                options.body = JSON.stringify(data);
+	            }
+	            try {
+	                const response = await fetch(url, options);
+	                if (!response.ok) {
+	                    const errorData = await response.json();
+	                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+	                }
+	                return await response.json();
+	            } catch (error) {
+	                console.error('Supabase请求错误:', error);
+	                throw error;
+	            }
+	        }
+	        // 获取所有记录
+	        async function getAllRecords(table) {
+	            return supabaseRequest(table);
+	        }
+	        // 获取单条记录
+	        async function getRecord(table, id) {
+	            const idColumn = table === 'users' ? 'user_id' : 'id';
+	            return supabaseRequest(table, 'GET', null, `${idColumn}=eq.${id}&limit=1`);
+	        }
+	        // 插入记录
+	        async function insertRecord(table, data) {
+	            return supabaseRequest(table, 'POST', data);
+	        }
+	        // 更新记录
+	        async function updateRecord(table, data, id) {
+	            const idColumn = table === 'users' ? 'user_id' : 'id';
+	            return supabaseRequest(`${table}?${idColumn}=eq.${id}`, 'PATCH', data);
+	        }
+	        // 删除记录
+	        async function deleteRecord(table, id) {
+	            const idColumn = table === 'users' ? 'user_id' : 'id';
+	            return supabaseRequest(`${table}?${idColumn}=eq.${id}`, 'DELETE');
+	        }
+	        // 执行管理员API操作
+	        async function executeAdminAPI(action, table, data = null, filter = null) {
+	            return apiRequest('/admin-api', 'POST', {
+	                action,
+	                table,
+	                data,
+	                filter
+	            });
+	        }
+	        // 测试数据库连接
+	        async function testDatabaseConnection() {
+	            return apiRequest('/test-db');
+	        }
+	        // 发送随机老师
+	        async function sendRandomTeacher() {
+	            return apiRequest('/send-random-teacher');
+	        }
+	        // 登录函数
+	        async function login() {
+	            const adminKey = document.getElementById('admin-key').value;
+	            if (!adminKey) {
+	                showNotification('请输入管理密钥', 'error');
+	                return;
+	            }
+	            // 验证密钥
+	            if (adminKey === ADMIN_API_KEY) {
+	                // 保存到本地存储
+	                localStorage.setItem('adminApiKey', adminKey);
+	                // 隐藏登录模态框
+	                document.getElementById('login-modal').style.display = 'none';
+	                // 加载仪表盘
+	                navigateToPage('dashboard');
+	                showNotification('登录成功', 'success');
+	            } else {
+	                showNotification('密钥错误，请重新输入', 'error');
+	            }
+	        }
+	        // 退出登录函数
+	        function logout() {
+	            // 清除本地存储
+	            localStorage.removeItem('adminApiKey');
+	            // 显示登录模态框
+	            document.getElementById('login-modal').style.display = 'flex';
+	            // 清空内容
+	            document.getElementById('content').innerHTML = '';
+	            showNotification('已退出登录', 'info');
+	        }
+	        // 检查是否已登录
+	        function isLoggedIn() {
+	            return localStorage.getItem('adminApiKey') === ADMIN_API_KEY;
+	        }
+	        // 加载仪表盘
+	        async function loadDashboard() {
+	            const content = document.getElementById('content');
+	            try {
+	                // 测试数据库连接
+	                const dbStatus = await testDatabaseConnection();
+	                // 获取统计数据
+	                const users = await getAllRecords('users');
+	                const teachers = await getAllRecords('teachers');
+	                const keywords = await getAllRecords('keywords');
+	                const banned = await getAllRecords('banned_keywords');
+	                // 渲染仪表盘
+	                content.innerHTML = `
+	                    <div class="stats-grid">
+	                        <div class="stat-card users">
+	                            <div class="stat-icon">
+	                                <i class="fas fa-users"></i>
+	                            </div>
+	                            <div class="stat-info">
+	                                <h3>${users.length}</h3>
+	                                <p>用户总数</p>
+	                            </div>
+	                        </div>
+	                        <div class="stat-card teachers">
+	                            <div class="stat-icon">
+	                                <i class="fas fa-user-tie"></i>
+	                            </div>
+	                            <div class="stat-info">
+	                                <h3>${teachers.length}</h3>
+	                                <p>老师总数</p>
+	                            </div>
+	                        </div>
+	                        <div class="stat-card keywords">
+	                            <div class="stat-icon">
+	                                <i class="fas fa-key"></i>
+	                            </div>
+	                            <div class="stat-info">
+	                                <h3>${keywords.length}</h3>
+	                                <p>关键词总数</p>
+	                            </div>
+	                        </div>
+	                        <div class="stat-card banned">
+	                            <div class="stat-icon">
+	                                <i class="fas fa-ban"></i>
+	                            </div>
+	                            <div class="stat-info">
+	                                <h3>${banned.length}</h3>
+	                                <p>禁言词总数</p>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="card">
+	                        <div class="card-header">
+	                            <h2 class="card-title">系统状态</h2>
+	                        </div>
+	                        <div class="card-body">
+	                            <div class="status-item">
+	                                <div class="status-label">数据库连接状态:</div>
+	                                <div class="status-value ${dbStatus.status === 'success' ? 'status-success' : 'status-error'}">
+	                                    ${dbStatus.status === 'success' ? '正常' : '异常'}
+	                                </div>
+	                            </div>
+	                            <div class="status-item">
+	                                <div class="status-label">用户数量:</div>
+	                                <div class="status-value">${users.length}</div>
+	                            </div>
+	                            <div class="status-item">
+	                                <div class="status-label">老师数量:</div>
+	                                <div class="status-value">${teachers.length}</div>
+	                            </div>
+	                            <div class="status-item">
+	                                <div class="status-label">待审核老师:</div>
+	                                <div class="status-value">${teachers.filter(t => t.status === 'pending').length}</div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="card">
+	                        <div class="card-header">
+	                            <h2 class="card-title">快捷操作</h2>
+	                        </div>
+	                        <div class="card-body">
+	                            <div class="quick-actions">
+	                                <button class="btn btn-primary" onclick="sendRandomTeacherAction()">
+	                                    <i class="fas fa-paper-plane"></i> 发送随机老师
+	                                </button>
+	                                <button class="btn btn-success" onclick="sendRandomTeacherToGroups()">
+	                                    <i class="fas fa-broadcast-tower"></i> 发送随机老师到群组
+	                                </button>
+	                                <button class="btn btn-warning" onclick="navigateToPage('users')">
+	                                    <i class="fas fa-users"></i> 管理用户
+	                                </button>
+	                                <button class="btn btn-danger" onclick="navigateToPage('teachers')">
+	                                    <i class="fas fa-user-tie"></i> 管理老师
+	                                </button>
+	                            </div>
+	                        </div>
+	                    </div>
+	                `;
+	            } catch (error) {
+	                content.innerHTML = `
+	                    <div class="error">
+	                        <h3>加载失败</h3>
+	                        <p>${error.message}</p>
+	                        <button class="btn btn-primary" onclick="loadDashboard()">重试</button>
+	                    </div>
+	                `;
+	            }
+	        }
+	        // 发送随机老师操作
+	        async function sendRandomTeacherAction() {
+	            try {
+	                showNotification('正在发送随机老师...', 'info');
+	                const result = await sendRandomTeacher();
+	                showNotification('随机老师已发送', 'success');
+	            } catch (error) {
+	                showNotification(`发送失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 发送随机老师到群组操作
+	        async function sendRandomTeacherToGroups() {
+	            try {
+	                showNotification('正在发送随机老师到群组...', 'info');
+	                // 获取已审核的老师
+	                const teachers = await getAllRecords('teachers');
+	                const approvedTeachers = teachers.filter(t => t.status === 'approved');
+	                if (approvedTeachers.length === 0) {
+	                    showNotification('没有已审核的老师可以发送', 'warning');
+	                    return;
+	                }
+	                // 随机选择一个老师
+	                const randomIndex = Math.floor(Math.random() * approvedTeachers.length);
+	                const teacher = approvedTeachers[randomIndex];
+	                // 构建发送内容
+	                const caption = `🌟 每日推荐老师 🌟\n\n` +
+	                    `花名: ${teacher.nickname}\n` +
+	                    `年龄: ${teacher.age}\n` +
+	                    `地区: ${teacher.region}\n` +
+	                    `服务类型: ${teacher.service_type}\n` +
+	                    `修车费: ${teacher.repair_cost}\n` +
+	                    `自我介绍: ${teacher.intro}\n\n` +
+	                    `联系老师: ${teacher.telegram_account}`;
+	                // 调用API发送到群组
+	                const result = await apiRequest('/send-random-teacher', 'GET');
+	                showNotification('随机老师已发送到群组', 'success');
+	            } catch (error) {
+	                showNotification(`发送失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 加载用户管理页面
+	        async function loadUsers() {
+	            const content = document.getElementById('content');
+	            try {
+	                // 获取用户数据
+	                const users = await getAllRecords('users');
+	                // 渲染用户管理页面
+	                content.innerHTML = `
+	                    <div class="card">
+	                        <div class="card-header">
+	                            <h2 class="card-title">用户管理</h2>
+	                            <div class="action-buttons">
+	                                <button class="btn btn-primary" onclick="refreshUsers()">
+	                                    <i class="fas fa-sync-alt"></i> 刷新
+	                                </button>
+	                            </div>
+	                        </div>
+	                        <div class="card-body">
+	                            <div class="table-container">
+	                                <table>
+	                                    <thead>
+	                                        <tr>
+	                                            <th>ID</th>
+	                                            <th>用户名</th>
+	                                            <th>显示名称</th>
+	                                            <th>积分</th>
+	                                            <th>最后签到</th>
+	                                            <th>操作</th>
+	                                        </tr>
+	                                    </thead>
+	                                    <tbody>
+	                                        ${users.map(user => `
+	                                            <tr>
+	                                                <td>${user.user_id}</td>
+	                                                <td>${user.username || '-'}</td>
+	                                                <td>${user.display_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || '-'}</td>
+	                                                <td>${user.points || 0}</td>
+	                                                <td>${user.last_sign_date || '-'}</td>
+	                                                <td>
+	                                                    <div class="action-buttons">
+	                                                        <button class="btn btn-success btn-sm" onclick="adjustUserPoints(${user.user_id}, 10)">
+	                                                            <i class="fas fa-plus"></i> +10
+	                                                        </button>
+	                                                        <button class="btn btn-warning btn-sm" onclick="adjustUserPoints(${user.user_id}, -10)">
+	                                                            <i class="fas fa-minus"></i> -10
+	                                                        </button>
+	                                                        <button class="btn btn-primary btn-sm" onclick="editUser(${user.user_id})">
+	                                                            <i class="fas fa-edit"></i> 编辑
+	                                                        </button>
+	                                                    </div>
+	                                                </td>
+	                                            </tr>
+	                                        `).join('')}
+	                                    </tbody>
+	                                </table>
+	                            </div>
+	                        </div>
+	                    </div>
+	                `;
+	            } catch (error) {
+	                content.innerHTML = `
+	                    <div class="error">
+	                        <h3>加载失败</h3>
+	                        <p>${error.message}</p>
+	                        <button class="btn btn-primary" onclick="loadUsers()">重试</button>
+	                    </div>
+	                `;
+	            }
+	        }
+	        // 刷新用户列表
+	        function refreshUsers() {
+	            loadUsers();
+	            showNotification('用户列表已刷新', 'info');
+	        }
+	        // 调整用户积分
+	        async function adjustUserPoints(userId, pointsChange) {
+	            try {
+	                const result = await executeAdminAPI('adjust_points', 'users', {
+	                    user_id: userId,
+	                    points_change: pointsChange
+	                });
+	                showNotification(`积分调整成功，新积分: ${result.new_points}`, 'success');
+	                refreshUsers();
+	            } catch (error) {
+	                showNotification(`调整失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 编辑用户
+	        async function editUser(userId) {
+	            try {
+	                // 获取用户详情
+	                const user = await getRecord('users', userId);
+	                // 创建编辑表单
+	                const content = document.getElementById('content');
+	                content.innerHTML = `
+	                    <div class="card">
+	                        <div class="card-header">
+	                            <h2 class="card-title">编辑用户</h2>
+	                            <div class="action-buttons">
+	                                <button class="btn btn-primary" onclick="saveUser(${userId})">
+	                                    <i class="fas fa-save"></i> 保存
+	                                </button>
+	                                <button class="btn btn-secondary" onclick="loadUsers()">
+	                                    <i class="fas fa-times"></i> 取消
+	                                </button>
+	                            </div>
+	                        </div>
+	                        <div class="card-body">
+	                            <div class="form-group">
+	                                <label for="user-username">用户名</label>
+	                                <input type="text" id="user-username" class="form-control" value="${user.username || ''}">
+	                            </div>
+	                            <div class="form-group">
+	                                <label for="user-first-name">名字</label>
+	                                <input type="text" id="user-first-name" class="form-control" value="${user.first_name || ''}">
+	                            </div>
+	                            <div class="form-group">
+	                                <label for="user-last-name">姓氏</label>
+	                                <input type="text" id="user-last-name" class="form-control" value="${user.last_name || ''}">
+	                            </div>
+	                            <div class="form-group">
+	                                <label for="user-display-name">显示名称</label>
+	                                <input type="text" id="user-display-name" class="form-control" value="${user.display_name || ''}">
+	                            </div>
+	                            <div class="form-group">
+	                                <label for="user-points">积分</label>
+	                                <input type="number" id="user-points" class="form-control" value="${user.points || 0}">
+	                            </div>
+	                        </div>
+	                    </div>
+	                `;
+	            } catch (error) {
+	                showNotification(`获取用户信息失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 保存用户
+	        async function saveUser(userId) {
+	            try {
+	                const userData = {
+	                    username: document.getElementById('user-username').value,
+	                    first_name: document.getElementById('user-first-name').value,
+	                    last_name: document.getElementById('user-last-name').value,
+	                    display_name: document.getElementById('user-display-name').value,
+	                    points: parseInt(document.getElementById('user-points').value) || 0
+	                };
+	                await updateRecord('users', userData, userId);
+	                showNotification('用户信息已更新', 'success');
+	                loadUsers();
+	            } catch (error) {
+	                showNotification(`保存失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 加载老师管理页面
+	        async function loadTeachers() {
+	            const content = document.getElementById('content');
+	            try {
+	                // 获取老师数据
+	                const teachers = await getAllRecords('teachers');
+	                // 渲染老师管理页面
+	                content.innerHTML = `
+	                    <div class="card">
+	                        <div class="card-header">
+	                            <h2 class="card-title">老师管理</h2>
+	                            <div class="action-buttons">
+	                                <button class="btn btn-primary" onclick="refreshTeachers()">
+	                                    <i class="fas fa-sync-alt"></i> 刷新
+	                                </button>
+	                            </div>
+	                        </div>
+	                        <div class="card-body">
+	                            <div class="table-container">
+	                                <table>
+	                                    <thead>
+	                                        <tr>
+	                                            <th>ID</th>
+	                                            <th>花名</th>
+	                                            <th>年龄</th>
+	                                            <th>地区</th>
+	                                            <th>状态</th>
+	                                            <th>操作</th>
+	                                        </tr>
+	                                    </thead>
+	                                    <tbody>
+	                                        ${teachers.map(teacher => `
+	                                            <tr>
+	                                                <td>${teacher.id}</td>
+	                                                <td>${teacher.nickname}</td>
+	                                                <td>${teacher.age}</td>
+	                                                <td>${teacher.region}</td>
+	                                                <td>
+	                                                    <span class="status-badge ${teacher.status === 'approved' ? 'status-approved' : 'status-pending'}">
+	                                                        ${teacher.status === 'approved' ? '已审核' : '待审核'}
+	                                                    </span>
+	                                                </td>
+	                                                <td>
+	                                                    <div class="action-buttons">
+	                                                        ${teacher.status === 'pending' ? `
+	                                                            <button class="btn btn-success btn-sm" onclick="approveTeacher(${teacher.id})">
+	                                                                <i class="fas fa-check"></i> 审核
+	                                                            </button>
+	                                                        ` : ''}
+	                                                        <button class="btn btn-primary btn-sm" onclick="viewTeacher(${teacher.id})">
+	                                                            <i class="fas fa-eye"></i> 查看
+	                                                        </button>
+	                                                        <button class="btn btn-danger btn-sm" onclick="deleteTeacher(${teacher.id})">
+	                                                            <i class="fas fa-trash"></i> 删除
+	                                                        </button>
+	                                                    </div>
+	                                                </td>
+	                                            </tr>
+	                                        `).join('')}
+	                                    </tbody>
+	                                </table>
+	                            </div>
+	                        </div>
+	                    </div>
+	                `;
+	            } catch (error) {
+	                content.innerHTML = `
+	                    <div class="error">
+	                        <h3>加载失败</h3>
+	                        <p>${error.message}</p>
+	                        <button class="btn btn-primary" onclick="loadTeachers()">重试</button>
+	                    </div>
+	                `;
+	            }
+	        }
+	        // 刷新老师列表
+	        function refreshTeachers() {
+	            loadTeachers();
+	            showNotification('老师列表已刷新', 'info');
+	        }
+	        // 审核老师
+	        async function approveTeacher(teacherId) {
+	            try {
+	                await updateRecord('teachers', { status: 'approved' }, teacherId);
+	                showNotification('老师已审核通过', 'success');
+	                refreshTeachers();
+	            } catch (error) {
+	                showNotification(`审核失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 查看老师详情
+	        async function viewTeacher(teacherId) {
+	            try {
+	                // 获取老师详情
+	                const teacher = await getRecord('teachers', teacherId);
+	                // 创建详情视图
+	                const content = document.getElementById('content');
+	                content.innerHTML = `
+	                    <div class="card">
+	                        <div class="card-header">
+	                            <h2 class="card-title">老师详情</h2>
+	                            <div class="action-buttons">
+	                                <button class="btn btn-secondary" onclick="loadTeachers()">
+	                                    <i class="fas fa-arrow-left"></i> 返回
+	                                </button>
+	                            </div>
+	                        </div>
+	                        <div class="card-body">
+	                            <div class="teacher-details">
+	                                <div class="detail-row">
+	                                    <div class="detail-label">花名:</div>
+	                                    <div class="detail-value">${teacher.nickname}</div>
+	                                </div>
+	                                <div class="detail-row">
+	                                    <div class="detail-label">年龄:</div>
+	                                    <div class="detail-value">${teacher.age}</div>
+	                                </div>
+	                                <div class="detail-row">
+	                                    <div class="detail-label">地区:</div>
+	                                    <div class="detail-value">${teacher.region}</div>
+	                                </div>
+	                                <div class="detail-row">
+	                                    <div class="detail-label">Telegram账号:</div>
+	                                    <div class="detail-value">${teacher.telegram_account}</div>
+	                                </div>
+	                                <div class="detail-row">
+	                                    <div class="detail-label">频道链接:</div>
+	                                    <div class="detail-value">
+	                                        <a href="${teacher.channel}" target="_blank">${teacher.channel}</a>
+	                                    </div>
+	                                </div>
+	                                <div class="detail-row">
+	                                    <div class="detail-label">服务类型:</div>
+	                                    <div class="detail-value">${teacher.service_type}</div>
+	                                </div>
+	                                <div class="detail-row">
+	                                    <div class="detail-label">修车费:</div>
+	                                    <div class="detail-value">${teacher.repair_cost}</div>
+	                                </div>
+	                                <div class="detail-row">
+	                                    <div class="detail-label">自我介绍:</div>
+	                                    <div class="detail-value">${teacher.intro}</div>
+	                                </div>
+	                                <div class="detail-row">
+	                                    <div class="detail-label">状态:</div>
+	                                    <div class="detail-value">
+	                                        <span class="status-badge ${teacher.status === 'approved' ? 'status-approved' : 'status-pending'}">
+	                                            ${teacher.status === 'approved' ? '已审核' : '待审核'}
+	                                        </span>
+	                                    </div>
+	                                </div>
+	                                ${teacher.photo_url_1 ? `
+	                                    <div class="detail-row">
+	                                        <div class="detail-label">照片1:</div>
+	                                        <div class="detail-value">
+	                                            <img src="${teacher.photo_url_1}" alt="照片1" class="teacher-photo">
+	                                        </div>
+	                                    </div>
+	                                ` : ''}
+	                                ${teacher.photo_url_2 ? `
+	                                    <div class="detail-row">
+	                                        <div class="detail-label">照片2:</div>
+	                                        <div class="detail-value">
+	                                            <img src="${teacher.photo_url_2}" alt="照片2" class="teacher-photo">
+	                                        </div>
+	                                    </div>
+	                                ` : ''}
+	                                ${teacher.photo_url_3 ? `
+	                                    <div class="detail-row">
+	                                        <div class="detail-label">照片3:</div>
+	                                        <div class="detail-value">
+	                                            <img src="${teacher.photo_url_3}" alt="照片3" class="teacher-photo">
+	                                        </div>
+	                                    </div>
+	                                ` : ''}
+	                                ${teacher.video_url ? `
+	                                    <div class="detail-row">
+	                                        <div class="detail-label">视频:</div>
+	                                        <div class="detail-value">
+	                                            <video src="${teacher.video_url}" controls class="teacher-video"></video>
+	                                        </div>
+	                                    </div>
+	                                ` : ''}
+	                            </div>
+	                        </div>
+	                    </div>
+	                `;
+	            } catch (error) {
+	                showNotification(`获取老师信息失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 删除老师
+	        async function deleteTeacher(teacherId) {
+	            if (!confirm('确定要删除这个老师吗？此操作不可撤销。')) {
+	                return;
+	            }
+	            try {
+	                await deleteRecord('teachers', teacherId);
+	                showNotification('老师已删除', 'success');
+	                refreshTeachers();
+	            } catch (error) {
+	                showNotification(`删除失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 加载关键词管理页面
+	        async function loadKeywords() {
+	            const content = document.getElementById('content');
+	            try {
+	                // 获取关键词数据
+	                const keywords = await getAllRecords('keywords');
+	                // 渲染关键词管理页面
+	                content.innerHTML = `
+	                    <div class="card">
+	                        <div class="card-header">
+	                            <h2 class="card-title">关键词管理</h2>
+	                            <div class="action-buttons">
+	                                <button class="btn btn-primary" onclick="showAddKeyword()">
+	                                    <i class="fas fa-plus"></i> 添加关键词
+	                                </button>
+	                                <button class="btn btn-secondary" onclick="refreshKeywords()">
+	                                    <i class="fas fa-sync-alt"></i> 刷新
+	                                </button>
+	                            </div>
+	                        </div>
+	                        <div class="card-body">
+	                            <div class="table-container">
+	                                <table>
+	                                    <thead>
+	                                        <tr>
+	                                            <th>ID</th>
+	                                            <th>关键词</th>
+	                                            <th>回复内容</th>
+	                                            <th>状态</th>
+	                                            <th>操作</th>
+	                                        </tr>
+	                                    </thead>
+	                                    <tbody>
+	                                        ${keywords.map(keyword => `
+	                                            <tr>
+	                                                <td>${keyword.id}</td>
+	                                                <td>${keyword.keyword}</td>
+	                                                <td>${keyword.response}</td>
+	                                                <td>
+	                                                    <span class="status-badge ${keyword.is_active ? 'status-active' : 'status-inactive'}">
+	                                                        ${keyword.is_active ? '激活' : '禁用'}
+	                                                    </span>
+	                                                </td>
+	                                                <td>
+	                                                    <div class="action-buttons">
+	                                                        <button class="btn btn-primary btn-sm" onclick="editKeyword(${keyword.id})">
+	                                                            <i class="fas fa-edit"></i> 编辑
+	                                                        </button>
+	                                                        <button class="btn btn-danger btn-sm" onclick="deleteKeyword(${keyword.id})">
+	                                                            <i class="fas fa-trash"></i> 删除
+	                                                        </button>
+	                                                    </div>
+	                                                </td>
+	                                            </tr>
+	                                        `).join('')}
+	                                    </tbody>
+	                                </table>
+	                            </div>
+	                        </div>
+	                    </div>
+	                `;
+	            } catch (error) {
+	                content.innerHTML = `
+	                    <div class="error">
+	                        <h3>加载失败</h3>
+	                        <p>${error.message}</p>
+	                        <button class="btn btn-primary" onclick="loadKeywords()">重试</button>
+	                    </div>
+	                `;
+	            }
+	        }
+	        // 刷新关键词列表
+	        function refreshKeywords() {
+	            loadKeywords();
+	            showNotification('关键词列表已刷新', 'info');
+	        }
+	        // 显示添加关键词表单
+	        function showAddKeyword() {
+	            const content = document.getElementById('content');
+	            content.innerHTML = `
+	                <div class="card">
+	                    <div class="card-header">
+	                        <h2 class="card-title">添加关键词</h2>
+	                        <div class="action-buttons">
+	                            <button class="btn btn-primary" onclick="addKeyword()">
+	                                <i class="fas fa-save"></i> 保存
+	                            </button>
+	                            <button class="btn btn-secondary" onclick="loadKeywords()">
+	                                <i class="fas fa-times"></i> 取消
+	                            </button>
+	                        </div>
+	                    </div>
+	                    <div class="card-body">
+	                        <div class="form-group">
+	                            <label for="keyword-text">关键词</label>
+	                            <input type="text" id="keyword-text" class="form-control" placeholder="请输入关键词">
+	                        </div>
+	                        <div class="form-group">
+	                            <label for="keyword-response">回复内容</label>
+	                            <textarea id="keyword-response" class="form-control" rows="4" placeholder="请输入回复内容"></textarea>
+	                        </div>
+	                        <div class="form-group">
+	                            <label>
+	                                <input type="checkbox" id="keyword-active" checked> 激活状态
+	                            </label>
+	                        </div>
+	                    </div>
+	                </div>
+	            `;
+	        }
+	        // 添加关键词
+	        async function addKeyword() {
+	            try {
+	                const keywordData = {
+	                    keyword: document.getElementById('keyword-text').value,
+	                    response: document.getElementById('keyword-response').value,
+	                    is_active: document.getElementById('keyword-active').checked
+	                };
+	                if (!keywordData.keyword || !keywordData.response) {
+	                    showNotification('请填写完整信息', 'error');
+	                    return;
+	                }
+	                await insertRecord('keywords', keywordData);
+	                showNotification('关键词已添加', 'success');
+	                loadKeywords();
+	            } catch (error) {
+	                showNotification(`添加失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 编辑关键词
+	        async function editKeyword(keywordId) {
+	            try {
+	                // 获取关键词详情
+	                const keyword = await getRecord('keywords', keywordId);
+	                // 创建编辑表单
+	                const content = document.getElementById('content');
+	                content.innerHTML = `
+	                    <div class="card">
+	                        <div class="card-header">
+	                            <h2 class="card-title">编辑关键词</h2>
+	                            <div class="action-buttons">
+	                                <button class="btn btn-primary" onclick="updateKeyword(${keywordId})">
+	                                    <i class="fas fa-save"></i> 保存
+	                                </button>
+	                                <button class="btn btn-secondary" onclick="loadKeywords()">
+	                                    <i class="fas fa-times"></i> 取消
+	                                </button>
+	                            </div>
+	                        </div>
+	                        <div class="card-body">
+	                            <div class="form-group">
+	                                <label for="keyword-text">关键词</label>
+	                                <input type="text" id="keyword-text" class="form-control" value="${keyword.keyword}">
+	                            </div>
+	                            <div class="form-group">
+	                                <label for="keyword-response">回复内容</label>
+	                                <textarea id="keyword-response" class="form-control" rows="4">${keyword.response}</textarea>
+	                            </div>
+	                            <div class="form-group">
+	                                <label>
+	                                    <input type="checkbox" id="keyword-active" ${keyword.is_active ? 'checked' : ''}> 激活状态
+	                                </label>
+	                            </div>
+	                        </div>
+	                    </div>
+	                `;
+	            } catch (error) {
+	                showNotification(`获取关键词信息失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 更新关键词
+	        async function updateKeyword(keywordId) {
+	            try {
+	                const keywordData = {
+	                    keyword: document.getElementById('keyword-text').value,
+	                    response: document.getElementById('keyword-response').value,
+	                    is_active: document.getElementById('keyword-active').checked
+	                };
+	                if (!keywordData.keyword || !keywordData.response) {
+	                    showNotification('请填写完整信息', 'error');
+	                    return;
+	                }
+	                await updateRecord('keywords', keywordData, keywordId);
+	                showNotification('关键词已更新', 'success');
+	                loadKeywords();
+	            } catch (error) {
+	                showNotification(`更新失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 删除关键词
+	        async function deleteKeyword(keywordId) {
+	            if (!confirm('确定要删除这个关键词吗？此操作不可撤销。')) {
+	                return;
+	            }
+	            try {
+	                await deleteRecord('keywords', keywordId);
+	                showNotification('关键词已删除', 'success');
+	                refreshKeywords();
+	            } catch (error) {
+	                showNotification(`删除失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 加载禁言词管理页面
+	        async function loadBanned() {
+	            const content = document.getElementById('content');
+	            try {
+	                // 获取禁言词数据
+	                const bannedKeywords = await getAllRecords('banned_keywords');
+	                // 渲染禁言词管理页面
+	                content.innerHTML = `
+	                    <div class="card">
+	                        <div class="card-header">
+	                            <h2 class="card-title">禁言词管理</h2>
+	                            <div class="action-buttons">
+	                                <button class="btn btn-primary" onclick="showAddBannedKeyword()">
+	                                    <i class="fas fa-plus"></i> 添加禁言词
+	                                </button>
+	                                <button class="btn btn-secondary" onclick="refreshBanned()">
+	                                    <i class="fas fa-sync-alt"></i> 刷新
+	                                </button>
+	                            </div>
+	                        </div>
+	                        <div class="card-body">
+	                            <div class="table-container">
+	                                <table>
+	                                    <thead>
+	                                        <tr>
+	                                            <th>ID</th>
+	                                            <th>禁言词</th>
+	                                            <th>操作</th>
+	                                        </tr>
+	                                    </thead>
+	                                    <tbody>
+	                                        ${bannedKeywords.map(keyword => `
+	                                            <tr>
+	                                                <td>${keyword.id}</td>
+	                                                <td>${keyword.keyword}</td>
+	                                                <td>
+	                                                    <div class="action-buttons">
+	                                                        <button class="btn btn-danger btn-sm" onclick="deleteBannedKeyword(${keyword.id})">
+	                                                            <i class="fas fa-trash"></i> 删除
+	                                                        </button>
+	                                                    </div>
+	                                                </td>
+	                                            </tr>
+	                                        `).join('')}
+	                                    </tbody>
+	                                </table>
+	                            </div>
+	                        </div>
+	                    </div>
+	                `;
+	            } catch (error) {
+	                content.innerHTML = `
+	                    <div class="error">
+	                        <h3>加载失败</h3>
+	                        <p>${error.message}</p>
+	                        <button class="btn btn-primary" onclick="loadBanned()">重试</button>
+	                    </div>
+	                `;
+	            }
+	        }
+	        // 刷新禁言词列表
+	        function refreshBanned() {
+	            loadBanned();
+	            showNotification('禁言词列表已刷新', 'info');
+	        }
+	        // 显示添加禁言词表单
+	        function showAddBannedKeyword() {
+	            const content = document.getElementById('content');
+	            content.innerHTML = `
+	                <div class="card">
+	                    <div class="card-header">
+	                        <h2 class="card-title">添加禁言词</h2>
+	                        <div class="action-buttons">
+	                            <button class="btn btn-primary" onclick="addBannedKeyword()">
+	                                <i class="fas fa-save"></i> 保存
+	                            </button>
+	                            <button class="btn btn-secondary" onclick="loadBanned()">
+	                                <i class="fas fa-times"></i> 取消
+	                            </button>
+	                        </div>
+	                    </div>
+	                    <div class="card-body">
+	                        <div class="form-group">
+	                            <label for="banned-keyword">禁言词</label>
+	                            <input type="text" id="banned-keyword" class="form-control" placeholder="请输入禁言词">
+	                        </div>
+	                    </div>
+	                </div>
+	            `;
+	        }
+	        // 添加禁言词
+	        async function addBannedKeyword() {
+	            try {
+	                const keyword = document.getElementById('banned-keyword').value;
+	                if (!keyword) {
+	                    showNotification('请输入禁言词', 'error');
+	                    return;
+	                }
+	                await insertRecord('banned_keywords', { keyword });
+	                showNotification('禁言词已添加', 'success');
+	                loadBanned();
+	            } catch (error) {
+	                showNotification(`添加失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 删除禁言词
+	        async function deleteBannedKeyword(keywordId) {
+	            if (!confirm('确定要删除这个禁言词吗？此操作不可撤销。')) {
+	                return;
+	            }
+	            try {
+	                await deleteRecord('banned_keywords', keywordId);
+	                showNotification('禁言词已删除', 'success');
+	                refreshBanned();
+	            } catch (error) {
+	                showNotification(`删除失败: ${error.message}`, 'error');
+	            }
+	        }
+	        // 初始化应用
+	        function initApp() {
+	            // 检查是否已登录
+	            const apiKey = localStorage.getItem('adminApiKey');
+	            if (apiKey) {
+	                // 隐藏登录模态框
+	                document.getElementById('login-modal').style.display = 'none';
+	                // 加载仪表盘
+	                navigateToPage('dashboard');
+	            } else {
+	                // 显示登录模态框
+	                document.getElementById('login-modal').style.display = 'flex';
+	            }
+	        }
+	        // 导航到页面
+	        function navigateToPage(page) {
+	            // 更新活动菜单项
+	            document.querySelectorAll('.nav-item').forEach(item => {
+	                item.classList.remove('active');
+	            });
+	            document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+	            // 更新页面标题
+	            const titles = {
+	                'dashboard': '仪表盘',
+	                'users': '用户管理',
+	                'teachers': '老师管理',
+	                'keywords': '关键词管理',
+	                'banned': '禁言词管理'
+	            };
+	            document.getElementById('page-title').textContent = titles[page] || '未知页面';
+	            // 加载页面内容
+	            const content = document.getElementById('content');
+	            content.innerHTML = '<div class="loading"><div class="spinner"></div><p>加载中...</p></div>';
+	            // 根据页面加载相应内容
+	            switch(page) {
+	                case 'dashboard':
+	                    loadDashboard();
+	                    break;
+	                case 'users':
+	                    loadUsers();
+	                    break;
+	                case 'teachers':
+	                    loadTeachers();
+	                    break;
+	                case 'keywords':
+	                    loadKeywords();
+	                    break;
+	                case 'banned':
+	                    loadBanned();
+	                    break;
+	                default:
+	                    content.innerHTML = '<div class="error">页面不存在</div>';
+	            }
+	        }
+	        // 显示通知
+	        function showNotification(message, type = 'info') {
+	            const container = document.getElementById('notification-container');
+	            const notification = document.createElement('div');
+	            notification.className = `notification notification-${type}`;
+	            notification.innerHTML = `
+	                <div class="notification-content">
+	                    <div class="notification-message">${message}</div>
+	                    <button class="notification-close">&times;</button>
+	                </div>
+	            `;
+	            container.appendChild(notification);
+	            // 关闭按钮事件
+	            notification.querySelector('.notification-close').addEventListener('click', function() {
+	                notification.classList.add('fade-out');
+	                setTimeout(() => {
+	                    container.removeChild(notification);
+	                }, 300);
+	            });
+	            // 自动关闭
+	            setTimeout(() => {
+	                if (notification.parentNode) {
+	                    notification.classList.add('fade-out');
+	                    setTimeout(() => {
+	                        if (notification.parentNode) {
+	                            container.removeChild(notification);
+	                        }
+	                    }, 300);
+	                }
+	            }, 5000);
+	        }
+	        document.addEventListener('DOMContentLoaded', function() {
+	            // 初始化应用
+	            initApp();
+	            // 导航菜单点击事件
+	            document.querySelectorAll('.nav-item').forEach(item => {
+	                item.addEventListener('click', function(e) {
+	                    e.preventDefault();
+	                    const page = this.getAttribute('data-page');
+	                    if (page) {
+	                        navigateToPage(page);
+	                    }
+	                });
+	            });
+	            // 登录按钮点击事件
+	            document.getElementById('login-btn').addEventListener('click', login);
+	            // 退出登录按钮点击事件
+	            document.getElementById('logout-btn').addEventListener('click', logout);
+	        });
+	    </script>
+	</body>
+	</html>

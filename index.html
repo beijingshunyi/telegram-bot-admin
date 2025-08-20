@@ -1614,29 +1614,8 @@
             showLoading(true);
             
             try {
-                // 首先检查表结构，看是否有image_url列
-                try {
-                    await checkTableColumnExists('teachers', 'image_url');
-                    // 如果列存在，直接保存
-                    await directSupabaseUpsert('teachers', teacherData, 'id');
-                } catch (error) {
-                    if (error.message.includes('不存在') || error.message.includes('not found')) {
-                        // 如果列不存在，尝试添加列
-                        try {
-                            await addTableColumn('teachers', 'image_url', 'text');
-                            // 添加列成功后，再保存数据
-                            await directSupabaseUpsert('teachers', teacherData, 'id');
-                        } catch (addError) {
-                            console.error('添加列失败:', addError);
-                            // 如果添加列失败，尝试不包含image_url字段保存
-                            delete teacherData.image_url;
-                            await directSupabaseUpsert('teachers', teacherData, 'id');
-                        }
-                    } else {
-                        // 如果是其他错误，直接抛出
-                        throw error;
-                    }
-                }
+                // 直接保存，不检查列是否存在，因为我们已经确认列存在
+                await directSupabaseUpsert('teachers', teacherData, 'id');
                 
                 showAlert('老师保存成功', 'success');
                 bootstrap.Modal.getInstance(document.getElementById('editTeacherModal')).hide();
@@ -1719,29 +1698,8 @@
             showLoading(true);
             
             try {
-                // 首先检查表结构，看是否有image_url列
-                try {
-                    await checkTableColumnExists('teachers', 'image_url');
-                    // 如果列存在，直接保存
-                    await directSupabaseInsert('teachers', teacherData);
-                } catch (error) {
-                    if (error.message.includes('不存在') || error.message.includes('not found')) {
-                        // 如果列不存在，尝试添加列
-                        try {
-                            await addTableColumn('teachers', 'image_url', 'text');
-                            // 添加列成功后，再保存数据
-                            await directSupabaseInsert('teachers', teacherData);
-                        } catch (addError) {
-                            console.error('添加列失败:', addError);
-                            // 如果添加列失败，尝试不包含image_url字段保存
-                            delete teacherData.image_url;
-                            await directSupabaseInsert('teachers', teacherData);
-                        }
-                    } else {
-                        // 如果是其他错误，直接抛出
-                        throw error;
-                    }
-                }
+                // 直接保存，不检查列是否存在，因为我们已经确认列存在
+                await directSupabaseInsert('teachers', teacherData);
                 
                 showAlert('老师添加成功', 'success');
                 bootstrap.Modal.getInstance(document.getElementById('addTeacherModal')).hide();
@@ -1883,11 +1841,12 @@
                 showLoading(false);
             });
         }
-        // 删除关键词
+        // 删除关键词 - 使用服务角色密钥
         function deleteKeyword(keywordId) {
             if (!confirm('确定要删除这个关键词吗？')) return;
             showLoading(true);
-            directSupabaseDelete('keywords', keywordId)
+            // 使用服务角色密钥删除关键词
+            directSupabaseDeleteWithServiceKey('keywords', keywordId)
             .then(() => {
                 showAlert('关键词删除成功', 'success');
                 loadKeywords(currentPage.keywords);
@@ -2194,29 +2153,8 @@
             showLoading(true);
             
             try {
-                // 首先检查表结构，看是否有image_url列
-                try {
-                    await checkTableColumnExists('scheduled_messages', 'image_url');
-                    // 如果列存在，直接保存
-                    await directSupabaseInsertWithServiceKey('scheduled_messages', taskData);
-                } catch (error) {
-                    if (error.message.includes('不存在') || error.message.includes('not found')) {
-                        // 如果列不存在，尝试添加列
-                        try {
-                            await addTableColumn('scheduled_messages', 'image_url', 'text');
-                            // 添加列成功后，再保存数据
-                            await directSupabaseInsertWithServiceKey('scheduled_messages', taskData);
-                        } catch (addError) {
-                            console.error('添加列失败:', addError);
-                            // 如果添加列失败，尝试不包含image_url字段保存
-                            delete taskData.image_url;
-                            await directSupabaseInsertWithServiceKey('scheduled_messages', taskData);
-                        }
-                    } else {
-                        // 如果是其他错误，直接抛出
-                        throw error;
-                    }
-                }
+                // 直接保存，不检查列是否存在，因为我们已经确认列存在
+                await directSupabaseInsertWithServiceKey('scheduled_messages', taskData);
                 
                 showAlert('定时任务添加成功', 'success');
                 bootstrap.Modal.getInstance(document.getElementById('addScheduledTaskModal')).hide();
@@ -2307,29 +2245,8 @@
             showLoading(true);
             
             try {
-                // 首先检查表结构，看是否有image_url列
-                try {
-                    await checkTableColumnExists('scheduled_messages', 'image_url');
-                    // 如果列存在，直接保存
-                    await directSupabaseUpsertWithServiceKey('scheduled_messages', taskData, 'id');
-                } catch (error) {
-                    if (error.message.includes('不存在') || error.message.includes('not found')) {
-                        // 如果列不存在，尝试添加列
-                        try {
-                            await addTableColumn('scheduled_messages', 'image_url', 'text');
-                            // 添加列成功后，再保存数据
-                            await directSupabaseUpsertWithServiceKey('scheduled_messages', taskData, 'id');
-                        } catch (addError) {
-                            console.error('添加列失败:', addError);
-                            // 如果添加列失败，尝试不包含image_url字段保存
-                            delete taskData.image_url;
-                            await directSupabaseUpsertWithServiceKey('scheduled_messages', taskData, 'id');
-                        }
-                    } else {
-                        // 如果是其他错误，直接抛出
-                        throw error;
-                    }
-                }
+                // 直接保存，不检查列是否存在，因为我们已经确认列存在
+                await directSupabaseUpsertWithServiceKey('scheduled_messages', taskData, 'id');
                 
                 showAlert('定时任务保存成功', 'success');
                 bootstrap.Modal.getInstance(document.getElementById('editScheduledTaskModal')).hide();
@@ -2533,126 +2450,6 @@
             } else {
                 throw new Error('获取存储桶列表失败');
             }
-        }
-        
-        // 检查表列是否存在
-        async function checkTableColumnExists(tableName, columnName) {
-            // 检查缓存
-            if (tableSchemaCache[tableName] && tableSchemaCache[tableName].includes(columnName)) {
-                return true;
-            }
-            
-            // 获取表结构 - 使用更简单的方法
-            try {
-                // 尝试获取一条记录，看是否有该列
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/${tableName}?limit=1`, {
-                    method: 'GET',
-                    headers: {
-                        'apikey': SUPABASE_SERVICE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`获取表结构失败: ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                
-                // 如果有数据，检查是否包含该列
-                if (data && data.length > 0) {
-                    const columnExists = data[0].hasOwnProperty(columnName);
-                    
-                    if (columnExists) {
-                        // 更新缓存
-                        if (!tableSchemaCache[tableName]) {
-                            tableSchemaCache[tableName] = [];
-                        }
-                        tableSchemaCache[tableName].push(columnName);
-                        return true;
-                    }
-                }
-                
-                // 如果没有数据或者列不存在，尝试插入一条测试记录
-                const testData = {};
-                testData[columnName] = 'test_value';
-                
-                const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/${tableName}`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_SERVICE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify(testData)
-                });
-                
-                if (insertResponse.ok) {
-                    // 插入成功，说明列存在
-                    // 更新缓存
-                    if (!tableSchemaCache[tableName]) {
-                        tableSchemaCache[tableName] = [];
-                    }
-                    tableSchemaCache[tableName].push(columnName);
-                    
-                    // 删除测试记录
-                    const insertedData = await insertResponse.json();
-                    if (insertedData && insertedData.id) {
-                        await fetch(`${SUPABASE_URL}/rest/v1/${tableName}?id=eq.${insertedData.id}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'apikey': SUPABASE_SERVICE_KEY,
-                                'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
-                            }
-                        });
-                    }
-                    
-                    return true;
-                } else {
-                    const errorText = await insertResponse.text();
-                    if (errorText.includes('column') && errorText.includes('does not exist')) {
-                        throw new Error(`列 ${columnName} 在表 ${tableName} 中不存在`);
-                    } else {
-                        // 如果是其他错误，可能是其他原因导致的插入失败
-                        throw new Error(`检查列存在性失败: ${errorText}`);
-                    }
-                }
-            } catch (error) {
-                throw error;
-            }
-        }
-        
-        // 添加表列
-        async function addTableColumn(tableName, columnName, columnType) {
-            // 使用SQL直接添加列
-            const sql = `ALTER TABLE ${tableName} ADD COLUMN IF NOT EXISTS ${columnName} ${columnType}`;
-            
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/exec`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_SERVICE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    sql: sql
-                })
-            });
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`添加列失败: ${errorText}`);
-            }
-            
-            // 更新缓存
-            if (!tableSchemaCache[tableName]) {
-                tableSchemaCache[tableName] = [];
-            }
-            tableSchemaCache[tableName].push(columnName);
-            
-            return true;
         }
         
         // 加载系统设置

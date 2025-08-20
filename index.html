@@ -1528,8 +1528,20 @@
             modal.show();
         }
         // 保存老师
-        function saveTeacher() {
+        async function saveTeacher() {
             const teacherId = document.getElementById('editTeacherId').value;
+            const imageInput = document.getElementById('editTeacherImage');
+            let imageUrl = document.getElementById('editTeacherImageUrl').value;
+            
+            // 如果选择了新图片，先上传图片
+            if (imageInput.files && imageInput.files[0]) {
+                imageUrl = await uploadTeacherImage(imageInput.files[0], 'edit');
+                if (!imageUrl) {
+                    showAlert('图片上传失败', 'danger');
+                    return;
+                }
+            }
+            
             const teacherData = {
                 id: parseInt(teacherId),
                 nickname: document.getElementById('editTeacherNickname').value,
@@ -1541,7 +1553,7 @@
                 repair_cost: document.getElementById('editTeacherRepairCost').value,
                 intro: document.getElementById('editTeacherIntro').value,
                 status: document.getElementById('editTeacherStatus').value,
-                image_url: document.getElementById('editTeacherImageUrl').value
+                image_url: imageUrl
             };
             showLoading(true);
             directSupabaseUpsert('teachers', teacherData, 'id')
@@ -1582,7 +1594,19 @@
             modal.show();
         }
         // 添加老师
-        function addTeacher() {
+        async function addTeacher() {
+            const imageInput = document.getElementById('addTeacherImage');
+            let imageUrl = '';
+            
+            // 如果选择了图片，先上传图片
+            if (imageInput.files && imageInput.files[0]) {
+                imageUrl = await uploadTeacherImage(imageInput.files[0], 'add');
+                if (!imageUrl) {
+                    showAlert('图片上传失败', 'danger');
+                    return;
+                }
+            }
+            
             const teacherData = {
                 nickname: document.getElementById('addTeacherNickname').value,
                 age: parseInt(document.getElementById('addTeacherAge').value),
@@ -1593,7 +1617,7 @@
                 repair_cost: document.getElementById('addTeacherRepairCost').value,
                 intro: document.getElementById('addTeacherIntro').value,
                 status: document.getElementById('addTeacherStatus').value,
-                image_url: document.getElementById('addTeacherImageUrl').value
+                image_url: imageUrl
             };
             showLoading(true);
             directSupabaseInsert('teachers', teacherData)
@@ -1613,20 +1637,17 @@
         function previewTeacherImage(type) {
             const fileInput = document.getElementById(`${type}TeacherImage`);
             const previewElement = document.getElementById(`${type}TeacherImagePreview`);
-            const hiddenInput = document.getElementById(`${type}TeacherImageUrl`);
             
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
                 
                 reader.onload = function(e) {
                     previewElement.innerHTML = `<img src="${e.target.result}" class="image-preview" alt="头像预览">`;
-                    // 这里我们只做预览，实际上传在保存时进行
                 };
                 
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
                 previewElement.innerHTML = '';
-                hiddenInput.value = '';
             }
         }
         // 上传老师图片
@@ -1655,9 +1676,6 @@
                 
                 // 获取公共URL
                 const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
-                
-                // 设置隐藏字段
-                document.getElementById(`${type}TeacherImageUrl`).value = imageUrl;
                 
                 return imageUrl;
             } catch (error) {
@@ -2161,15 +2179,34 @@
             })
             .then(response => {
                 if (response.ok) {
-                    return response.text();
+                    // 检查响应是否为空
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return response.json().then(data => {
+                            return data.message || data || '操作成功';
+                        }).catch(() => {
+                            return '操作成功';
+                        });
+                    } else {
+                        return response.text().then(text => {
+                            return text || '操作成功';
+                        });
+                    }
                 } else {
                     return response.text().then(text => {
-                        throw new Error(text || '触发失败');
+                        try {
+                            // 尝试解析为JSON
+                            const errorData = JSON.parse(text);
+                            throw new Error(errorData.error || errorData.details || errorData.message || '触发失败');
+                        } catch (e) {
+                            // 如果不是JSON，直接使用文本
+                            throw new Error(text || '触发失败');
+                        }
                     });
                 }
             })
-            .then(text => {
-                showAlert(text, 'success');
+            .then(message => {
+                showAlert(message, 'success');
                 // 刷新随机老师配置数量
                 loadDashboard();
             })

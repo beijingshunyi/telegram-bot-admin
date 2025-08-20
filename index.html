@@ -220,6 +220,15 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="card stat-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">随机老师配置</h5>
+                                    <h2 class="text-info" id="totalRandomTeacherConfigs">-</h2>
+                                    <p class="card-text">随机老师发送配置数量</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-4">
@@ -474,6 +483,9 @@
                             </button>
                             <button class="btn btn-primary" onclick="refreshScheduledTasks()">
                                 <i class="bi bi-arrow-clockwise me-1"></i> 刷新列表
+                            </button>
+                            <button class="btn btn-warning" onclick="triggerRandomTeacherConfig()">
+                                <i class="bi bi-lightning me-1"></i> 触发随机老师发送
                             </button>
                         </div>
                     </div>
@@ -1169,13 +1181,15 @@
                 directSupabaseFetch('users'),
                 directSupabaseFetch('teachers'),
                 directSupabaseFetch('keywords'),
-                directSupabaseFetchWithServiceKey('banned_keywords') // 使用服务角色密钥获取禁言词
+                directSupabaseFetchWithServiceKey('banned_keywords'), // 使用服务角色密钥获取禁言词
+                directSupabaseFetchWithServiceKey('random_teacher_config') // 新增
             ])
-            .then(([users, teachers, keywords, banned]) => {
+            .then(([users, teachers, keywords, banned, randomTeacherConfigs]) => {
                 document.getElementById('totalUsers').textContent = users.length;
                 document.getElementById('totalTeachers').textContent = teachers.length;
                 document.getElementById('totalKeywords').textContent = keywords.length;
                 document.getElementById('totalBanned').textContent = banned.length;
+                document.getElementById('totalRandomTeacherConfigs').textContent = randomTeacherConfigs.length; // 新增
                 // 加载最近用户
                 const recentUsers = users.slice(0, 5);
                 const recentUsersHtml = recentUsers.map(user => `
@@ -2029,6 +2043,40 @@
             })
             .catch(error => {
                 showAlert('触发定时任务失败: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+        
+        // 手动触发随机老师发送配置
+        function triggerRandomTeacherConfig() {
+            if (!confirm('确定要立即触发随机老师发送配置吗？')) return;
+            showLoading(true);
+            
+            // 调用触发随机老师发送配置的API
+            fetch(`${API_BASE_URL}/send-random-teacher-config`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text || '触发失败');
+                    });
+                }
+            })
+            .then(text => {
+                showAlert(text, 'success');
+                // 刷新随机老师配置数量
+                loadDashboard();
+            })
+            .catch(error => {
+                showAlert('触发随机老师发送配置失败: ' + error.message, 'danger');
             })
             .finally(() => {
                 showLoading(false);

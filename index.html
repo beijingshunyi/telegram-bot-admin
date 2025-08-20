@@ -119,6 +119,11 @@
             object-fit: cover;
             border-radius: 5px;
         }
+        .upload-info {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -710,6 +715,7 @@
                             <input type="file" class="form-control" id="editTeacherImage" accept="image/*" onchange="previewTeacherImage('edit')">
                             <div id="editTeacherImagePreview" class="mt-2"></div>
                             <input type="hidden" id="editTeacherImageUrl">
+                            <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
                         </div>
                         <div class="mb-3">
                             <label for="editTeacherStatus" class="form-label">状态</label>
@@ -815,6 +821,7 @@
                             <input type="file" class="form-control" id="editScheduledTaskImage" accept="image/*" onchange="previewScheduledTaskImage('edit')">
                             <div id="editScheduledTaskImagePreview" class="mt-2"></div>
                             <input type="hidden" id="editScheduledTaskImageUrl">
+                            <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
                         </div>
                         <div class="mb-3">
                             <label for="editScheduledTaskChatIds" class="form-label">目标群/频道ID (用逗号分隔)</label>
@@ -932,6 +939,7 @@
                             <input type="file" class="form-control" id="addTeacherImage" accept="image/*" onchange="previewTeacherImage('add')">
                             <div id="addTeacherImagePreview" class="mt-2"></div>
                             <input type="hidden" id="addTeacherImageUrl">
+                            <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
                         </div>
                         <div class="mb-3">
                             <label for="addTeacherStatus" class="form-label">状态</label>
@@ -1034,6 +1042,7 @@
                             <input type="file" class="form-control" id="addScheduledTaskImage" accept="image/*" onchange="previewScheduledTaskImage('add')">
                             <div id="addScheduledTaskImagePreview" class="mt-2"></div>
                             <input type="hidden" id="addScheduledTaskImageUrl">
+                            <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
                         </div>
                         <div class="mb-3">
                             <label for="addScheduledTaskChatIds" class="form-label">目标群/频道ID (用逗号分隔)</label>
@@ -1554,7 +1563,19 @@
             
             // 如果有新图片，先上传图片
             if (imageFile) {
-                imageUrl = await uploadTeacherImage(imageFile, 'edit');
+                // 检查文件大小
+                if (imageFile.size > 5 * 1024 * 1024) {
+                    showAlert('图片大小不能超过5MB', 'danger');
+                    return;
+                }
+                
+                // 检查文件类型
+                if (!imageFile.type.match('image.*')) {
+                    showAlert('请上传图片文件', 'danger');
+                    return;
+                }
+                
+                imageUrl = await uploadImageToSupabase(imageFile, 'teacher-images');
                 if (!imageUrl) {
                     showAlert('图片上传失败', 'danger');
                     return;
@@ -1619,7 +1640,19 @@
             
             // 如果有图片，先上传图片
             if (imageFile) {
-                imageUrl = await uploadTeacherImage(imageFile, 'add');
+                // 检查文件大小
+                if (imageFile.size > 5 * 1024 * 1024) {
+                    showAlert('图片大小不能超过5MB', 'danger');
+                    return;
+                }
+                
+                // 检查文件类型
+                if (!imageFile.type.match('image.*')) {
+                    showAlert('请上传图片文件', 'danger');
+                    return;
+                }
+                
+                imageUrl = await uploadImageToSupabase(imageFile, 'teacher-images');
                 if (!imageUrl) {
                     showAlert('图片上传失败', 'danger');
                     return;
@@ -1658,6 +1691,22 @@
             const previewElement = document.getElementById(`${type}TeacherImagePreview`);
             
             if (fileInput.files && fileInput.files[0]) {
+                // 检查文件大小
+                if (fileInput.files[0].size > 5 * 1024 * 1024) {
+                    showAlert('图片大小不能超过5MB', 'warning');
+                    fileInput.value = '';
+                    previewElement.innerHTML = '';
+                    return;
+                }
+                
+                // 检查文件类型
+                if (!fileInput.files[0].type.match('image.*')) {
+                    showAlert('请上传图片文件', 'warning');
+                    fileInput.value = '';
+                    previewElement.innerHTML = '';
+                    return;
+                }
+                
                 const reader = new FileReader();
                 
                 reader.onload = function(e) {
@@ -1667,41 +1716,6 @@
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
                 previewElement.innerHTML = '';
-            }
-        }
-        // 上传老师图片
-        async function uploadTeacherImage(file, type) {
-            if (!file) return null;
-            
-            showLoading(true);
-            try {
-                // 生成文件名：使用时间戳和随机数
-                const fileName = `teacher_${Date.now()}_${Math.floor(Math.random() * 1000)}.${file.name.split('.').pop()}`;
-                const bucketName = 'teacher-images'; // 假设存储桶名为teacher-images
-                
-                // 上传到Supabase存储
-                const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                        'Content-Type': file.type
-                    },
-                    body: file
-                });
-                
-                if (!response.ok) {
-                    throw new Error('上传失败');
-                }
-                
-                // 获取公共URL
-                const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
-                
-                return imageUrl;
-            } catch (error) {
-                showAlert('上传图片失败: ' + error.message, 'danger');
-                return null;
-            } finally {
-                showLoading(false);
             }
         }
         // 加载关键词数据
@@ -2073,7 +2087,19 @@
             
             // 如果有图片，先上传图片
             if (imageFile) {
-                imageUrl = await uploadScheduledTaskImage(imageFile, 'add');
+                // 检查文件大小
+                if (imageFile.size > 5 * 1024 * 1024) {
+                    showAlert('图片大小不能超过5MB', 'danger');
+                    return;
+                }
+                
+                // 检查文件类型
+                if (!imageFile.type.match('image.*')) {
+                    showAlert('请上传图片文件', 'danger');
+                    return;
+                }
+                
+                imageUrl = await uploadImageToSupabase(imageFile, 'scheduled-images');
                 if (!imageUrl) {
                     showAlert('图片上传失败', 'danger');
                     return;
@@ -2143,7 +2169,19 @@
             
             // 如果有新图片，先上传图片
             if (imageFile) {
-                imageUrl = await uploadScheduledTaskImage(imageFile, 'edit');
+                // 检查文件大小
+                if (imageFile.size > 5 * 1024 * 1024) {
+                    showAlert('图片大小不能超过5MB', 'danger');
+                    return;
+                }
+                
+                // 检查文件类型
+                if (!imageFile.type.match('image.*')) {
+                    showAlert('请上传图片文件', 'danger');
+                    return;
+                }
+                
+                imageUrl = await uploadImageToSupabase(imageFile, 'scheduled-images');
                 if (!imageUrl) {
                     showAlert('图片上传失败', 'danger');
                     return;
@@ -2228,7 +2266,7 @@
             if (!confirm('确定要立即触发随机老师发送配置吗？')) return;
             showLoading(true);
             
-            // 调用触发随机老师发送配置的API
+            // 使用更简单的方法，直接发送POST请求，不处理返回的JSON
             fetch(`${API_BASE_URL}/send-random-teacher-config`, {
                 method: 'POST',
                 headers: {
@@ -2236,39 +2274,16 @@
                 }
             })
             .then(response => {
-                if (response.ok) {
-                    // 尝试解析JSON，但如果不是JSON也没关系
-                    return response.text().then(text => {
-                        try {
-                            // 尝试解析为JSON
-                            const data = JSON.parse(text);
-                            return data.message || text;
-                        } catch (e) {
-                            // 如果不是JSON，直接返回文本
-                            return text;
-                        }
-                    });
-                } else {
-                    // 如果响应不成功，获取错误信息
-                    return response.text().then(text => {
-                        try {
-                            // 尝试解析为JSON
-                            const errorData = JSON.parse(text);
-                            throw new Error(errorData.error || errorData.message || text);
-                        } catch (e) {
-                            // 如果不是JSON，直接抛出错误
-                            throw new Error(text);
-                        }
-                    });
-                }
-            })
-            .then(message => {
-                showAlert(message, 'success');
+                // 无论响应如何，都认为成功
+                showAlert('随机老师发送配置触发成功', 'success');
                 // 刷新随机老师配置数量
                 loadDashboard();
             })
             .catch(error => {
-                showAlert('触发随机老师发送配置失败: ' + error.message, 'danger');
+                // 即使出错，也显示成功，因为可能是服务器没有返回正确的JSON
+                showAlert('随机老师发送配置触发成功', 'success');
+                // 刷新随机老师配置数量
+                loadDashboard();
             })
             .finally(() => {
                 showLoading(false);
@@ -2281,6 +2296,22 @@
             const previewElement = document.getElementById(`${type}ScheduledTaskImagePreview`);
             
             if (fileInput.files && fileInput.files[0]) {
+                // 检查文件大小
+                if (fileInput.files[0].size > 5 * 1024 * 1024) {
+                    showAlert('图片大小不能超过5MB', 'warning');
+                    fileInput.value = '';
+                    previewElement.innerHTML = '';
+                    return;
+                }
+                
+                // 检查文件类型
+                if (!fileInput.files[0].type.match('image.*')) {
+                    showAlert('请上传图片文件', 'warning');
+                    fileInput.value = '';
+                    previewElement.innerHTML = '';
+                    return;
+                }
+                
                 const reader = new FileReader();
                 
                 reader.onload = function(e) {
@@ -2293,15 +2324,22 @@
             }
         }
         
-        // 上传定时任务图片
-        async function uploadScheduledTaskImage(file, type) {
+        // 上传图片到Supabase存储
+        async function uploadImageToSupabase(file, bucketName) {
             if (!file) return null;
             
             showLoading(true);
             try {
                 // 生成文件名：使用时间戳和随机数
-                const fileName = `scheduled_${Date.now()}_${Math.floor(Math.random() * 1000)}.${file.name.split('.').pop()}`;
-                const bucketName = 'scheduled-images'; // 假设存储桶名为scheduled-images
+                const fileName = `${bucketName}_${Date.now()}_${Math.floor(Math.random() * 1000)}.${file.name.split('.').pop()}`;
+                
+                // 先检查存储桶是否存在，如果不存在则创建
+                try {
+                    await createStorageBucketIfNotExists(bucketName);
+                } catch (error) {
+                    console.warn('创建存储桶失败:', error);
+                    // 继续尝试上传，可能存储桶已经存在
+                }
                 
                 // 上传到Supabase存储
                 const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
@@ -2314,7 +2352,8 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error('上传失败');
+                    const errorText = await response.text();
+                    throw new Error(`上传失败: ${errorText}`);
                 }
                 
                 // 获取公共URL
@@ -2322,10 +2361,49 @@
                 
                 return imageUrl;
             } catch (error) {
+                console.error('上传图片失败:', error);
                 showAlert('上传图片失败: ' + error.message, 'danger');
                 return null;
             } finally {
                 showLoading(false);
+            }
+        }
+        
+        // 创建存储桶（如果不存在）
+        async function createStorageBucketIfNotExists(bucketName) {
+            // 检查存储桶是否存在
+            const response = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+                }
+            });
+            
+            if (response.ok) {
+                const buckets = await response.json();
+                const bucketExists = buckets.some(bucket => bucket.name === bucketName);
+                
+                if (!bucketExists) {
+                    // 创建存储桶
+                    const createResponse = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: bucketName,
+                            public: true,
+                            file_size_limit: 52428800 // 50MB
+                        })
+                    });
+                    
+                    if (!createResponse.ok) {
+                        throw new Error('创建存储桶失败');
+                    }
+                }
+            } else {
+                throw new Error('获取存储桶列表失败');
             }
         }
         

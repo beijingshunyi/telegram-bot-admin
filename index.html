@@ -101,6 +101,18 @@
             color: #e74c3c;
             font-weight: bold;
         }
+        .teacher-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -357,6 +369,7 @@
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
+                                            <th>头像</th>
                                             <th>ID</th>
                                             <th>花名</th>
                                             <th>年龄</th>
@@ -369,7 +382,7 @@
                                     </thead>
                                     <tbody id="teachersTable">
                                         <tr>
-                                            <td colspan="8" class="text-center">加载中...</td>
+                                            <td colspan="9" class="text-center">加载中...</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -686,6 +699,12 @@
                             <textarea class="form-control" id="editTeacherIntro" rows="3"></textarea>
                         </div>
                         <div class="mb-3">
+                            <label for="editTeacherImage" class="form-label">头像</label>
+                            <input type="file" class="form-control" id="editTeacherImage" accept="image/*" onchange="previewTeacherImage('edit')">
+                            <div id="editTeacherImagePreview" class="mt-2"></div>
+                            <input type="hidden" id="editTeacherImageUrl">
+                        </div>
+                        <div class="mb-3">
                             <label for="editTeacherStatus" class="form-label">状态</label>
                             <select class="form-select" id="editTeacherStatus">
                                 <option value="pending">待审核</option>
@@ -894,6 +913,12 @@
                         <div class="mb-3">
                             <label for="addTeacherIntro" class="form-label">自我介绍</label>
                             <textarea class="form-control" id="addTeacherIntro" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addTeacherImage" class="form-label">头像</label>
+                            <input type="file" class="form-control" id="addTeacherImage" accept="image/*" onchange="previewTeacherImage('add')">
+                            <div id="addTeacherImagePreview" class="mt-2"></div>
+                            <input type="hidden" id="addTeacherImageUrl">
                         </div>
                         <div class="mb-3">
                             <label for="addTeacherStatus" class="form-label">状态</label>
@@ -1434,6 +1459,7 @@
             const pageData = teachersData.slice(start, end);
             const html = pageData.map(teacher => `
                 <tr>
+                    <td>${teacher.image_url ? `<img src="${teacher.image_url}" class="teacher-image" alt="头像">` : '<i class="bi bi-person-circle" style="font-size: 2rem;"></i>'}</td>
                     <td>${teacher.id}</td>
                     <td>${teacher.nickname}</td>
                     <td>${teacher.age}</td>
@@ -1453,7 +1479,7 @@
             `).join('');
             const teachersTableElement = document.getElementById('teachersTable');
             if (teachersTableElement) {
-                teachersTableElement.innerHTML = html || '<tr><td colspan="8" class="text-center">暂无数据</td></tr>';
+                teachersTableElement.innerHTML = html || '<tr><td colspan="9" class="text-center">暂无数据</td></tr>';
             }
             // 渲染分页
             renderPagination('teachers', teachersData.length, currentPage.teachers);
@@ -1488,6 +1514,16 @@
             document.getElementById('editTeacherRepairCost').value = teacher.repair_cost;
             document.getElementById('editTeacherIntro').value = teacher.intro;
             document.getElementById('editTeacherStatus').value = teacher.status;
+            document.getElementById('editTeacherImageUrl').value = teacher.image_url || '';
+            
+            // 显示图片预览
+            const previewElement = document.getElementById('editTeacherImagePreview');
+            if (teacher.image_url) {
+                previewElement.innerHTML = `<img src="${teacher.image_url}" class="image-preview" alt="头像预览">`;
+            } else {
+                previewElement.innerHTML = '';
+            }
+            
             const modal = new bootstrap.Modal(document.getElementById('editTeacherModal'));
             modal.show();
         }
@@ -1504,7 +1540,8 @@
                 service_type: document.getElementById('editTeacherServiceType').value,
                 repair_cost: document.getElementById('editTeacherRepairCost').value,
                 intro: document.getElementById('editTeacherIntro').value,
-                status: document.getElementById('editTeacherStatus').value
+                status: document.getElementById('editTeacherStatus').value,
+                image_url: document.getElementById('editTeacherImageUrl').value
             };
             showLoading(true);
             directSupabaseUpsert('teachers', teacherData, 'id')
@@ -1539,6 +1576,8 @@
         // 显示添加老师模态框
         function showAddTeacherModal() {
             document.getElementById('addTeacherForm').reset();
+            document.getElementById('addTeacherImagePreview').innerHTML = '';
+            document.getElementById('addTeacherImageUrl').value = '';
             const modal = new bootstrap.Modal(document.getElementById('addTeacherModal'));
             modal.show();
         }
@@ -1553,7 +1592,8 @@
                 service_type: document.getElementById('addTeacherServiceType').value,
                 repair_cost: document.getElementById('addTeacherRepairCost').value,
                 intro: document.getElementById('addTeacherIntro').value,
-                status: document.getElementById('addTeacherStatus').value
+                status: document.getElementById('addTeacherStatus').value,
+                image_url: document.getElementById('addTeacherImageUrl').value
             };
             showLoading(true);
             directSupabaseInsert('teachers', teacherData)
@@ -1568,6 +1608,64 @@
             .finally(() => {
                 showLoading(false);
             });
+        }
+        // 预览老师图片
+        function previewTeacherImage(type) {
+            const fileInput = document.getElementById(`${type}TeacherImage`);
+            const previewElement = document.getElementById(`${type}TeacherImagePreview`);
+            const hiddenInput = document.getElementById(`${type}TeacherImageUrl`);
+            
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewElement.innerHTML = `<img src="${e.target.result}" class="image-preview" alt="头像预览">`;
+                    // 这里我们只做预览，实际上传在保存时进行
+                };
+                
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                previewElement.innerHTML = '';
+                hiddenInput.value = '';
+            }
+        }
+        // 上传老师图片
+        async function uploadTeacherImage(file, type) {
+            if (!file) return null;
+            
+            showLoading(true);
+            try {
+                // 生成文件名：使用时间戳和随机数
+                const fileName = `teacher_${Date.now()}_${Math.floor(Math.random() * 1000)}.${file.name.split('.').pop()}`;
+                const bucketName = 'teacher-images'; // 假设存储桶名为teacher-images
+                
+                // 上传到Supabase存储
+                const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                        'Content-Type': file.type
+                    },
+                    body: file
+                });
+                
+                if (!response.ok) {
+                    throw new Error('上传失败');
+                }
+                
+                // 获取公共URL
+                const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
+                
+                // 设置隐藏字段
+                document.getElementById(`${type}TeacherImageUrl`).value = imageUrl;
+                
+                return imageUrl;
+            } catch (error) {
+                showAlert('上传图片失败: ' + error.message, 'danger');
+                return null;
+            } finally {
+                showLoading(false);
+            }
         }
         // 加载关键词数据
         function loadKeywords(page = 1) {

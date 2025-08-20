@@ -1193,14 +1193,12 @@
                 console.error('找不到部分: ' + section);
                 return;
             }
-            
             // 更新侧边栏激活状态
             document.querySelectorAll('.sidebar .nav-link').forEach(el => {
                 el.classList.remove('active');
             });
             event.target.classList.add('active');
             currentSection = section;
-            
             // 加载数据
             switch(section) {
                 case 'dashboard':
@@ -1257,7 +1255,6 @@
                 if (recentUsersElement) {
                     recentUsersElement.innerHTML = recentUsersHtml;
                 }
-                
                 // 加载最近老师
                 const recentTeachers = teachers.slice(0, 5);
                 const recentTeachersHtml = recentTeachers.map(teacher => `
@@ -1543,7 +1540,6 @@
             document.getElementById('editTeacherIntro').value = teacher.intro;
             document.getElementById('editTeacherStatus').value = teacher.status;
             document.getElementById('editTeacherImageUrl').value = teacher.image_url || '';
-            
             // 显示图片预览
             const previewElement = document.getElementById('editTeacherImagePreview');
             if (teacher.image_url) {
@@ -1551,7 +1547,6 @@
             } else {
                 previewElement.innerHTML = '';
             }
-            
             const modal = new bootstrap.Modal(document.getElementById('editTeacherModal'));
             modal.show();
         }
@@ -1560,7 +1555,6 @@
             const teacherId = document.getElementById('editTeacherId').value;
             const imageFile = document.getElementById('editTeacherImage').files[0];
             let imageUrl = document.getElementById('editTeacherImageUrl').value;
-            
             // 如果有新图片，先上传图片
             if (imageFile) {
                 // 检查文件大小
@@ -1568,20 +1562,17 @@
                     showAlert('图片大小不能超过5MB', 'danger');
                     return;
                 }
-                
                 // 检查文件类型
                 if (!imageFile.type.match('image.*')) {
                     showAlert('请上传图片文件', 'danger');
                     return;
                 }
-                
                 imageUrl = await uploadImageToSupabase(imageFile, 'teacher-images');
                 if (!imageUrl) {
                     showAlert('图片上传失败', 'danger');
                     return;
                 }
             }
-            
             const teacherData = {
                 id: parseInt(teacherId),
                 nickname: document.getElementById('editTeacherNickname').value,
@@ -1637,7 +1628,6 @@
         async function addTeacher() {
             const imageFile = document.getElementById('addTeacherImage').files[0];
             let imageUrl = '';
-            
             // 如果有图片，先上传图片
             if (imageFile) {
                 // 检查文件大小
@@ -1645,20 +1635,17 @@
                     showAlert('图片大小不能超过5MB', 'danger');
                     return;
                 }
-                
                 // 检查文件类型
                 if (!imageFile.type.match('image.*')) {
                     showAlert('请上传图片文件', 'danger');
                     return;
                 }
-                
                 imageUrl = await uploadImageToSupabase(imageFile, 'teacher-images');
                 if (!imageUrl) {
                     showAlert('图片上传失败', 'danger');
                     return;
                 }
             }
-            
             const teacherData = {
                 nickname: document.getElementById('addTeacherNickname').value,
                 age: parseInt(document.getElementById('addTeacherAge').value),
@@ -1689,7 +1676,6 @@
         function previewTeacherImage(type) {
             const fileInput = document.getElementById(`${type}TeacherImage`);
             const previewElement = document.getElementById(`${type}TeacherImagePreview`);
-            
             if (fileInput.files && fileInput.files[0]) {
                 // 检查文件大小
                 if (fileInput.files[0].size > 5 * 1024 * 1024) {
@@ -1698,7 +1684,6 @@
                     previewElement.innerHTML = '';
                     return;
                 }
-                
                 // 检查文件类型
                 if (!fileInput.files[0].type.match('image.*')) {
                     showAlert('请上传图片文件', 'warning');
@@ -1706,13 +1691,10 @@
                     previewElement.innerHTML = '';
                     return;
                 }
-                
                 const reader = new FileReader();
-                
                 reader.onload = function(e) {
                     previewElement.innerHTML = `<img src="${e.target.result}" class="image-preview" alt="头像预览">`;
                 };
-                
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
                 previewElement.innerHTML = '';
@@ -1987,7 +1969,6 @@
                 showLoading(false);
             });
         }
-        
         // 定时发送任务相关函数
         // 加载定时任务数据
         function loadScheduledTasks(page = 1) {
@@ -2006,7 +1987,6 @@
                 showLoading(false);
             });
         }
-        
         // 渲染定时任务表格
         function renderScheduledTasksTable() {
             const start = (currentPage.scheduled - 1) * itemsPerPage;
@@ -2034,18 +2014,15 @@
                     </td>
                 </tr>
             `).join('');
-            
             const scheduledTasksTableElement = document.getElementById('scheduledTasksTable');
             if (scheduledTasksTableElement) {
                 scheduledTasksTableElement.innerHTML = html || '<tr><td colspan="8" class="text-center">暂无数据</td></tr>';
             } else {
                 console.error('找不到定时任务表格元素: scheduledTasksTable');
             }
-            
             // 渲染分页
             renderPagination('scheduled', scheduledTasksData.length, currentPage.scheduled);
         }
-        
         // 搜索定时任务
         function searchScheduledTasks() {
             const keyword = document.getElementById('scheduledSearch').value.toLowerCase();
@@ -2061,12 +2038,10 @@
             currentPage.scheduled = 1;
             renderScheduledTasksTable();
         }
-        
         // 刷新定时任务列表
         function refreshScheduledTasks() {
             loadScheduledTasks(currentPage.scheduled);
         }
-        
         // 显示添加定时任务模态框
         function showAddScheduledTaskModal() {
             document.getElementById('addScheduledTaskForm').reset();
@@ -2079,12 +2054,10 @@
             const modal = new bootstrap.Modal(document.getElementById('addScheduledTaskModal'));
             modal.show();
         }
-        
         // 添加定时任务
         async function addScheduledTask() {
             const imageFile = document.getElementById('addScheduledTaskImage').files[0];
             let imageUrl = '';
-            
             // 如果有图片，先上传图片
             if (imageFile) {
                 // 检查文件大小
@@ -2092,20 +2065,17 @@
                     showAlert('图片大小不能超过5MB', 'danger');
                     return;
                 }
-                
                 // 检查文件类型
                 if (!imageFile.type.match('image.*')) {
                     showAlert('请上传图片文件', 'danger');
                     return;
                 }
-                
                 imageUrl = await uploadImageToSupabase(imageFile, 'scheduled-images');
                 if (!imageUrl) {
                     showAlert('图片上传失败', 'danger');
                     return;
                 }
             }
-            
             const nextSendTime = document.getElementById('addScheduledTaskNextSend').value;
             const taskData = {
                 name: document.getElementById('addScheduledTaskName').value,
@@ -2130,7 +2100,6 @@
                 showLoading(false);
             });
         }
-        
         // 编辑定时任务
         function editScheduledTask(taskId) {
             const task = scheduledTasksData.find(t => t.id === taskId);
@@ -2139,7 +2108,6 @@
             document.getElementById('editScheduledTaskName').value = task.name;
             document.getElementById('editScheduledTaskContent').value = task.content;
             document.getElementById('editScheduledTaskImageUrl').value = task.image_url || '';
-            
             // 显示图片预览
             const previewElement = document.getElementById('editScheduledTaskImagePreview');
             if (task.image_url) {
@@ -2147,26 +2115,21 @@
             } else {
                 previewElement.innerHTML = '';
             }
-            
             document.getElementById('editScheduledTaskChatIds').value = task.chat_ids.join(',');
             document.getElementById('editScheduledTaskInterval').value = task.interval;
-            
             // 设置下次发送时间
             const nextSendTime = new Date(task.next_send_time);
             nextSendTime.setMinutes(nextSendTime.getMinutes() - nextSendTime.getTimezoneOffset());
             document.getElementById('editScheduledTaskNextSend').value = nextSendTime.toISOString().slice(0, 16);
-            
             document.getElementById('editScheduledTaskActive').value = task.is_active ? 'true' : 'false';
             const modal = new bootstrap.Modal(document.getElementById('editScheduledTaskModal'));
             modal.show();
         }
-        
         // 保存定时任务
         async function saveScheduledTask() {
             const taskId = document.getElementById('editScheduledTaskId').value;
             const imageFile = document.getElementById('editScheduledTaskImage').files[0];
             let imageUrl = document.getElementById('editScheduledTaskImageUrl').value;
-            
             // 如果有新图片，先上传图片
             if (imageFile) {
                 // 检查文件大小
@@ -2174,20 +2137,17 @@
                     showAlert('图片大小不能超过5MB', 'danger');
                     return;
                 }
-                
                 // 检查文件类型
                 if (!imageFile.type.match('image.*')) {
                     showAlert('请上传图片文件', 'danger');
                     return;
                 }
-                
                 imageUrl = await uploadImageToSupabase(imageFile, 'scheduled-images');
                 if (!imageUrl) {
                     showAlert('图片上传失败', 'danger');
                     return;
                 }
             }
-            
             const nextSendTime = document.getElementById('editScheduledTaskNextSend').value;
             const taskData = {
                 id: parseInt(taskId),
@@ -2213,7 +2173,6 @@
                 showLoading(false);
             });
         }
-        
         // 删除定时任务
         function deleteScheduledTask(taskId) {
             if (!confirm('确定要删除这个定时任务吗？')) return;
@@ -2230,12 +2189,10 @@
                 showLoading(false);
             });
         }
-        
         // 触发定时任务
         function triggerScheduledTask(taskId) {
             if (!confirm('确定要立即触发这个定时任务吗？')) return;
             showLoading(true);
-            
             // 调用触发任务的API
             fetch(`${API_BASE_URL}/api/scheduled/${taskId}/trigger`, {
                 method: 'POST',
@@ -2260,12 +2217,10 @@
                 showLoading(false);
             });
         }
-        
         // 手动触发随机老师发送配置
         function triggerRandomTeacherConfig() {
             if (!confirm('确定要立即触发随机老师发送配置吗？')) return;
             showLoading(true);
-            
             // 使用更简单的方法，直接发送POST请求，不处理返回的JSON
             fetch(`${API_BASE_URL}/send-random-teacher-config`, {
                 method: 'POST',
@@ -2289,12 +2244,10 @@
                 showLoading(false);
             });
         }
-        
         // 预览定时任务图片
         function previewScheduledTaskImage(type) {
             const fileInput = document.getElementById(`${type}ScheduledTaskImage`);
             const previewElement = document.getElementById(`${type}ScheduledTaskImagePreview`);
-            
             if (fileInput.files && fileInput.files[0]) {
                 // 检查文件大小
                 if (fileInput.files[0].size > 5 * 1024 * 1024) {
@@ -2303,7 +2256,6 @@
                     previewElement.innerHTML = '';
                     return;
                 }
-                
                 // 检查文件类型
                 if (!fileInput.files[0].type.match('image.*')) {
                     showAlert('请上传图片文件', 'warning');
@@ -2311,28 +2263,22 @@
                     previewElement.innerHTML = '';
                     return;
                 }
-                
                 const reader = new FileReader();
-                
                 reader.onload = function(e) {
                     previewElement.innerHTML = `<img src="${e.target.result}" class="image-preview" alt="图片预览">`;
                 };
-                
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
                 previewElement.innerHTML = '';
             }
         }
-        
         // 上传图片到Supabase存储
         async function uploadImageToSupabase(file, bucketName) {
             if (!file) return null;
-            
             showLoading(true);
             try {
                 // 生成文件名：使用时间戳和随机数
                 const fileName = `${bucketName}_${Date.now()}_${Math.floor(Math.random() * 1000)}.${file.name.split('.').pop()}`;
-                
                 // 先检查存储桶是否存在，如果不存在则创建
                 try {
                     await createStorageBucketIfNotExists(bucketName);
@@ -2340,7 +2286,6 @@
                     console.warn('创建存储桶失败:', error);
                     // 继续尝试上传，可能存储桶已经存在
                 }
-                
                 // 上传到Supabase存储
                 const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
                     method: 'POST',
@@ -2350,15 +2295,12 @@
                     },
                     body: file
                 });
-                
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`上传失败: ${errorText}`);
                 }
-                
                 // 获取公共URL
                 const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
-                
                 return imageUrl;
             } catch (error) {
                 console.error('上传图片失败:', error);
@@ -2368,7 +2310,6 @@
                 showLoading(false);
             }
         }
-        
         // 创建存储桶（如果不存在）
         async function createStorageBucketIfNotExists(bucketName) {
             // 检查存储桶是否存在
@@ -2378,11 +2319,9 @@
                     'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
                 }
             });
-            
             if (response.ok) {
                 const buckets = await response.json();
                 const bucketExists = buckets.some(bucket => bucket.name === bucketName);
-                
                 if (!bucketExists) {
                     // 创建存储桶
                     const createResponse = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
@@ -2397,7 +2336,6 @@
                             file_size_limit: 52428800 // 50MB
                         })
                     });
-                    
                     if (!createResponse.ok) {
                         throw new Error('创建存储桶失败');
                     }
@@ -2406,7 +2344,6 @@
                 throw new Error('获取存储桶列表失败');
             }
         }
-        
         // 加载系统设置
         function loadSettings() {
             // 更新服务器时间
@@ -2468,7 +2405,6 @@
             html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
                 <a class="page-link" href="#" onclick="changePage('${type}', ${currentPage + 1})">下一页</a>
             </li>`;
-            
             const paginationElement = document.getElementById(type + 'Pagination');
             if (paginationElement) {
                 paginationElement.innerHTML = html;

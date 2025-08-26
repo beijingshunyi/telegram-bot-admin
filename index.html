@@ -10,29 +10,34 @@
         :root {
             --primary-color: #185A56;
             --secondary-color: #FD742D;
-            --light-bg: #f8f9fa;
-            --dark-text: #333;
-            --sidebar-width: 280px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
-            background-color: var(--light-bg);
+            background-color: #f8f9fa;
             font-family: 'Microsoft YaHei', sans-serif;
-            color: var(--dark-text);
-            overflow-x: hidden;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .main-container {
+            display: flex;
+            height: 100vh;
         }
         
         .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: var(--sidebar-width);
+            width: 260px;
             background-color: var(--primary-color);
             color: white;
-            z-index: 1000;
-            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            z-index: 1000;
         }
         
         .sidebar-header {
@@ -42,93 +47,142 @@
         }
         
         .sidebar-header h3 {
-            margin: 0;
-            font-weight: 600;
             font-size: 1.2rem;
+            margin-bottom: 5px;
         }
         
-        .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
+        .sidebar-header p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .sidebar-menu {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+        
+        .menu-section {
+            margin-bottom: 25px;
+        }
+        
+        .menu-title {
+            padding: 0 20px 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
             padding: 12px 20px;
-            border-radius: 0;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
             transition: all 0.3s;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .menu-item.active {
+            background-color: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: var(--secondary-color);
+        }
+        
+        .menu-item i {
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+        
+        .sidebar-footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .top-bar {
+            height: 60px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            z-index: 100;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .user-info {
             display: flex;
             align-items: center;
         }
         
-        .sidebar .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
+        .user-info .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            color: #495057;
+            text-decoration: none;
         }
         
-        .sidebar .nav-link.active {
-            background-color: var(--secondary-color);
-            color: white;
-            font-weight: 500;
-        }
-        
-        .sidebar .nav-link i {
+        .user-info i {
+            font-size: 1.5rem;
             margin-right: 10px;
-            font-size: 1.1rem;
-        }
-        
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 20px;
-            transition: all 0.3s;
-            min-height: 100vh;
-        }
-        
-        .page-header {
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--primary-color);
-        }
-        
-        .page-header h1 {
             color: var(--primary-color);
-            font-weight: 600;
-            margin: 0;
+        }
+        
+        .content {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+        }
+        
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
         }
         
         .card {
-            margin-bottom: 25px;
             border: none;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.3s;
-        }
-        
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
         }
         
         .card-header {
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 10px 10px 0 0 !important;
+            background-color: white;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
             padding: 15px 20px;
-            font-weight: 500;
-        }
-        
-        .stat-card {
-            border-left: 4px solid var(--secondary-color);
-            transition: all 0.3s;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .stat-card .card-body h5 {
+            font-weight: 600;
             color: var(--primary-color);
-            font-weight: 500;
+            border-radius: 10px 10px 0 0 !important;
         }
         
-        .stat-card .card-body h2 {
-            color: var(--secondary-color);
-            font-weight: 700;
+        .card-body {
+            padding: 20px;
         }
         
         .btn-primary {
@@ -136,28 +190,44 @@
             border-color: var(--primary-color);
         }
         
-        .btn-primary:hover {
-            background-color: #14443f;
-            border-color: #14443f;
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: #14433f;
+            border-color: #14433f;
         }
         
-        .btn-success {
+        .btn-secondary {
             background-color: var(--secondary-color);
             border-color: var(--secondary-color);
         }
         
-        .btn-success:hover {
-            background-color: #e65a1b;
-            border-color: #e65a1b;
+        .btn-secondary:hover, .btn-secondary:focus {
+            background-color: #e5661f;
+            border-color: #e5661f;
         }
         
-        .table-responsive {
-            border-radius: 10px;
-            overflow: hidden;
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-secondary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
         }
         
         .table {
-            margin-bottom: 0;
+            border-radius: 8px;
+            overflow: hidden;
         }
         
         .table thead th {
@@ -167,36 +237,45 @@
             font-weight: 500;
         }
         
+        .table td, .table th {
+            vertical-align: middle;
+        }
+        
         .table-hover tbody tr:hover {
             background-color: rgba(24, 90, 86, 0.05);
         }
         
-        .action-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .btn-action {
-            border-radius: 5px;
+        .badge {
             padding: 5px 10px;
-            font-size: 0.875rem;
+            border-radius: 20px;
+            font-weight: 500;
         }
         
-        .login-container {
-            max-width: 450px;
-            margin: 100px auto;
-            padding: 40px;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        .badge.bg-success {
+            background-color: #28a745 !important;
         }
         
-        .login-title {
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--primary-color);
-            font-weight: 600;
+        .badge.bg-warning {
+            background-color: #ffc107 !important;
+            color: #212529 !important;
+        }
+        
+        .badge.bg-danger {
+            background-color: #dc3545 !important;
+        }
+        
+        .badge.bg-secondary {
+            background-color: #6c757d !important;
+        }
+        
+        .status-active {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-inactive {
+            color: #dc3545;
+            font-weight: bold;
         }
         
         .modal-header {
@@ -209,18 +288,14 @@
             filter: brightness(0) invert(1);
         }
         
-        .form-label {
-            font-weight: 500;
-            color: var(--primary-color);
+        .modal-footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid rgba(0,0,0,0.05);
         }
         
         .form-control:focus, .form-select:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 0.25rem rgba(253, 116, 45, 0.25);
-        }
-        
-        .pagination {
-            margin-top: 20px;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(24, 90, 86, 0.25);
         }
         
         .pagination .page-link {
@@ -232,26 +307,42 @@
             border-color: var(--primary-color);
         }
         
+        .teacher-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        
+        .video-preview {
+            max-width: 300px;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        
+        .scheduled-task-image {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        
+        .upload-info {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
         .search-box {
             margin-bottom: 20px;
-        }
-        
-        .search-box .input-group {
-            border-radius: 50px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .search-box .form-control {
-            border: none;
-            border-radius: 50px 0 0 50px;
-        }
-        
-        .search-box .btn {
-            border: none;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 0 50px 50px 0;
         }
         
         .alert-container {
@@ -278,88 +369,124 @@
         .loading-spinner .spinner-border {
             width: 3rem;
             height: 3rem;
-            border-color: var(--secondary-color);
-            border-right-color: transparent;
         }
         
-        .status-active {
-            color: #28a745;
-            font-weight: bold;
+        .stats-card {
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.3s;
         }
         
-        .status-inactive {
-            color: #dc3545;
-            font-weight: bold;
+        .stats-card:hover {
+            transform: translateY(-5px);
         }
         
-        .teacher-image {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
+        .stats-card h5 {
+            color: #6c757d;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .stats-card h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stats-card p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-action {
+            padding: 5px 10px;
+            font-size: 0.875rem;
+        }
+        
+        .login-container {
+            max-width: 450px;
+            margin: 100px auto;
+            padding: 40px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background-color: var(--primary-color);
             border-radius: 50%;
-        }
-        
-        .image-preview {
-            max-width: 200px;
-            max-height: 200px;
-            margin-top: 10px;
-            border-radius: 5px;
-        }
-        
-        .video-preview {
-            max-width: 300px;
-            max-height: 300px;
-            margin-top: 10px;
-            border-radius: 5px;
-        }
-        
-        .scheduled-task-image {
-            max-width: 100px;
-            max-height: 100px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-        
-        .upload-info {
-            font-size: 0.85rem;
-            color: #6c757d;
-            margin-top: 5px;
-        }
-        
-        .debug-info {
-            font-size: 0.75rem;
-            color: #6c757d;
-            margin-top: 5px;
-            font-family: monospace;
-        }
-        
-        .points-input-group {
             display: flex;
             align-items: center;
-        }
-        
-        .points-input-group .input-group-text {
-            background-color: var(--primary-color);
+            justify-content: center;
             color: white;
+            font-size: 2rem;
+        }
+        
+        .form-floating label {
+            color: var(--primary-color);
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            padding: 12px;
+        }
+        
+        .btn-login {
+            background-color: var(--primary-color);
             border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
         }
         
-        .points-input-group .form-control {
-            border-left: none;
+        .btn-login:hover {
+            background-color: #14433f;
         }
         
-        .media-upload-container {
-            border: 2px dashed #ccc;
-            border-radius: 10px;
+        .nav-tabs .nav-link {
+            color: var(--primary-color);
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .media-upload-area {
+            border: 2px dashed #ced4da;
+            border-radius: 8px;
             padding: 20px;
             text-align: center;
             margin-bottom: 15px;
             transition: all 0.3s;
         }
         
-        .media-upload-container:hover {
-            border-color: var(--secondary-color);
-            background-color: rgba(253, 116, 45, 0.05);
+        .media-upload-area:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .media-upload-area i {
+            font-size: 2rem;
+            color: #ced4da;
+            margin-bottom: 10px;
         }
         
         .media-preview-container {
@@ -369,20 +496,23 @@
             margin-top: 15px;
         }
         
-        .media-preview-item {
+        .media-preview {
             position: relative;
-            border-radius: 5px;
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
             overflow: hidden;
+            border: 1px solid #ced4da;
         }
         
-        .media-preview-item img,
-        .media-preview-item video {
-            max-width: 150px;
-            max-height: 150px;
-            display: block;
+        .media-preview img,
+        .media-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         
-        .media-preview-item .remove-media {
+        .media-preview .remove-media {
             position: absolute;
             top: 5px;
             right: 5px;
@@ -396,695 +526,553 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 12px;
-        }
-        
-        .user-profile {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .user-profile img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        
-        .user-profile .user-info {
-            flex: 1;
-        }
-        
-        .user-profile .user-info h5 {
-            margin: 0;
-            font-size: 0.9rem;
-        }
-        
-        .user-profile .user-info p {
-            margin: 0;
             font-size: 0.8rem;
-            opacity: 0.8;
         }
         
-        .sidebar-footer {
-            padding: 15px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            text-align: center;
+        .tab-content {
+            padding: 20px 0;
         }
         
-        .sidebar-footer button {
-            background-color: transparent;
-            border: 1px solid rgba(255,255,255,0.3);
+        .custom-file-upload {
+            display: inline-block;
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 5px;
+            background-color: var(--primary-color);
             color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.3s;
         }
         
-        .sidebar-footer button:hover {
-            background-color: rgba(255,255,255,0.1);
+        .custom-file-upload:hover {
+            background-color: #14433f;
         }
         
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-            }
-            
-            .sidebar-header h3,
-            .sidebar .nav-link span,
-            .user-profile .user-info,
-            .sidebar-footer {
-                display: none;
-            }
-            
-            .sidebar .nav-link {
-                justify-content: center;
-                padding: 15px 0;
-            }
-            
-            .sidebar .nav-link i {
-                margin: 0;
-                font-size: 1.5rem;
-            }
-            
-            .main-content {
-                margin-left: 70px;
-            }
+        input[type="file"] {
+            display: none;
         }
     </style>
 </head>
 <body>
     <!-- 加载动画 -->
     <div class="loading-spinner" id="loadingSpinner">
-        <div class="spinner-border" role="status">
+        <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">加载中...</span>
         </div>
     </div>
     
     <!-- 登录界面 -->
     <div class="login-container" id="loginContainer">
-        <div class="text-center mb-4">
-            <i class="bi bi-robot" style="font-size: 3rem; color: var(--primary-color);"></i>
+        <div class="login-logo">
+            <i class="bi bi-robot"></i>
         </div>
         <h2 class="login-title">北京修车【万花楼】超级机器人管理后台</h2>
-        <div class="mb-3">
-            <label for="adminKey" class="form-label">管理员密钥</label>
-            <input type="password" class="form-control" id="adminKey" placeholder="请输入管理员密钥">
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="adminKey" placeholder="管理员密钥">
+            <label for="adminKey">管理员密钥</label>
         </div>
-        <button class="btn btn-primary w-100" onclick="login()">登录</button>
+        <button class="btn btn-primary btn-login" onclick="login()">登录</button>
         <div class="mt-3 text-center">
             <small class="text-muted">请输入正确的管理员密钥以继续</small>
         </div>
     </div>
     
     <!-- 主界面 -->
-    <div class="d-flex" id="mainContainer" style="display: none;">
+    <div class="main-container" id="mainContainer" style="display: none;">
         <!-- 侧边栏 -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <i class="bi bi-robot" style="font-size: 1.5rem;"></i>
-                <h3>万花楼机器人</h3>
+                <h3>北京修车【万花楼】</h3>
+                <p>超级机器人管理后台</p>
             </div>
-            <ul class="nav flex-column mb-auto">
-                <li class="nav-item">
-                    <a href="#" class="nav-link active" onclick="showSection('dashboard')">
+            
+            <div class="sidebar-menu">
+                <div class="menu-section">
+                    <div class="menu-title">系统概览</div>
+                    <a href="#" class="menu-item active" onclick="showSection('dashboard')">
                         <i class="bi bi-speedometer2"></i>
                         <span>运行仪表盘</span>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection('users')">
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-title">用户管理</div>
+                    <a href="#" class="menu-item" onclick="showSection('users')">
                         <i class="bi bi-people"></i>
                         <span>用户管理</span>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection('teachers')">
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-title">老师管理</div>
+                    <a href="#" class="menu-item" onclick="showSection('teachers')">
                         <i class="bi bi-person-badge"></i>
                         <span>老师管理</span>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection('keywords')">
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-title">内容管理</div>
+                    <a href="#" class="menu-item" onclick="showSection('keywords')">
                         <i class="bi bi-key"></i>
                         <span>关键词管理</span>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection('banned')">
+                    <a href="#" class="menu-item" onclick="showSection('banned')">
                         <i class="bi bi-shield-x"></i>
                         <span>禁言词管理</span>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection('scheduled')">
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-title">任务管理</div>
+                    <a href="#" class="menu-item" onclick="showSection('scheduled')">
                         <i class="bi bi-clock-history"></i>
-                        <span>定时任务管理</span>
+                        <span>定时发送任务</span>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection('lottery')">
-                        <i class="bi bi-gift"></i>
-                        <span>抽奖管理</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection('settings')">
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-title">系统设置</div>
+                    <a href="#" class="menu-item" onclick="showSection('settings')">
                         <i class="bi bi-gear"></i>
                         <span>系统设置</span>
                     </a>
-                </li>
-            </ul>
-            <div class="user-profile">
-                <img src="https://picsum.photos/seed/admin/40/40.jpg" alt="管理员">
-                <div class="user-info">
-                    <h5>管理员</h5>
-                    <p>admin@example.com</p>
                 </div>
             </div>
+            
             <div class="sidebar-footer">
-                <button onclick="logout()">
-                    <i class="bi bi-box-arrow-right"></i> 退出登录
-                </button>
+                <p>© 2023 北京修车【万花楼】</p>
+                <p>超级机器人管理系统</p>
             </div>
         </div>
         
-        <!-- 主内容区 -->
-        <div class="main-content">
-            <!-- 仪表盘 -->
-            <div id="dashboardSection" class="content-section">
-                <div class="page-header">
-                    <h1>运行仪表盘</h1>
-                </div>
-                <div class="row">
-                    <div class="col-md-3 mb-4">
-                        <div class="card stat-card">
-                            <div class="card-body">
-                                <h5 class="card-title">用户总数</h5>
-                                <h2 class="text-primary" id="totalUsers">-</h2>
-                                <p class="card-text">注册用户数量</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card stat-card">
-                            <div class="card-body">
-                                <h5 class="card-title">老师总数</h5>
-                                <h2 class="text-success" id="totalTeachers">-</h2>
-                                <p class="card-text">已注册老师数量</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card stat-card">
-                            <div class="card-body">
-                                <h5 class="card-title">关键词总数</h5>
-                                <h2 class="text-warning" id="totalKeywords">-</h2>
-                                <p class="card-text">已设置关键词数量</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card stat-card">
-                            <div class="card-body">
-                                <h5 class="card-title">禁言词总数</h5>
-                                <h2 class="text-danger" id="totalBanned">-</h2>
-                                <p class="card-text">已设置禁言词数量</p>
-                            </div>
-                        </div>
+        <!-- 内容区域 -->
+        <div class="content-area">
+            <!-- 顶部栏 -->
+            <div class="top-bar">
+                <div class="page-title" id="pageTitle">运行仪表盘</div>
+                <div class="user-info">
+                    <div class="dropdown">
+                        <a href="#" class="dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                            <span>管理员</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" onclick="logout()">退出登录</a></li>
+                        </ul>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5>最近用户</h5>
+            </div>
+            
+            <!-- 内容区 -->
+            <div class="content">
+                <!-- 仪表盘 -->
+                <div id="dashboardSection" class="content-section active">
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-4">
+                            <div class="card stats-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">用户总数</h5>
+                                    <h2 class="text-primary" id="totalUsers">-</h2>
+                                    <p class="card-text">注册用户数量</p>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>用户名</th>
-                                                <th>积分</th>
-                                                <th>最后签到</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="recentUsers">
-                                            <tr>
-                                                <td colspan="4" class="text-center">加载中...</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="card stats-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">老师总数</h5>
+                                    <h2 class="text-success" id="totalTeachers">-</h2>
+                                    <p class="card-text">已注册老师数量</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="card stats-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">关键词总数</h5>
+                                    <h2 class="text-warning" id="totalKeywords">-</h2>
+                                    <p class="card-text">已设置关键词数量</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="card stats-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">禁言词总数</h5>
+                                    <h2 class="text-danger" id="totalBanned">-</h2>
+                                    <p class="card-text">已设置禁言词数量</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5>最近老师</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>最近用户</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>用户名</th>
+                                                    <th>积分</th>
+                                                    <th>最后签到</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="recentUsers">
+                                                <tr>
+                                                    <td colspan="4" class="text-center">加载中...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>花名</th>
-                                                <th>年龄</th>
-                                                <th>地区</th>
-                                                <th>状态</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="recentTeachers">
-                                            <tr>
-                                                <td colspan="4" class="text-center">加载中...</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>最近老师</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>花名</th>
+                                                    <th>年龄</th>
+                                                    <th>地区</th>
+                                                    <th>状态</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="recentTeachers">
+                                                <tr>
+                                                    <td colspan="4" class="text-center">加载中...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5>机器人状态</h5>
+                
+                <!-- 用户管理 -->
+                <div id="usersSection" class="content-section">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>用户管理</h5>
+                            <button class="btn btn-primary" onclick="showAddUserModal()">
+                                <i class="bi bi-plus-circle me-1"></i> 添加用户
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="search-box">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="搜索用户..." id="userSearch">
+                                    <button class="btn btn-outline-primary" type="button" onclick="searchUsers()">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="form-check form-switch me-3">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>用户名</th>
+                                            <th>显示名称</th>
+                                            <th>积分</th>
+                                            <th>消息数</th>
+                                            <th>最后签到</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTable">
+                                        <tr>
+                                            <td colspan="7" class="text-center">加载中...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center" id="usersPagination">
+                                    <!-- 分页按钮将通过JS动态生成 -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 老师管理 -->
+                <div id="teachersSection" class="content-section">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>老师管理</h5>
+                            <button class="btn btn-primary" onclick="showAddTeacherModal()">
+                                <i class="bi bi-plus-circle me-1"></i> 添加老师
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="search-box">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="搜索老师..." id="teacherSearch">
+                                    <button class="btn btn-outline-primary" type="button" onclick="searchTeachers()">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>头像</th>
+                                            <th>ID</th>
+                                            <th>花名</th>
+                                            <th>年龄</th>
+                                            <th>地区</th>
+                                            <th>账号</th>
+                                            <th>服务类型</th>
+                                            <th>状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="teachersTable">
+                                        <tr>
+                                            <td colspan="9" class="text-center">加载中...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center" id="teachersPagination">
+                                    <!-- 分页按钮将通过JS动态生成 -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 关键词管理 -->
+                <div id="keywordsSection" class="content-section">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>关键词管理</h5>
+                            <button class="btn btn-primary" onclick="showAddKeywordModal()">
+                                <i class="bi bi-plus-circle me-1"></i> 添加关键词
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="search-box">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="搜索关键词..." id="keywordSearch">
+                                    <button class="btn btn-outline-primary" type="button" onclick="searchKeywords()">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>关键词</th>
+                                            <th>回复内容</th>
+                                            <th>自定义回复</th>
+                                            <th>状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="keywordsTable">
+                                        <tr>
+                                            <td colspan="6" class="text-center">加载中...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center" id="keywordsPagination">
+                                    <!-- 分页按钮将通过JS动态生成 -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 禁言词管理 -->
+                <div id="bannedSection" class="content-section">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>禁言词管理</h5>
+                            <button class="btn btn-primary" onclick="showAddBannedModal()">
+                                <i class="bi bi-plus-circle me-1"></i> 添加禁言词
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="search-box">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="搜索禁言词..." id="bannedSearch">
+                                    <button class="btn btn-outline-primary" type="button" onclick="searchBanned()">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>禁言词</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bannedTable">
+                                        <tr>
+                                            <td colspan="3" class="text-center">加载中...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center" id="bannedPagination">
+                                    <!-- 分页按钮将通过JS动态生成 -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 定时发送任务 -->
+                <div id="scheduledSection" class="content-section">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>定时发送任务管理</h5>
+                            <div>
+                                <button class="btn btn-primary" onclick="showAddScheduledTaskModal()">
+                                    <i class="bi bi-plus-circle me-1"></i> 添加定时任务
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="refreshScheduledTasks()">
+                                    <i class="bi bi-arrow-clockwise me-1"></i> 刷新列表
+                                </button>
+                                <button class="btn btn-secondary" onclick="triggerRandomTeacherConfig()">
+                                    <i class="bi bi-lightning me-1"></i> 触发随机老师发送
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="search-box">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="搜索定时任务..." id="scheduledSearch">
+                                    <button class="btn btn-outline-primary" type="button" onclick="searchScheduledTasks()">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>任务名称</th>
+                                            <th>消息内容</th>
+                                            <th>图片</th>
+                                            <th>发送间隔</th>
+                                            <th>状态</th>
+                                            <th>下次发送</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="scheduledTasksTable">
+                                        <tr>
+                                            <td colspan="8" class="text-center">加载中...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center" id="scheduledTasksPagination">
+                                    <!-- 分页按钮将通过JS动态生成 -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 系统设置 -->
+                <div id="settingsSection" class="content-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>系统设置</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>机器人状态</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-check form-switch mb-3">
                                                 <input class="form-check-input" type="checkbox" id="botStatusSwitch" checked>
                                                 <label class="form-check-label" for="botStatusSwitch">
                                                     机器人运行状态
                                                 </label>
                                             </div>
-                                            <span id="currentBotStatus" class="badge bg-success">运行中</span>
+                                            <p class="text-muted">当前状态: <span id="currentBotStatus">运行中</span></p>
+                                            <button class="btn btn-primary" onclick="toggleBotStatus()">
+                                                <i class="bi bi-power me-1"></i> 切换状态
+                                            </button>
                                         </div>
-                                        <button class="btn btn-primary" onclick="toggleBotStatus()">
-                                            <i class="bi bi-power me-1"></i> 切换状态
-                                        </button>
                                     </div>
-                                    <div class="col-md-6">
-                                        <p>数据库连接: <span class="badge bg-success" id="dbStatus">已连接</span></p>
-                                        <p>最后检查: <span id="dbLastCheck">未检查</span></p>
-                                        <button class="btn btn-primary" onclick="checkDbStatus()">
-                                            <i class="bi bi-arrow-clockwise me-1"></i> 检查连接
-                                        </button>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>数据库状态</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>连接状态: <span class="badge bg-success" id="dbStatus">已连接</span></p>
+                                            <p>最后检查: <span id="dbLastCheck">未检查</span></p>
+                                            <button class="btn btn-primary" onclick="checkDbStatus()">
+                                                <i class="bi bi-arrow-clockwise me-1"></i> 检查连接
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 用户管理 -->
-            <div id="usersSection" class="content-section" style="display: none;">
-                <div class="page-header">
-                    <h1>用户管理</h1>
-                </div>
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">用户列表</h5>
-                        <button class="btn btn-success" onclick="showAddUserModal()">
-                            <i class="bi bi-plus-circle me-1"></i> 添加用户
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="search-box">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="搜索用户..." id="userSearch">
-                                <button class="btn" type="button" onclick="searchUsers()">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>用户名</th>
-                                        <th>显示名称</th>
-                                        <th>积分</th>
-                                        <th>消息数</th>
-                                        <th>最后签到</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="usersTable">
-                                    <tr>
-                                        <td colspan="7" class="text-center">加载中...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center" id="usersPagination">
-                                <!-- 分页按钮将通过JS动态生成 -->
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 老师管理 -->
-            <div id="teachersSection" class="content-section" style="display: none;">
-                <div class="page-header">
-                    <h1>老师管理</h1>
-                </div>
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">老师列表</h5>
-                        <button class="btn btn-success" onclick="showAddTeacherModal()">
-                            <i class="bi bi-plus-circle me-1"></i> 添加老师
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="search-box">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="搜索老师..." id="teacherSearch">
-                                <button class="btn" type="button" onclick="searchTeachers()">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>头像</th>
-                                        <th>ID</th>
-                                        <th>花名</th>
-                                        <th>年龄</th>
-                                        <th>地区</th>
-                                        <th>账号</th>
-                                        <th>服务类型</th>
-                                        <th>状态</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="teachersTable">
-                                    <tr>
-                                        <td colspan="9" class="text-center">加载中...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center" id="teachersPagination">
-                                <!-- 分页按钮将通过JS动态生成 -->
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 关键词管理 -->
-            <div id="keywordsSection" class="content-section" style="display: none;">
-                <div class="page-header">
-                    <h1>关键词管理</h1>
-                </div>
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">关键词列表</h5>
-                        <button class="btn btn-success" onclick="showAddKeywordModal()">
-                            <i class="bi bi-plus-circle me-1"></i> 添加关键词
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="search-box">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="搜索关键词..." id="keywordSearch">
-                                <button class="btn" type="button" onclick="searchKeywords()">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>关键词</th>
-                                        <th>回复内容</th>
-                                        <th>自定义回复</th>
-                                        <th>状态</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="keywordsTable">
-                                    <tr>
-                                        <td colspan="6" class="text-center">加载中...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center" id="keywordsPagination">
-                                <!-- 分页按钮将通过JS动态生成 -->
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 禁言词管理 -->
-            <div id="bannedSection" class="content-section" style="display: none;">
-                <div class="page-header">
-                    <h1>禁言词管理</h1>
-                </div>
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">禁言词列表</h5>
-                        <button class="btn btn-success" onclick="showAddBannedModal()">
-                            <i class="bi bi-plus-circle me-1"></i> 添加禁言词
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="search-box">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="搜索禁言词..." id="bannedSearch">
-                                <button class="btn" type="button" onclick="searchBanned()">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>禁言词</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="bannedTable">
-                                    <tr>
-                                        <td colspan="3" class="text-center">加载中...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center" id="bannedPagination">
-                                <!-- 分页按钮将通过JS动态生成 -->
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 定时发送任务 -->
-            <div id="scheduledSection" class="content-section" style="display: none;">
-                <div class="page-header">
-                    <h1>定时任务管理</h1>
-                </div>
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">定时任务列表</h5>
-                        <div>
-                            <button class="btn btn-success" onclick="showAddScheduledTaskModal()">
-                                <i class="bi bi-plus-circle me-1"></i> 添加定时任务
-                            </button>
-                            <button class="btn btn-primary" onclick="refreshScheduledTasks()">
-                                <i class="bi bi-arrow-clockwise me-1"></i> 刷新列表
-                            </button>
-                            <button class="btn btn-warning" onclick="triggerRandomTeacherConfig()">
-                                <i class="bi bi-lightning me-1"></i> 触发随机老师发送
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="search-box">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="搜索定时任务..." id="scheduledSearch">
-                                <button class="btn" type="button" onclick="searchScheduledTasks()">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>任务名称</th>
-                                        <th>消息内容</th>
-                                        <th>图片</th>
-                                        <th>发送间隔</th>
-                                        <th>状态</th>
-                                        <th>下次发送</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="scheduledTasksTable">
-                                    <tr>
-                                        <td colspan="8" class="text-center">加载中...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center" id="scheduledTasksPagination">
-                                <!-- 分页按钮将通过JS动态生成 -->
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 抽奖管理 -->
-            <div id="lotterySection" class="content-section" style="display: none;">
-                <div class="page-header">
-                    <h1>抽奖管理</h1>
-                </div>
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">抽奖活动列表</h5>
-                        <div>
-                            <button class="btn btn-success" onclick="showAddLotteryModal()">
-                                <i class="bi bi-plus-circle me-1"></i> 添加抽奖活动
-                            </button>
-                            <button class="btn btn-primary" onclick="refreshLotteryActivities()">
-                                <i class="bi bi-arrow-clockwise me-1"></i> 刷新列表
-                            </button>
-                            <button class="btn btn-warning" onclick="manualCheckLottery()">
-                                <i class="bi bi-gift me-1"></i> 手动开奖
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="search-box">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="搜索抽奖活动..." id="lotterySearch">
-                                <button class="btn" type="button" onclick="searchLotteryActivities()">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>抽奖标题</th>
-                                        <th>抽奖编号</th>
-                                        <th>奖品配置</th>
-                                        <th>所需积分</th>
-                                        <th>开奖时间</th>
-                                        <th>状态</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="lotteryActivitiesTable">
-                                    <tr>
-                                        <td colspan="8" class="text-center">加载中...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center" id="lotteryActivitiesPagination">
-                                <!-- 分页按钮将通过JS动态生成 -->
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 系统设置 -->
-            <div id="settingsSection" class="content-section" style="display: none;">
-                <div class="page-header">
-                    <h1>系统设置</h1>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5>机器人状态</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="botStatusSwitch" checked>
-                                    <label class="form-check-label" for="botStatusSwitch">
-                                        机器人运行状态
-                                    </label>
-                                </div>
-                                <p class="text-muted">当前状态: <span id="currentBotStatus">运行中</span></p>
-                                <button class="btn btn-primary" onclick="toggleBotStatus()">
-                                    <i class="bi bi-power me-1"></i> 切换状态
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5>数据库状态</h5>
-                            </div>
-                            <div class="card-body">
-                                <p>连接状态: <span class="badge bg-success" id="dbStatus">已连接</span></p>
-                                <p>最后检查: <span id="dbLastCheck">未检查</span></p>
-                                <button class="btn btn-primary" onclick="checkDbStatus()">
-                                    <i class="bi bi-arrow-clockwise me-1"></i> 检查连接
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5>系统信息</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <tbody>
-                                            <tr>
-                                                <th scope="row">版本</th>
-                                                <td>1.0.0</td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">最后更新</th>
-                                                <td id="lastUpdate">2023-01-01</td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">服务器时间</th>
-                                                <td id="serverTime">-</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                            <div class="row">
+                                <div class="col-md-12 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>系统信息</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th scope="row">版本</th>
+                                                            <td>1.0.0</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">最后更新</th>
+                                                            <td id="lastUpdate">2023-01-01</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">服务器时间</th>
+                                                            <td id="serverTime">-</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1144,77 +1132,107 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="editTeacherForm">
-                        <input type="hidden" id="editTeacherId">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="editTeacherNickname" class="form-label">花名</label>
-                                <input type="text" class="form-control" id="editTeacherNickname">
+                    <ul class="nav nav-tabs" id="editTeacherTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab" aria-controls="basic" aria-selected="true">基本信息</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="media-tab" data-bs-toggle="tab" data-bs-target="#media" type="button" role="tab" aria-controls="media" aria-selected="false">媒体资料</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="editTeacherTabContent">
+                        <div class="tab-pane fade show active" id="basic" role="tabpanel" aria-labelledby="basic-tab">
+                            <form id="editTeacherForm">
+                                <input type="hidden" id="editTeacherId">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="editTeacherNickname" class="form-label">花名</label>
+                                        <input type="text" class="form-control" id="editTeacherNickname" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="editTeacherAge" class="form-label">年龄</label>
+                                        <input type="number" class="form-control" id="editTeacherAge" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="editTeacherRegion" class="form-label">地区</label>
+                                        <input type="text" class="form-control" id="editTeacherRegion" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="editTeacherAccount" class="form-label">Telegram账号</label>
+                                        <input type="text" class="form-control" id="editTeacherAccount" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editTeacherChannel" class="form-label">频道链接</label>
+                                    <input type="text" class="form-control" id="editTeacherChannel" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editTeacherServiceType" class="form-label">服务类型</label>
+                                    <input type="text" class="form-control" id="editTeacherServiceType" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editTeacherRepairCost" class="form-label">修车费</label>
+                                    <input type="text" class="form-control" id="editTeacherRepairCost" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editTeacherIntro" class="form-label">自我介绍</label>
+                                    <textarea class="form-control" id="editTeacherIntro" rows="3" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editTeacherStatus" class="form-label">状态</label>
+                                    <select class="form-select" id="editTeacherStatus">
+                                        <option value="pending">待审核</option>
+                                        <option value="approved">已通过</option>
+                                        <option value="rejected">已拒绝</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="media" role="tabpanel" aria-labelledby="media-tab">
+                            <div class="mb-3">
+                                <label class="form-label">头像图片</label>
+                                <div class="media-upload-area">
+                                    <i class="bi bi-image"></i>
+                                    <p>点击或拖拽图片到此处上传</p>
+                                    <label for="editTeacherImage" class="custom-file-upload">
+                                        <i class="bi bi-upload"></i> 选择图片
+                                    </label>
+                                    <input type="file" id="editTeacherImage" accept="image/*" onchange="previewTeacherImage('edit')">
+                                </div>
+                                <div id="editTeacherImagePreview" class="media-preview-container"></div>
+                                <input type="hidden" id="editTeacherImageUrl">
+                                <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="editTeacherAge" class="form-label">年龄</label>
-                                <input type="number" class="form-control" id="editTeacherAge">
+                            <div class="mb-3">
+                                <label class="form-label">宣传图片 (最多3张)</label>
+                                <div class="media-upload-area">
+                                    <i class="bi bi-images"></i>
+                                    <p>点击或拖拽图片到此处上传</p>
+                                    <label for="editTeacherPhotos" class="custom-file-upload">
+                                        <i class="bi bi-upload"></i> 选择图片
+                                    </label>
+                                    <input type="file" id="editTeacherPhotos" accept="image/*" multiple onchange="previewTeacherPhotos('edit')">
+                                </div>
+                                <div id="editTeacherPhotosPreview" class="media-preview-container"></div>
+                                <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">宣传视频 (最多1个)</label>
+                                <div class="media-upload-area">
+                                    <i class="bi bi-camera-video"></i>
+                                    <p>点击或拖拽视频到此处上传</p>
+                                    <label for="editTeacherVideo" class="custom-file-upload">
+                                        <i class="bi bi-upload"></i> 选择视频
+                                    </label>
+                                    <input type="file" id="editTeacherVideo" accept="video/*" onchange="previewTeacherVideo('edit')">
+                                </div>
+                                <div id="editTeacherVideoPreview" class="media-preview-container"></div>
+                                <div class="upload-info">支持 MP4、MOV 格式，文件大小不超过 20MB</div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="editTeacherRegion" class="form-label">地区</label>
-                                <input type="text" class="form-control" id="editTeacherRegion">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="editTeacherAccount" class="form-label">Telegram账号</label>
-                                <input type="text" class="form-control" id="editTeacherAccount">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editTeacherChannel" class="form-label">频道链接</label>
-                            <input type="text" class="form-control" id="editTeacherChannel">
-                        </div>
-                        <div class="mb-3">
-                            <label for="editTeacherRobotAccount" class="form-label">机器人账号</label>
-                            <input type="text" class="form-control" id="editTeacherRobotAccount">
-                        </div>
-                        <div class="mb-3">
-                            <label for="editTeacherServiceType" class="form-label">服务类型</label>
-                            <input type="text" class="form-control" id="editTeacherServiceType">
-                        </div>
-                        <div class="mb-3">
-                            <label for="editTeacherRepairCost" class="form-label">修车费</label>
-                            <input type="text" class="form-control" id="editTeacherRepairCost">
-                        </div>
-                        <div class="mb-3">
-                            <label for="editTeacherIntro" class="form-label">自我介绍</label>
-                            <textarea class="form-control" id="editTeacherIntro" rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">照片</label>
-                            <div class="media-upload-container" onclick="document.getElementById('editTeacherPhotos').click()">
-                                <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: #ccc;"></i>
-                                <p>点击上传照片（最多3张）</p>
-                                <input type="file" id="editTeacherPhotos" accept="image/*" multiple style="display: none;" onchange="handleTeacherMediaUpload('edit', 'photo')">
-                            </div>
-                            <div id="editTeacherPhotosPreview" class="media-preview-container"></div>
-                            <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">视频</label>
-                            <div class="media-upload-container" onclick="document.getElementById('editTeacherVideo').click()">
-                                <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: #ccc;"></i>
-                                <p>点击上传视频（最多1个）</p>
-                                <input type="file" id="editTeacherVideo" accept="video/*" style="display: none;" onchange="handleTeacherMediaUpload('edit', 'video')">
-                            </div>
-                            <div id="editTeacherVideoPreview" class="media-preview-container"></div>
-                            <div class="upload-info">支持 MP4、MOV 格式，文件大小不超过 50MB</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editTeacherStatus" class="form-label">状态</label>
-                            <select class="form-select" id="editTeacherStatus">
-                                <option value="pending">待审核</option>
-                                <option value="approved">已通过</option>
-                                <option value="rejected">已拒绝</option>
-                            </select>
-                        </div>
-                    </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
@@ -1346,65 +1364,6 @@
         </div>
     </div>
     
-    <!-- 抽奖活动编辑模态框 -->
-    <div class="modal fade" id="editLotteryModal" tabindex="-1" aria-labelledby="editLotteryModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editLotteryModalLabel">编辑抽奖活动</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editLotteryForm">
-                        <input type="hidden" id="editLotteryId">
-                        <div class="mb-3">
-                            <label for="editLotteryTitle" class="form-label">抽奖标题</label>
-                            <input type="text" class="form-control" id="editLotteryTitle" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editLotteryLotteryId" class="form-label">抽奖编号</label>
-                            <input type="text" class="form-control" id="editLotteryLotteryId" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editLotteryPrizeConfig" class="form-label">奖品配置</label>
-                            <input type="text" class="form-control" id="editLotteryPrizeConfig" required>
-                            <div class="form-text">格式：奖品名1:数量1;奖品名2:数量2</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editLotteryDescription" class="form-label">抽奖说明</label>
-                            <textarea class="form-control" id="editLotteryDescription" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editLotteryPointsRequired" class="form-label">所需积分</label>
-                            <input type="number" class="form-control" id="editLotteryPointsRequired" min="0" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editLotteryEndTime" class="form-label">开奖时间</label>
-                            <input type="datetime-local" class="form-control" id="editLotteryEndTime" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editLotteryImageUrl" class="form-label">图片URL</label>
-                            <input type="text" class="form-control" id="editLotteryImageUrl">
-                            <div class="form-text">可选，留空则不显示图片</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editLotteryStatus" class="form-label">状态</label>
-                            <select class="form-select" id="editLotteryStatus">
-                                <option value="active">进行中</option>
-                                <option value="ended">已结束</option>
-                                <option value="cancelled">已取消</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" onclick="saveLottery()">保存</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <!-- 添加用户模态框 -->
     <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -1450,76 +1409,106 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="addTeacherForm">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="addTeacherNickname" class="form-label">花名</label>
-                                <input type="text" class="form-control" id="addTeacherNickname" required>
+                    <ul class="nav nav-tabs" id="addTeacherTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="add-basic-tab" data-bs-toggle="tab" data-bs-target="#add-basic" type="button" role="tab" aria-controls="add-basic" aria-selected="true">基本信息</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="add-media-tab" data-bs-toggle="tab" data-bs-target="#add-media" type="button" role="tab" aria-controls="add-media" aria-selected="false">媒体资料</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="addTeacherTabContent">
+                        <div class="tab-pane fade show active" id="add-basic" role="tabpanel" aria-labelledby="add-basic-tab">
+                            <form id="addTeacherForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="addTeacherNickname" class="form-label">花名</label>
+                                        <input type="text" class="form-control" id="addTeacherNickname" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="addTeacherAge" class="form-label">年龄</label>
+                                        <input type="number" class="form-control" id="addTeacherAge" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="addTeacherRegion" class="form-label">地区</label>
+                                        <input type="text" class="form-control" id="addTeacherRegion" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="addTeacherAccount" class="form-label">Telegram账号</label>
+                                        <input type="text" class="form-control" id="addTeacherAccount" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addTeacherChannel" class="form-label">频道链接</label>
+                                    <input type="text" class="form-control" id="addTeacherChannel" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addTeacherServiceType" class="form-label">服务类型</label>
+                                    <input type="text" class="form-control" id="addTeacherServiceType" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addTeacherRepairCost" class="form-label">修车费</label>
+                                    <input type="text" class="form-control" id="addTeacherRepairCost" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addTeacherIntro" class="form-label">自我介绍</label>
+                                    <textarea class="form-control" id="addTeacherIntro" rows="3" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addTeacherStatus" class="form-label">状态</label>
+                                    <select class="form-select" id="addTeacherStatus">
+                                        <option value="pending">待审核</option>
+                                        <option value="approved">已通过</option>
+                                        <option value="rejected">已拒绝</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="add-media" role="tabpanel" aria-labelledby="add-media-tab">
+                            <div class="mb-3">
+                                <label class="form-label">头像图片</label>
+                                <div class="media-upload-area">
+                                    <i class="bi bi-image"></i>
+                                    <p>点击或拖拽图片到此处上传</p>
+                                    <label for="addTeacherImage" class="custom-file-upload">
+                                        <i class="bi bi-upload"></i> 选择图片
+                                    </label>
+                                    <input type="file" id="addTeacherImage" accept="image/*" onchange="previewTeacherImage('add')">
+                                </div>
+                                <div id="addTeacherImagePreview" class="media-preview-container"></div>
+                                <input type="hidden" id="addTeacherImageUrl">
+                                <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="addTeacherAge" class="form-label">年龄</label>
-                                <input type="number" class="form-control" id="addTeacherAge" required>
+                            <div class="mb-3">
+                                <label class="form-label">宣传图片 (最多3张)</label>
+                                <div class="media-upload-area">
+                                    <i class="bi bi-images"></i>
+                                    <p>点击或拖拽图片到此处上传</p>
+                                    <label for="addTeacherPhotos" class="custom-file-upload">
+                                        <i class="bi bi-upload"></i> 选择图片
+                                    </label>
+                                    <input type="file" id="addTeacherPhotos" accept="image/*" multiple onchange="previewTeacherPhotos('add')">
+                                </div>
+                                <div id="addTeacherPhotosPreview" class="media-preview-container"></div>
+                                <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">宣传视频 (最多1个)</label>
+                                <div class="media-upload-area">
+                                    <i class="bi bi-camera-video"></i>
+                                    <p>点击或拖拽视频到此处上传</p>
+                                    <label for="addTeacherVideo" class="custom-file-upload">
+                                        <i class="bi bi-upload"></i> 选择视频
+                                    </label>
+                                    <input type="file" id="addTeacherVideo" accept="video/*" onchange="previewTeacherVideo('add')">
+                                </div>
+                                <div id="addTeacherVideoPreview" class="media-preview-container"></div>
+                                <div class="upload-info">支持 MP4、MOV 格式，文件大小不超过 20MB</div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="addTeacherRegion" class="form-label">地区</label>
-                                <input type="text" class="form-control" id="addTeacherRegion" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="addTeacherAccount" class="form-label">Telegram账号</label>
-                                <input type="text" class="form-control" id="addTeacherAccount" required>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addTeacherChannel" class="form-label">频道链接</label>
-                            <input type="text" class="form-control" id="addTeacherChannel" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addTeacherRobotAccount" class="form-label">机器人账号</label>
-                            <input type="text" class="form-control" id="addTeacherRobotAccount">
-                        </div>
-                        <div class="mb-3">
-                            <label for="addTeacherServiceType" class="form-label">服务类型</label>
-                            <input type="text" class="form-control" id="addTeacherServiceType" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addTeacherRepairCost" class="form-label">修车费</label>
-                            <input type="text" class="form-control" id="addTeacherRepairCost" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addTeacherIntro" class="form-label">自我介绍</label>
-                            <textarea class="form-control" id="addTeacherIntro" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">照片</label>
-                            <div class="media-upload-container" onclick="document.getElementById('addTeacherPhotos').click()">
-                                <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: #ccc;"></i>
-                                <p>点击上传照片（最多3张）</p>
-                                <input type="file" id="addTeacherPhotos" accept="image/*" multiple style="display: none;" onchange="handleTeacherMediaUpload('add', 'photo')">
-                            </div>
-                            <div id="addTeacherPhotosPreview" class="media-preview-container"></div>
-                            <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">视频</label>
-                            <div class="media-upload-container" onclick="document.getElementById('addTeacherVideo').click()">
-                                <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: #ccc;"></i>
-                                <p>点击上传视频（最多1个）</p>
-                                <input type="file" id="addTeacherVideo" accept="video/*" style="display: none;" onchange="handleTeacherMediaUpload('add', 'video')">
-                            </div>
-                            <div id="addTeacherVideoPreview" class="media-preview-container"></div>
-                            <div class="upload-info">支持 MP4、MOV 格式，文件大小不超过 50MB</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addTeacherStatus" class="form-label">状态</label>
-                            <select class="form-select" id="addTeacherStatus">
-                                <option value="pending">待审核</option>
-                                <option value="approved">已通过</option>
-                                <option value="rejected">已拒绝</option>
-                            </select>
-                        </div>
-                    </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
@@ -1648,56 +1637,6 @@
         </div>
     </div>
     
-    <!-- 添加抽奖活动模态框 -->
-    <div class="modal fade" id="addLotteryModal" tabindex="-1" aria-labelledby="addLotteryModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addLotteryModalLabel">添加抽奖活动</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="addLotteryForm">
-                        <div class="mb-3">
-                            <label for="addLotteryTitle" class="form-label">抽奖标题</label>
-                            <input type="text" class="form-control" id="addLotteryTitle" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addLotteryLotteryId" class="form-label">抽奖编号</label>
-                            <input type="text" class="form-control" id="addLotteryLotteryId" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addLotteryPrizeConfig" class="form-label">奖品配置</label>
-                            <input type="text" class="form-control" id="addLotteryPrizeConfig" required>
-                            <div class="form-text">格式：奖品名1:数量1;奖品名2:数量2</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addLotteryDescription" class="form-label">抽奖说明</label>
-                            <textarea class="form-control" id="addLotteryDescription" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addLotteryPointsRequired" class="form-label">所需积分</label>
-                            <input type="number" class="form-control" id="addLotteryPointsRequired" min="0" value="0" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addLotteryEndTime" class="form-label">开奖时间</label>
-                            <input type="datetime-local" class="form-control" id="addLotteryEndTime" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addLotteryImageUrl" class="form-label">图片URL</label>
-                            <input type="text" class="form-control" id="addLotteryImageUrl">
-                            <div class="form-text">可选，留空则不显示图片</div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" onclick="addLottery()">添加</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <!-- 调整积分模态框 -->
     <div class="modal fade" id="adjustPointsModal" tabindex="-1" aria-labelledby="adjustPointsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -1719,11 +1658,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="adjustPointsChange" class="form-label">积分变化</label>
-                            <div class="points-input-group">
-                                <span class="input-group-text">+/-</span>
-                                <input type="number" class="form-control" id="adjustPointsChange" placeholder="输入积分变化值，如100或-100">
-                            </div>
-                            <div class="form-text">正数为增加积分，负数为减少积分</div>
+                            <input type="number" class="form-control" id="adjustPointsChange" placeholder="正数为增加，负数为减少">
+                            <div class="form-text">例如：+100 增加100积分，-100 减少100积分</div>
                         </div>
                         <div class="mb-3">
                             <label for="adjustPointsReason" class="form-label">原因</label>
@@ -1759,24 +1695,24 @@
         let keywordsData = [];
         let bannedData = [];
         let scheduledTasksData = [];
-        let lotteryActivitiesData = [];
         let currentPage = {
             users: 1,
             teachers: 1,
             keywords: 1,
             banned: 1,
-            scheduled: 1,
-            lottery: 1
+            scheduled: 1
         };
         const itemsPerPage = 10;
         
-        // 老师媒体文件缓存
+        // 老师媒体文件存储
         let teacherMediaFiles = {
-            add: {
+            edit: {
+                image: null,
                 photos: [],
                 video: null
             },
-            edit: {
+            add: {
+                image: null,
                 photos: [],
                 video: null
             }
@@ -1836,23 +1772,36 @@
         function showSection(section) {
             // 隐藏所有部分
             document.querySelectorAll('.content-section').forEach(el => {
-                el.style.display = 'none';
+                el.classList.remove('active');
             });
             
             // 显示选中的部分
             const sectionElement = document.getElementById(section + 'Section');
             if (sectionElement) {
-                sectionElement.style.display = 'block';
+                sectionElement.classList.add('active');
             } else {
                 console.error('找不到部分: ' + section);
                 return;
             }
             
             // 更新侧边栏激活状态
-            document.querySelectorAll('.sidebar .nav-link').forEach(el => {
+            document.querySelectorAll('.menu-item').forEach(el => {
                 el.classList.remove('active');
             });
-            event.target.closest('.nav-link').classList.add('active');
+            event.target.closest('.menu-item').classList.add('active');
+            
+            // 更新页面标题
+            const titles = {
+                'dashboard': '运行仪表盘',
+                'users': '用户管理',
+                'teachers': '老师管理',
+                'keywords': '关键词管理',
+                'banned': '禁言词管理',
+                'scheduled': '定时发送任务',
+                'settings': '系统设置'
+            };
+            document.getElementById('pageTitle').textContent = titles[section] || '管理后台';
+            
             currentSection = section;
             
             // 加载数据
@@ -1875,9 +1824,6 @@
                 case 'scheduled':
                     loadScheduledTasks();
                     break;
-                case 'lottery':
-                    loadLotteryActivities();
-                    break;
                 case 'settings':
                     loadSettings();
                     break;
@@ -1892,13 +1838,15 @@
                 directSupabaseFetch('users'),
                 directSupabaseFetch('teachers'),
                 directSupabaseFetch('keywords'),
-                directSupabaseFetchWithServiceKey('banned_keywords')
+                directSupabaseFetchWithServiceKey('banned_keywords'), // 使用服务角色密钥获取禁言词
+                directSupabaseFetchWithServiceKey('random_teacher_config') // 新增
             ])
-            .then(([users, teachers, keywords, banned]) => {
+            .then(([users, teachers, keywords, banned, randomTeacherConfigs]) => {
                 document.getElementById('totalUsers').textContent = users.length;
                 document.getElementById('totalTeachers').textContent = teachers.length;
                 document.getElementById('totalKeywords').textContent = keywords.length;
                 document.getElementById('totalBanned').textContent = banned.length;
+                document.getElementById('totalRandomTeacherConfigs').textContent = randomTeacherConfigs.length; // 新增
                 
                 // 加载最近用户
                 const recentUsers = users.slice(0, 5);
@@ -1973,7 +1921,7 @@
                             <button class="btn btn-sm btn-primary btn-action" onclick="editUser(${user.user_id})" title="编辑">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button class="btn btn-sm btn-warning btn-action" onclick="showAdjustPointsModal(${user.user_id})" title="调整积分">
+                            <button class="btn btn-sm btn-secondary btn-action" onclick="showAdjustPointsModal(${user.user_id})" title="调整积分">
                                 <i class="bi bi-cash-coin"></i>
                             </button>
                             <button class="btn btn-sm btn-danger btn-action" onclick="deleteUser(${user.user_id})" title="删除">
@@ -2012,14 +1960,12 @@
         function editUser(userId) {
             const user = usersData.find(u => u.user_id === userId);
             if (!user) return;
-            
             document.getElementById('editUserId').value = user.user_id;
             document.getElementById('editUserName').value = user.username || '';
             document.getElementById('editUserDisplayName').value = user.display_name || '';
             document.getElementById('editUserPoints').value = user.points || 0;
             document.getElementById('editUserMessageCount').value = user.message_count_today || 0;
             document.getElementById('editUserLastSign').value = user.last_sign_date ? new Date(user.last_sign_date).toLocaleDateString() : '';
-            
             const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
             modal.show();
         }
@@ -2033,7 +1979,6 @@
                 display_name: document.getElementById('editUserDisplayName').value,
                 points: parseInt(document.getElementById('editUserPoints').value)
             };
-            
             showLoading(true);
             directSupabaseUpsert('users', userData, 'user_id')
             .then(() => {
@@ -2052,7 +1997,6 @@
         // 删除用户
         function deleteUser(userId) {
             if (!confirm('确定要删除这个用户吗？')) return;
-            
             showLoading(true);
             directSupabaseDelete('users', userId)
             .then(() => {
@@ -2071,13 +2015,11 @@
         function showAdjustPointsModal(userId) {
             const user = usersData.find(u => u.user_id === userId);
             if (!user) return;
-            
             document.getElementById('adjustPointsUserId').value = user.user_id;
             document.getElementById('adjustPointsUserName').value = user.display_name || user.username || '用户' + user.user_id;
             document.getElementById('adjustPointsCurrent').value = user.points || 0;
             document.getElementById('adjustPointsChange').value = '';
             document.getElementById('adjustPointsReason').value = '';
-            
             const modal = new bootstrap.Modal(document.getElementById('adjustPointsModal'));
             modal.show();
         }
@@ -2086,17 +2028,14 @@
         function adjustPoints() {
             const userId = document.getElementById('adjustPointsUserId').value;
             const pointsChange = parseInt(document.getElementById('adjustPointsChange').value) || 0;
-            
             if (pointsChange === 0) {
                 showAlert('请输入有效的积分变化值', 'warning');
                 return;
             }
-            
             showLoading(true);
             directSupabaseFetch('users', `user_id=eq.${userId}`)
             .then(user => {
                 if (!user) throw new Error("用户不存在");
-                
                 const newPoints = Math.max(0, (user.points || 0) + pointsChange);
                 return directSupabaseUpsert('users', { ...user, points: newPoints }, 'user_id');
             })
@@ -2128,7 +2067,6 @@
                 display_name: document.getElementById('addUserDisplayName').value,
                 points: parseInt(document.getElementById('addUserPoints').value) || 0
             };
-            
             showLoading(true);
             directSupabaseInsert('users', userData)
             .then(() => {
@@ -2168,7 +2106,7 @@
             const pageData = teachersData.slice(start, end);
             const html = pageData.map(teacher => `
                 <tr>
-                    <td>${teacher.photo_url_1 ? `<img src="${teacher.photo_url_1}" class="teacher-image" alt="头像">` : '<i class="bi bi-person-circle" style="font-size: 2rem;"></i>'}</td>
+                    <td>${teacher.image_url ? `<img src="${teacher.image_url}" class="teacher-image" alt="头像">` : '<i class="bi bi-person-circle" style="font-size: 2rem;"></i>'}</td>
                     <td>${teacher.id}</td>
                     <td>${teacher.nickname}</td>
                     <td>${teacher.age}</td>
@@ -2218,44 +2156,77 @@
             const teacher = teachersData.find(t => t.id === teacherId);
             if (!teacher) return;
             
-            // 重置媒体文件缓存
+            // 重置媒体文件存储
             teacherMediaFiles.edit = {
+                image: null,
                 photos: [],
                 video: null
             };
             
+            // 填充基本信息
             document.getElementById('editTeacherId').value = teacher.id;
             document.getElementById('editTeacherNickname').value = teacher.nickname;
             document.getElementById('editTeacherAge').value = teacher.age;
             document.getElementById('editTeacherRegion').value = teacher.region;
             document.getElementById('editTeacherAccount').value = teacher.telegram_account;
             document.getElementById('editTeacherChannel').value = teacher.channel;
-            document.getElementById('editTeacherRobotAccount').value = teacher.robot_account || '';
             document.getElementById('editTeacherServiceType').value = teacher.service_type;
             document.getElementById('editTeacherRepairCost').value = teacher.repair_cost;
             document.getElementById('editTeacherIntro').value = teacher.intro;
             document.getElementById('editTeacherStatus').value = teacher.status;
             
-            // 显示已有照片
-            const photosPreview = document.getElementById('editTeacherPhotosPreview');
-            photosPreview.innerHTML = '';
+            // 显示图片预览
+            const imagePreviewElement = document.getElementById('editTeacherImagePreview');
+            if (teacher.image_url) {
+                imagePreviewElement.innerHTML = `
+                    <div class="media-preview">
+                        <img src="${teacher.image_url}" alt="头像预览">
+                    </div>
+                `;
+                document.getElementById('editTeacherImageUrl').value = teacher.image_url;
+            } else {
+                imagePreviewElement.innerHTML = '';
+                document.getElementById('editTeacherImageUrl').value = '';
+            }
+            
+            // 显示宣传图片预览
+            const photosPreviewElement = document.getElementById('editTeacherPhotosPreview');
+            photosPreviewElement.innerHTML = '';
             
             if (teacher.photo_url_1) {
-                addMediaPreview('edit', 'photo', teacher.photo_url_1);
+                photosPreviewElement.innerHTML += `
+                    <div class="media-preview">
+                        <img src="${teacher.photo_url_1}" alt="宣传图片1">
+                    </div>
+                `;
             }
+            
             if (teacher.photo_url_2) {
-                addMediaPreview('edit', 'photo', teacher.photo_url_2);
+                photosPreviewElement.innerHTML += `
+                    <div class="media-preview">
+                        <img src="${teacher.photo_url_2}" alt="宣传图片2">
+                    </div>
+                `;
             }
+            
             if (teacher.photo_url_3) {
-                addMediaPreview('edit', 'photo', teacher.photo_url_3);
+                photosPreviewElement.innerHTML += `
+                    <div class="media-preview">
+                        <img src="${teacher.photo_url_3}" alt="宣传图片3">
+                    </div>
+                `;
             }
             
-            // 显示已有视频
-            const videoPreview = document.getElementById('editTeacherVideoPreview');
-            videoPreview.innerHTML = '';
-            
+            // 显示视频预览
+            const videoPreviewElement = document.getElementById('editTeacherVideoPreview');
             if (teacher.video_url) {
-                addMediaPreview('edit', 'video', teacher.video_url);
+                videoPreviewElement.innerHTML = `
+                    <div class="media-preview">
+                        <video controls src="${teacher.video_url}" alt="宣传视频"></video>
+                    </div>
+                `;
+            } else {
+                videoPreviewElement.innerHTML = '';
             }
             
             const modal = new bootstrap.Modal(document.getElementById('editTeacherModal'));
@@ -2274,50 +2245,49 @@
                 region: document.getElementById('editTeacherRegion').value,
                 telegram_account: document.getElementById('editTeacherAccount').value,
                 channel: document.getElementById('editTeacherChannel').value,
-                robot_account: document.getElementById('editTeacherRobotAccount').value,
                 service_type: document.getElementById('editTeacherServiceType').value,
                 repair_cost: document.getElementById('editTeacherRepairCost').value,
                 intro: document.getElementById('editTeacherIntro').value,
                 status: document.getElementById('editTeacherStatus').value
             };
             
-            // 处理照片
-            if (teacherMediaFiles.edit.photos.length > 0) {
-                if (teacherMediaFiles.edit.photos[0]) {
-                    if (typeof teacherMediaFiles.edit.photos[0] === 'string') {
-                        teacherData.photo_url_1 = teacherMediaFiles.edit.photos[0];
-                    } else {
-                        teacherData.photo_url_1 = await uploadMediaToSupabase(teacherMediaFiles.edit.photos[0], 'teacher-photos');
-                    }
-                }
-                if (teacherMediaFiles.edit.photos[1]) {
-                    if (typeof teacherMediaFiles.edit.photos[1] === 'string') {
-                        teacherData.photo_url_2 = teacherMediaFiles.edit.photos[1];
-                    } else {
-                        teacherData.photo_url_2 = await uploadMediaToSupabase(teacherMediaFiles.edit.photos[1], 'teacher-photos');
-                    }
-                }
-                if (teacherMediaFiles.edit.photos[2]) {
-                    if (typeof teacherMediaFiles.edit.photos[2] === 'string') {
-                        teacherData.photo_url_3 = teacherMediaFiles.edit.photos[2];
-                    } else {
-                        teacherData.photo_url_3 = await uploadMediaToSupabase(teacherMediaFiles.edit.photos[2], 'teacher-photos');
-                    }
-                }
-            }
-            
-            // 处理视频
-            if (teacherMediaFiles.edit.video) {
-                if (typeof teacherMediaFiles.edit.video === 'string') {
-                    teacherData.video_url = teacherMediaFiles.edit.video;
-                } else {
-                    teacherData.video_url = await uploadMediaToSupabase(teacherMediaFiles.edit.video, 'teacher-videos');
-                }
-            }
-            
             showLoading(true);
             
             try {
+                // 处理头像图片
+                if (teacherMediaFiles.edit.image) {
+                    const imageUrl = await uploadImageToSupabase(teacherMediaFiles.edit.image, 'teacher-images');
+                    if (imageUrl) {
+                        teacherData.image_url = imageUrl;
+                    }
+                }
+                
+                // 处理宣传图片
+                if (teacherMediaFiles.edit.photos.length > 0) {
+                    const photoUrls = [];
+                    for (let i = 0; i < Math.min(teacherMediaFiles.edit.photos.length, 3); i++) {
+                        const photoUrl = await uploadImageToSupabase(teacherMediaFiles.edit.photos[i], 'teacher-photos');
+                        if (photoUrl) {
+                            photoUrls.push(photoUrl);
+                        }
+                    }
+                    
+                    if (photoUrls.length > 0) {
+                        teacherData.photo_url_1 = photoUrls[0] || null;
+                        teacherData.photo_url_2 = photoUrls[1] || null;
+                        teacherData.photo_url_3 = photoUrls[2] || null;
+                    }
+                }
+                
+                // 处理视频
+                if (teacherMediaFiles.edit.video) {
+                    const videoUrl = await uploadVideoToSupabase(teacherMediaFiles.edit.video, 'teacher-videos');
+                    if (videoUrl) {
+                        teacherData.video_url = videoUrl;
+                    }
+                }
+                
+                // 保存老师数据
                 await directSupabaseUpsert('teachers', teacherData, 'id');
                 
                 showAlert('老师保存成功', 'success');
@@ -2334,7 +2304,6 @@
         // 删除老师
         function deleteTeacher(teacherId) {
             if (!confirm('确定要删除这个老师吗？')) return;
-            
             showLoading(true);
             directSupabaseDelete('teachers', teacherId)
             .then(() => {
@@ -2353,15 +2322,18 @@
         function showAddTeacherModal() {
             document.getElementById('addTeacherForm').reset();
             
-            // 重置媒体文件缓存
+            // 重置媒体文件存储
             teacherMediaFiles.add = {
+                image: null,
                 photos: [],
                 video: null
             };
             
             // 清空预览
+            document.getElementById('addTeacherImagePreview').innerHTML = '';
             document.getElementById('addTeacherPhotosPreview').innerHTML = '';
             document.getElementById('addTeacherVideoPreview').innerHTML = '';
+            document.getElementById('addTeacherImageUrl').value = '';
             
             const modal = new bootstrap.Modal(document.getElementById('addTeacherModal'));
             modal.show();
@@ -2376,34 +2348,49 @@
                 region: document.getElementById('addTeacherRegion').value,
                 telegram_account: document.getElementById('addTeacherAccount').value,
                 channel: document.getElementById('addTeacherChannel').value,
-                robot_account: document.getElementById('addTeacherRobotAccount').value,
                 service_type: document.getElementById('addTeacherServiceType').value,
                 repair_cost: document.getElementById('addTeacherRepairCost').value,
                 intro: document.getElementById('addTeacherIntro').value,
                 status: document.getElementById('addTeacherStatus').value
             };
             
-            // 处理照片
-            if (teacherMediaFiles.add.photos.length > 0) {
-                teacherData.photo_url_1 = await uploadMediaToSupabase(teacherMediaFiles.add.photos[0], 'teacher-photos');
-                
-                if (teacherMediaFiles.add.photos[1]) {
-                    teacherData.photo_url_2 = await uploadMediaToSupabase(teacherMediaFiles.add.photos[1], 'teacher-photos');
-                }
-                
-                if (teacherMediaFiles.add.photos[2]) {
-                    teacherData.photo_url_3 = await uploadMediaToSupabase(teacherMediaFiles.add.photos[2], 'teacher-photos');
-                }
-            }
-            
-            // 处理视频
-            if (teacherMediaFiles.add.video) {
-                teacherData.video_url = await uploadMediaToSupabase(teacherMediaFiles.add.video, 'teacher-videos');
-            }
-            
             showLoading(true);
             
             try {
+                // 处理头像图片
+                if (teacherMediaFiles.add.image) {
+                    const imageUrl = await uploadImageToSupabase(teacherMediaFiles.add.image, 'teacher-images');
+                    if (imageUrl) {
+                        teacherData.image_url = imageUrl;
+                    }
+                }
+                
+                // 处理宣传图片
+                if (teacherMediaFiles.add.photos.length > 0) {
+                    const photoUrls = [];
+                    for (let i = 0; i < Math.min(teacherMediaFiles.add.photos.length, 3); i++) {
+                        const photoUrl = await uploadImageToSupabase(teacherMediaFiles.add.photos[i], 'teacher-photos');
+                        if (photoUrl) {
+                            photoUrls.push(photoUrl);
+                        }
+                    }
+                    
+                    if (photoUrls.length > 0) {
+                        teacherData.photo_url_1 = photoUrls[0] || null;
+                        teacherData.photo_url_2 = photoUrls[1] || null;
+                        teacherData.photo_url_3 = photoUrls[2] || null;
+                    }
+                }
+                
+                // 处理视频
+                if (teacherMediaFiles.add.video) {
+                    const videoUrl = await uploadVideoToSupabase(teacherMediaFiles.add.video, 'teacher-videos');
+                    if (videoUrl) {
+                        teacherData.video_url = videoUrl;
+                    }
+                }
+                
+                // 保存老师数据
                 await directSupabaseInsert('teachers', teacherData);
                 
                 showAlert('老师添加成功', 'success');
@@ -2417,231 +2404,173 @@
             }
         }
         
-        // 处理老师媒体文件上传
-        function handleTeacherMediaUpload(type, mediaType) {
-            const inputId = type === 'add' ? 'addTeacher' + (mediaType === 'photo' ? 'Photos' : 'Video') : 'editTeacher' + (mediaType === 'photo' ? 'Photos' : 'Video');
-            const previewId = type + 'Teacher' + (mediaType === 'photo' ? 'Photos' : 'Video') + 'Preview';
+        // 预览老师图片
+        function previewTeacherImage(type) {
+            const fileInput = document.getElementById(`${type}TeacherImage`);
+            const previewElement = document.getElementById(`${type}TeacherImagePreview`);
             
-            const fileInput = document.getElementById(inputId);
-            const previewContainer = document.getElementById(previewId);
-            
-            if (mediaType === 'photo') {
-                // 限制最多3张照片
-                if (teacherMediaFiles[type].photos.length >= 3) {
-                    showAlert('最多只能上传3张照片', 'warning');
+            if (fileInput.files && fileInput.files[0]) {
+                // 检查文件大小
+                if (fileInput.files[0].size > 5 * 1024 * 1024) {
+                    showAlert('图片大小不能超过5MB', 'warning');
+                    fileInput.value = '';
+                    previewElement.innerHTML = '';
                     return;
                 }
                 
-                // 处理照片上传
-                for (let i = 0; i < fileInput.files.length; i++) {
-                    if (teacherMediaFiles[type].photos.length >= 3) break;
+                // 检查文件类型
+                if (!fileInput.files[0].type.match('image.*')) {
+                    showAlert('请上传图片文件', 'warning');
+                    fileInput.value = '';
+                    previewElement.innerHTML = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewElement.innerHTML = `
+                        <div class="media-preview">
+                            <img src="${e.target.result}" alt="头像预览">
+                        </div>
+                    `;
                     
+                    // 保存文件对象
+                    teacherMediaFiles[type].image = fileInput.files[0];
+                };
+                
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                previewElement.innerHTML = '';
+                teacherMediaFiles[type].image = null;
+            }
+        }
+        
+        // 预览老师宣传图片
+        function previewTeacherPhotos(type) {
+            const fileInput = document.getElementById(`${type}TeacherPhotos`);
+            const previewElement = document.getElementById(`${type}TeacherPhotosPreview`);
+            
+            if (fileInput.files && fileInput.files.length > 0) {
+                previewElement.innerHTML = '';
+                
+                // 清空之前的图片
+                teacherMediaFiles[type].photos = [];
+                
+                // 最多处理3张图片
+                const maxFiles = Math.min(fileInput.files.length, 3);
+                
+                for (let i = 0; i < maxFiles; i++) {
                     const file = fileInput.files[i];
                     
                     // 检查文件大小
                     if (file.size > 5 * 1024 * 1024) {
-                        showAlert('照片大小不能超过5MB', 'warning');
+                        showAlert(`第${i+1}张图片大小超过5MB，已跳过`, 'warning');
                         continue;
                     }
                     
                     // 检查文件类型
                     if (!file.type.match('image.*')) {
-                        showAlert('请上传图片文件', 'warning');
+                        showAlert(`第${i+1}个文件不是图片，已跳过`, 'warning');
                         continue;
                     }
                     
-                    // 添加到缓存
-                    teacherMediaFiles[type].photos.push(file);
-                    
-                    // 添加预览
                     const reader = new FileReader();
-                    reader.onload = function(e) {
-                        addMediaPreview(type, mediaType, e.target.result);
-                    };
+                    
+                    reader.onload = (function(index) {
+                        return function(e) {
+                            previewElement.innerHTML += `
+                                <div class="media-preview">
+                                    <img src="${e.target.result}" alt="宣传图片${index+1}">
+                                    <button type="button" class="remove-media" onclick="removeTeacherPhoto('${type}', ${index})">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            `;
+                            
+                            // 保存文件对象
+                            teacherMediaFiles[type].photos[index] = file;
+                        };
+                    })(i);
+                    
                     reader.readAsDataURL(file);
                 }
-            } else if (mediaType === 'video') {
-                // 只能有一个视频
-                if (teacherMediaFiles[type].video) {
-                    showAlert('只能上传一个视频', 'warning');
-                    return;
-                }
+            } else {
+                previewElement.innerHTML = '';
+                teacherMediaFiles[type].photos = [];
+            }
+        }
+        
+        // 移除老师宣传图片
+        function removeTeacherPhoto(type, index) {
+            const previewElement = document.getElementById(`${type}TeacherPhotosPreview`);
+            const mediaPreviews = previewElement.querySelectorAll('.media-preview');
+            
+            if (mediaPreviews[index]) {
+                mediaPreviews[index].remove();
+                teacherMediaFiles[type].photos.splice(index, 1);
                 
-                const file = fileInput.files[0];
-                
+                // 重新编号
+                const newMediaPreviews = previewElement.querySelectorAll('.media-preview');
+                newMediaPreviews.forEach((preview, newIndex) => {
+                    const removeButton = preview.querySelector('.remove-media');
+                    if (removeButton) {
+                        removeButton.setAttribute('onclick', `removeTeacherPhoto('${type}', ${newIndex})`);
+                    }
+                });
+            }
+        }
+        
+        // 预览老师视频
+        function previewTeacherVideo(type) {
+            const fileInput = document.getElementById(`${type}TeacherVideo`);
+            const previewElement = document.getElementById(`${type}TeacherVideoPreview`);
+            
+            if (fileInput.files && fileInput.files[0]) {
                 // 检查文件大小
-                if (file.size > 50 * 1024 * 1024) {
-                    showAlert('视频大小不能超过50MB', 'warning');
+                if (fileInput.files[0].size > 20 * 1024 * 1024) {
+                    showAlert('视频大小不能超过20MB', 'warning');
+                    fileInput.value = '';
+                    previewElement.innerHTML = '';
                     return;
                 }
                 
                 // 检查文件类型
-                if (!file.type.match('video.*')) {
+                if (!fileInput.files[0].type.match('video.*')) {
                     showAlert('请上传视频文件', 'warning');
+                    fileInput.value = '';
+                    previewElement.innerHTML = '';
                     return;
                 }
                 
-                // 添加到缓存
-                teacherMediaFiles[type].video = file;
-                
-                // 添加预览
                 const reader = new FileReader();
+                
                 reader.onload = function(e) {
-                    addMediaPreview(type, mediaType, e.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-            
-            // 清空文件输入，以便可以再次选择相同的文件
-            fileInput.value = '';
-        }
-        
-        // 添加媒体预览
-        function addMediaPreview(type, mediaType, src) {
-            const previewId = type + 'Teacher' + (mediaType === 'photo' ? 'Photos' : 'Video') + 'Preview';
-            const previewContainer = document.getElementById(previewId);
-            
-            const previewItem = document.createElement('div');
-            previewItem.className = 'media-preview-item';
-            
-            if (mediaType === 'photo') {
-                const img = document.createElement('img');
-                img.src = src;
-                img.className = 'image-preview';
-                previewItem.appendChild(img);
-            } else if (mediaType === 'video') {
-                const video = document.createElement('video');
-                video.src = src;
-                video.className = 'video-preview';
-                video.controls = true;
-                previewItem.appendChild(video);
-            }
-            
-            // 添加删除按钮
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-media';
-            removeBtn.innerHTML = '×';
-            removeBtn.onclick = function() {
-                removeMediaPreview(type, mediaType, previewItem, src);
-            };
-            previewItem.appendChild(removeBtn);
-            
-            previewContainer.appendChild(previewItem);
-        }
-        
-        // 移除媒体预览
-        function removeMediaPreview(type, mediaType, previewItem, src) {
-            const previewId = type + 'Teacher' + (mediaType === 'photo' ? 'Photos' : 'Video') + 'Preview';
-            const previewContainer = document.getElementById(previewId);
-            
-            // 从缓存中移除
-            if (mediaType === 'photo') {
-                const index = teacherMediaFiles[type].photos.findIndex(item => {
-                    if (typeof item === 'string') {
-                        return item === src;
-                    } else {
-                        // 对于文件对象，我们无法直接比较，所以移除预览项即可
-                        return false;
-                    }
-                });
-                
-                if (index !== -1) {
-                    teacherMediaFiles[type].photos.splice(index, 1);
-                }
-            } else if (mediaType === 'video') {
-                if (typeof teacherMediaFiles[type].video === 'string' && teacherMediaFiles[type].video === src) {
-                    teacherMediaFiles[type].video = null;
-                } else if (typeof teacherMediaFiles[type].video !== 'string') {
-                    teacherMediaFiles[type].video = null;
-                }
-            }
-            
-            // 从预览中移除
-            previewContainer.removeChild(previewItem);
-        }
-        
-        // 上传媒体文件到Supabase存储
-        async function uploadMediaToSupabase(file, bucketName) {
-            if (!file) return null;
-            
-            showLoading(true);
-            try {
-                // 生成文件名：使用时间戳和随机数
-                const fileExtension = file.name.split('.').pop();
-                const fileName = `${bucketName}_${Date.now()}_${Math.floor(Math.random() * 1000)}.${fileExtension}`;
-                
-                // 先检查存储桶是否存在，如果不存在则创建
-                try {
-                    await createStorageBucketIfNotExists(bucketName);
-                } catch (error) {
-                    console.warn('创建存储桶失败:', error);
-                    // 继续尝试上传，可能存储桶已经存在
-                }
-                
-                // 上传到Supabase存储
-                const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                        'Content-Type': file.type
-                    },
-                    body: file
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`上传失败: ${errorText}`);
-                }
-                
-                // 获取公共URL
-                const mediaUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
-                
-                return mediaUrl;
-            } catch (error) {
-                console.error('上传媒体文件失败:', error);
-                showAlert('上传媒体文件失败: ' + error.message, 'danger');
-                return null;
-            } finally {
-                showLoading(false);
-            }
-        }
-        
-        // 创建存储桶（如果不存在）
-        async function createStorageBucketIfNotExists(bucketName) {
-            // 检查存储桶是否存在
-            const response = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
-                }
-            });
-            
-            if (response.ok) {
-                const buckets = await response.json();
-                const bucketExists = buckets.some(bucket => bucket.name === bucketName);
-                
-                if (!bucketExists) {
-                    // 创建存储桶
-                    const createResponse = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            name: bucketName,
-                            public: true,
-                            file_size_limit: 52428800 // 50MB
-                        })
-                    });
+                    previewElement.innerHTML = `
+                        <div class="media-preview">
+                            <video controls src="${e.target.result}" alt="宣传视频"></video>
+                            <button type="button" class="remove-media" onclick="removeTeacherVideo('${type}')">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    `;
                     
-                    if (!createResponse.ok) {
-                        throw new Error('创建存储桶失败');
-                    }
-                }
+                    // 保存文件对象
+                    teacherMediaFiles[type].video = fileInput.files[0];
+                };
+                
+                reader.readAsDataURL(fileInput.files[0]);
             } else {
-                throw new Error('获取存储桶列表失败');
+                previewElement.innerHTML = '';
+                teacherMediaFiles[type].video = null;
             }
+        }
+        
+        // 移除老师视频
+        function removeTeacherVideo(type) {
+            const previewElement = document.getElementById(`${type}TeacherVideoPreview`);
+            previewElement.innerHTML = '';
+            teacherMediaFiles[type].video = null;
         }
         
         // 加载关键词数据
@@ -2714,13 +2643,11 @@
         function editKeyword(keywordId) {
             const keyword = keywordsData.find(k => k.id === keywordId);
             if (!keyword) return;
-            
             document.getElementById('editKeywordId').value = keyword.id;
             document.getElementById('editKeywordKeyword').value = keyword.keyword;
             document.getElementById('editKeywordResponse').value = keyword.response;
             document.getElementById('editKeywordReplyContent').value = keyword.reply_content || '';
             document.getElementById('editKeywordActive').value = keyword.is_active ? 'true' : 'false';
-            
             const modal = new bootstrap.Modal(document.getElementById('editKeywordModal'));
             modal.show();
         }
@@ -2735,7 +2662,6 @@
                 reply_content: document.getElementById('editKeywordReplyContent').value,
                 is_active: document.getElementById('editKeywordActive').value === 'true'
             };
-            
             showLoading(true);
             directSupabaseUpsert('keywords', keywordData, 'id')
             .then(() => {
@@ -2754,7 +2680,6 @@
         // 删除关键词 - 使用服务角色密钥
         function deleteKeyword(keywordId) {
             if (!confirm('确定要删除这个关键词吗？')) return;
-            
             showLoading(true);
             // 使用服务角色密钥删除关键词
             directSupabaseDeleteWithServiceKey('keywords', keywordId)
@@ -2785,7 +2710,6 @@
                 reply_content: document.getElementById('addKeywordReplyContent').value,
                 is_active: document.getElementById('addKeywordActive').value === 'true'
             };
-            
             showLoading(true);
             directSupabaseInsertWithServiceKey('keywords', keywordData)
             .then(() => {
@@ -2867,10 +2791,8 @@
         function editBanned(bannedId) {
             const banned = bannedData.find(b => b.id === bannedId);
             if (!banned) return;
-            
             document.getElementById('editBannedId').value = banned.id;
             document.getElementById('editBannedKeyword').value = banned.keyword;
-            
             const modal = new bootstrap.Modal(document.getElementById('editBannedModal'));
             modal.show();
         }
@@ -2882,7 +2804,6 @@
                 id: parseInt(bannedId),
                 keyword: document.getElementById('editBannedKeyword').value
             };
-            
             showLoading(true);
             directSupabaseUpsertWithServiceKey('banned_keywords', bannedData, 'id')
             .then(() => {
@@ -2901,7 +2822,6 @@
         // 删除禁言词
         function deleteBanned(bannedId) {
             if (!confirm('确定要删除这个禁言词吗？')) return;
-            
             showLoading(true);
             directSupabaseDeleteWithServiceKey('banned_keywords', bannedId)
             .then(() => {
@@ -2928,7 +2848,6 @@
             const bannedData = {
                 keyword: document.getElementById('addBannedKeyword').value
             };
-            
             showLoading(true);
             directSupabaseInsertWithServiceKey('banned_keywords', bannedData)
             .then(() => {
@@ -2982,7 +2901,7 @@
                             <button class="btn btn-sm btn-primary btn-action" onclick="triggerScheduledTask(${task.id})" title="立即触发">
                                 <i class="bi bi-play-circle"></i>
                             </button>
-                            <button class="btn btn-sm btn-warning btn-action" onclick="editScheduledTask(${task.id})" title="编辑">
+                            <button class="btn btn-sm btn-secondary btn-action" onclick="editScheduledTask(${task.id})" title="编辑">
                                 <i class="bi bi-pencil"></i>
                             </button>
                             <button class="btn btn-sm btn-danger btn-action" onclick="deleteScheduledTask(${task.id})" title="删除">
@@ -3102,7 +3021,6 @@
         function editScheduledTask(taskId) {
             const task = scheduledTasksData.find(t => t.id === taskId);
             if (!task) return;
-            
             document.getElementById('editScheduledTaskId').value = task.id;
             document.getElementById('editScheduledTaskName').value = task.name;
             document.getElementById('editScheduledTaskContent').value = task.content;
@@ -3194,7 +3112,6 @@
         // 删除定时任务
         function deleteScheduledTask(taskId) {
             if (!confirm('确定要删除这个定时任务吗？')) return;
-            
             showLoading(true);
             directSupabaseDeleteWithServiceKey('scheduled_messages', taskId)
             .then(() => {
@@ -3212,7 +3129,6 @@
         // 触发定时任务
         function triggerScheduledTask(taskId) {
             if (!confirm('确定要立即触发这个定时任务吗？')) return;
-            
             showLoading(true);
             
             // 调用触发任务的API
@@ -3243,12 +3159,11 @@
         // 手动触发随机老师发送配置
         function triggerRandomTeacherConfig() {
             if (!confirm('确定要立即触发随机老师发送配置吗？')) return;
-            
             showLoading(true);
             
             // 使用更简单的方法，直接发送POST请求，不处理返回的JSON
-            fetch(`${API_BASE_URL}/send-random-teacher`, {
-                method: 'GET',
+            fetch(`${API_BASE_URL}/send-random-teacher-config`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -3304,355 +3219,132 @@
             }
         }
         
-        // 抽奖活动相关函数
-        // 加载抽奖活动数据
-        function loadLotteryActivities(page = 1) {
+        // 上传图片到Supabase存储
+        async function uploadImageToSupabase(file, bucketName) {
+            if (!file) return null;
+            
             showLoading(true);
-            currentPage.lottery = page;
-            // 使用服务角色密钥获取抽奖活动数据
-            directSupabaseFetchWithServiceKey('lottery_activities')
-            .then(data => {
-                lotteryActivitiesData = data;
-                renderLotteryActivitiesTable();
-            })
-            .catch(error => {
-                showAlert('加载抽奖活动失败: ' + error.message, 'danger');
-            })
-            .finally(() => {
-                showLoading(false);
-            });
-        }
-        
-        // 渲染抽奖活动表格
-        function renderLotteryActivitiesTable() {
-            const start = (currentPage.lottery - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageData = lotteryActivitiesData.slice(start, end);
-            const html = pageData.map(lottery => {
-                // 解析奖品配置
-                let prizes = [];
+            try {
+                // 生成文件名：使用时间戳和随机数
+                const fileName = `${bucketName}_${Date.now()}_${Math.floor(Math.random() * 1000)}.${file.name.split('.').pop()}`;
+                
+                // 先检查存储桶是否存在，如果不存在则创建
                 try {
-                    const prizeContent = JSON.parse(lottery.prize_content || "{}");
-                    if (prizeContent.config) {
-                        prizes = prizeContent.prizes || [];
-                    } else {
-                        prizes = parsePrizeConfig(lottery.prize_content || "");
-                    }
+                    await createStorageBucketIfNotExists(bucketName);
                 } catch (error) {
-                    prizes = parsePrizeConfig(lottery.prize_content || "");
+                    console.warn('创建存储桶失败:', error);
+                    // 继续尝试上传，可能存储桶已经存在
                 }
                 
-                let prizeText = "";
-                prizes.forEach((prize, index) => {
-                    prizeText += `${index + 1}. ${prize.name} (数量: ${prize.count})\n`;
+                // 上传到Supabase存储
+                const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                        'Content-Type': file.type
+                    },
+                    body: file
                 });
                 
-                return `
-                    <tr>
-                        <td>${lottery.id}</td>
-                        <td>${lottery.title}</td>
-                        <td>${lottery.lottery_id}</td>
-                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${prizeText}">${prizeText.substring(0, 30)}${prizeText.length > 30 ? '...' : ''}</td>
-                        <td>${lottery.points_required}</td>
-                        <td>${new Date(lottery.end_time).toLocaleString()}</td>
-                        <td>${getStatusBadge(lottery.status)}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn btn-sm btn-warning btn-action" onclick="editLottery(${lottery.id})" title="编辑">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger btn-action" onclick="deleteLottery(${lottery.id})" title="删除">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-            
-            const lotteryActivitiesTableElement = document.getElementById('lotteryActivitiesTable');
-            if (lotteryActivitiesTableElement) {
-                lotteryActivitiesTableElement.innerHTML = html || '<tr><td colspan="8" class="text-center">暂无数据</td></tr>';
-            }
-            
-            // 渲染分页
-            renderPagination('lottery', lotteryActivitiesData.length, currentPage.lottery);
-        }
-        
-        // 解析奖品配置
-        function parsePrizeConfig(prizeConfigStr) {
-            if (!prizeConfigStr) return [];
-            const prizes = [];
-            const prizeItems = prizeConfigStr.split(';');
-            for (const item of prizeItems) {
-                const parts = item.split(':');
-                if (parts.length >= 2) {
-                    const prizeName = parts[0].trim();
-                    const prizeCount = parseInt(parts[1].trim()) || 1;
-                    prizes.push({
-                        name: prizeName,
-                        count: prizeCount,
-                        winners: []
-                    });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`上传失败: ${errorText}`);
                 }
-            }
-            return prizes;
-        }
-        
-        // 搜索抽奖活动
-        function searchLotteryActivities() {
-            const keyword = document.getElementById('lotterySearch').value.toLowerCase();
-            if (!keyword) {
-                renderLotteryActivitiesTable();
-                return;
-            }
-            const filtered = lotteryActivitiesData.filter(lottery => 
-                lottery.title.toLowerCase().includes(keyword) ||
-                lottery.lottery_id.toLowerCase().includes(keyword)
-            );
-            lotteryActivitiesData = filtered;
-            currentPage.lottery = 1;
-            renderLotteryActivitiesTable();
-        }
-        
-        // 刷新抽奖活动列表
-        function refreshLotteryActivities() {
-            loadLotteryActivities(currentPage.lottery);
-        }
-        
-        // 显示添加抽奖活动模态框
-        function showAddLotteryModal() {
-            document.getElementById('addLotteryForm').reset();
-            // 设置默认开奖时间为24小时后
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            tomorrow.setMinutes(tomorrow.getMinutes() - tomorrow.getTimezoneOffset());
-            document.getElementById('addLotteryEndTime').value = tomorrow.toISOString().slice(0, 16);
-            const modal = new bootstrap.Modal(document.getElementById('addLotteryModal'));
-            modal.show();
-        }
-        
-        // 添加抽奖活动
-        async function addLottery() {
-            const title = document.getElementById('addLotteryTitle').value;
-            const lotteryId = document.getElementById('addLotteryLotteryId').value.toUpperCase();
-            const prizeConfig = document.getElementById('addLotteryPrizeConfig').value;
-            const description = document.getElementById('addLotteryDescription').value;
-            const pointsRequired = parseInt(document.getElementById('addLotteryPointsRequired').value) || 0;
-            let endTime = document.getElementById('addLotteryEndTime').value;
-            const imageUrl = document.getElementById('addLotteryImageUrl').value;
-            
-            // 转换时间为ISO格式
-            if (!endTime.includes('T')) {
-                endTime = convertBeijingToISO(endTime);
-            }
-            
-            // 解析奖品配置
-            const prizes = parsePrizeConfig(prizeConfig);
-            if (prizes.length === 0) {
-                showAlert('奖品配置格式错误', 'danger');
-                return;
-            }
-            
-            // 构建奖品内容JSON
-            const prizeContentJson = JSON.stringify({
-                config: prizeConfig,
-                prizes: prizes
-            });
-            
-            // 构建抽奖数据对象
-            const lotteryData = {
-                id: hashCode(lotteryId),
-                title: title,
-                lottery_id: lotteryId,
-                prize_content: prizeContentJson,
-                description: description,
-                points_required: pointsRequired,
-                end_time: endTime,
-                image_url: imageUrl,
-                status: 'active'
-            };
-            
-            showLoading(true);
-            
-            try {
-                await directSupabaseInsertWithServiceKey('lottery_activities', lotteryData);
                 
-                showAlert('抽奖活动添加成功', 'success');
-                bootstrap.Modal.getInstance(document.getElementById('addLotteryModal')).hide();
-                loadLotteryActivities(currentPage.lottery);
+                // 获取公共URL
+                const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
+                
+                return imageUrl;
             } catch (error) {
-                console.error('添加抽奖活动失败:', error);
-                showAlert('添加抽奖活动失败: ' + error.message, 'danger');
+                console.error('上传图片失败:', error);
+                showAlert('上传图片失败: ' + error.message, 'danger');
+                return null;
             } finally {
                 showLoading(false);
             }
         }
         
-        // 编辑抽奖活动
-        function editLottery(lotteryId) {
-            const lottery = lotteryActivitiesData.find(l => l.id === lotteryId);
-            if (!lottery) return;
-            
-            // 解析奖品配置
-            let prizeConfig = "";
-            try {
-                const prizeContent = JSON.parse(lottery.prize_content || "{}");
-                if (prizeContent.config) {
-                    prizeConfig = prizeContent.config;
-                } else {
-                    prizeConfig = lottery.prize_content || "";
-                }
-            } catch (error) {
-                prizeConfig = lottery.prize_content || "";
-            }
-            
-            document.getElementById('editLotteryId').value = lottery.id;
-            document.getElementById('editLotteryTitle').value = lottery.title;
-            document.getElementById('editLotteryLotteryId').value = lottery.lottery_id;
-            document.getElementById('editLotteryPrizeConfig').value = prizeConfig;
-            document.getElementById('editLotteryDescription').value = lottery.description;
-            document.getElementById('editLotteryPointsRequired').value = lottery.points_required;
-            
-            // 设置开奖时间
-            const endTime = new Date(lottery.end_time);
-            endTime.setMinutes(endTime.getMinutes() - endTime.getTimezoneOffset());
-            document.getElementById('editLotteryEndTime').value = endTime.toISOString().slice(0, 16);
-            
-            document.getElementById('editLotteryImageUrl').value = lottery.image_url || '';
-            document.getElementById('editLotteryStatus').value = lottery.status;
-            
-            const modal = new bootstrap.Modal(document.getElementById('editLotteryModal'));
-            modal.show();
-        }
-        
-        // 保存抽奖活动
-        async function saveLottery() {
-            const lotteryId = document.getElementById('editLotteryId').value;
-            const title = document.getElementById('editLotteryTitle').value;
-            const lotteryCode = document.getElementById('editLotteryLotteryId').value.toUpperCase();
-            const prizeConfig = document.getElementById('editLotteryPrizeConfig').value;
-            const description = document.getElementById('editLotteryDescription').value;
-            const pointsRequired = parseInt(document.getElementById('editLotteryPointsRequired').value) || 0;
-            let endTime = document.getElementById('editLotteryEndTime').value;
-            const imageUrl = document.getElementById('editLotteryImageUrl').value;
-            const status = document.getElementById('editLotteryStatus').value;
-            
-            // 转换时间为ISO格式
-            if (!endTime.includes('T')) {
-                endTime = convertBeijingToISO(endTime);
-            }
-            
-            // 解析奖品配置
-            const prizes = parsePrizeConfig(prizeConfig);
-            if (prizes.length === 0) {
-                showAlert('奖品配置格式错误', 'danger');
-                return;
-            }
-            
-            // 构建奖品内容JSON
-            const prizeContentJson = JSON.stringify({
-                config: prizeConfig,
-                prizes: prizes
-            });
-            
-            // 构建抽奖数据对象
-            const lotteryData = {
-                id: parseInt(lotteryId),
-                title: title,
-                lottery_id: lotteryCode,
-                prize_content: prizeContentJson,
-                description: description,
-                points_required: pointsRequired,
-                end_time: endTime,
-                image_url: imageUrl,
-                status: status
-            };
+        // 上传视频到Supabase存储
+        async function uploadVideoToSupabase(file, bucketName) {
+            if (!file) return null;
             
             showLoading(true);
-            
             try {
-                await directSupabaseUpsertWithServiceKey('lottery_activities', lotteryData, 'id');
+                // 生成文件名：使用时间戳和随机数
+                const fileName = `${bucketName}_${Date.now()}_${Math.floor(Math.random() * 1000)}.${file.name.split('.').pop()}`;
                 
-                showAlert('抽奖活动保存成功', 'success');
-                bootstrap.Modal.getInstance(document.getElementById('editLotteryModal')).hide();
-                loadLotteryActivities(currentPage.lottery);
+                // 先检查存储桶是否存在，如果不存在则创建
+                try {
+                    await createStorageBucketIfNotExists(bucketName);
+                } catch (error) {
+                    console.warn('创建存储桶失败:', error);
+                    // 继续尝试上传，可能存储桶已经存在
+                }
+                
+                // 上传到Supabase存储
+                const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                        'Content-Type': file.type
+                    },
+                    body: file
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`上传失败: ${errorText}`);
+                }
+                
+                // 获取公共URL
+                const videoUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
+                
+                return videoUrl;
             } catch (error) {
-                console.error('保存抽奖活动失败:', error);
-                showAlert('保存抽奖活动失败: ' + error.message, 'danger');
+                console.error('上传视频失败:', error);
+                showAlert('上传视频失败: ' + error.message, 'danger');
+                return null;
             } finally {
                 showLoading(false);
             }
         }
         
-        // 删除抽奖活动
-        function deleteLottery(lotteryId) {
-            if (!confirm('确定要删除这个抽奖活动吗？')) return;
-            
-            showLoading(true);
-            directSupabaseDeleteWithServiceKey('lottery_activities', lotteryId)
-            .then(() => {
-                showAlert('抽奖活动删除成功', 'success');
-                loadLotteryActivities(currentPage.lottery);
-            })
-            .catch(error => {
-                showAlert('删除抽奖活动失败: ' + error.message, 'danger');
-            })
-            .finally(() => {
-                showLoading(false);
-            });
-        }
-        
-        // 手动开奖
-        function manualCheckLottery() {
-            if (!confirm('确定要手动开奖吗？这将检查所有已到开奖时间的抽奖活动。')) return;
-            
-            showLoading(true);
-            
-            fetch(`${API_BASE_URL}/manual-check-lottery`, {
+        // 创建存储桶（如果不存在）
+        async function createStorageBucketIfNotExists(bucketName) {
+            // 检查存储桶是否存在
+            const response = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
                 }
-            })
-            .then(response => {
-                if (response.ok) {
-                    showAlert('手动开奖成功', 'success');
-                    loadLotteryActivities(currentPage.lottery);
-                } else {
-                    return response.text().then(text => {
-                        throw new Error(text || '开奖失败');
-                    });
-                }
-            })
-            .catch(error => {
-                showAlert('手动开奖失败: ' + error.message, 'danger');
-            })
-            .finally(() => {
-                showLoading(false);
             });
-        }
-        
-        // 哈希函数
-        function hashCode(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                hash |= 0;
+            
+            if (response.ok) {
+                const buckets = await response.json();
+                const bucketExists = buckets.some(bucket => bucket.name === bucketName);
+                
+                if (!bucketExists) {
+                    // 创建存储桶
+                    const createResponse = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: bucketName,
+                            public: true,
+                            file_size_limit: 52428800 // 50MB
+                        })
+                    });
+                    
+                    if (!createResponse.ok) {
+                        throw new Error('创建存储桶失败');
+                    }
+                }
+            } else {
+                throw new Error('获取存储桶列表失败');
             }
-            return Math.abs(hash);
-        }
-        
-        // 时间转换函数
-        function convertBeijingToISO(beijingTimeString) {
-            if (!beijingTimeString) return "";
-            const parts = beijingTimeString.split(' ');
-            if (parts.length !== 2) return beijingTimeString;
-            const datePart = parts[0];
-            const timePart = parts[1];
-            const beijingTime = new Date(`${datePart}T${timePart}+08:00`);
-            if (isNaN(beijingTime.getTime())) return beijingTimeString;
-            return beijingTime.toISOString();
         }
         
         // 加载系统设置
@@ -3701,12 +3393,10 @@
         function renderPagination(type, totalItems, currentPage) {
             const totalPages = Math.ceil(totalItems / itemsPerPage);
             let html = '';
-            
             // 上一页
             html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
                 <a class="page-link" href="#" onclick="changePage('${type}', ${currentPage - 1})">上一页</a>
             </li>`;
-            
             // 页码
             for (let i = 1; i <= totalPages; i++) {
                 if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
@@ -3717,7 +3407,6 @@
                     html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
                 }
             }
-            
             // 下一页
             html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
                 <a class="page-link" href="#" onclick="changePage('${type}', ${currentPage + 1})">下一页</a>
@@ -3748,9 +3437,6 @@
                 case 'scheduled':
                     renderScheduledTasksTable();
                     break;
-                case 'lottery':
-                    renderLotteryActivitiesTable();
-                    break;
             }
         }
         
@@ -3763,12 +3449,6 @@
                     return '<span class="badge bg-success">已通过</span>';
                 case 'rejected':
                     return '<span class="badge bg-danger">已拒绝</span>';
-                case 'active':
-                    return '<span class="badge bg-success">进行中</span>';
-                case 'ended':
-                    return '<span class="badge bg-secondary">已结束</span>';
-                case 'cancelled':
-                    return '<span class="badge bg-danger">已取消</span>';
                 default:
                     return '<span class="badge bg-secondary">未知</span>';
             }
@@ -3825,11 +3505,6 @@
         
         // 使用服务角色密钥插入数据
         async function directSupabaseInsertWithServiceKey(table, data) {
-            // 如果是抽奖活动，删除prize_config字段
-            if (table === 'lottery_activities' && data.prize_config) {
-                delete data.prize_config;
-            }
-            
             const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
                 method: 'POST',
                 headers: {
@@ -3865,11 +3540,6 @@
         
         // 使用服务角色密钥更新数据
         async function directSupabaseUpsertWithServiceKey(table, data, conflictColumn) {
-            // 如果是抽奖活动，删除prize_config字段
-            if (table === 'lottery_activities' && data.prize_config) {
-                delete data.prize_config;
-            }
-            
             const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?on_conflict=${conflictColumn}`, {
                 method: 'POST',
                 headers: {
@@ -3915,51 +3585,6 @@
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(`Supabase delete错误: ${errorData.message || response.statusText}`);
-            }
-        }
-        
-        // 上传图片到Supabase存储
-        async function uploadImageToSupabase(file, bucketName) {
-            if (!file) return null;
-            
-            showLoading(true);
-            try {
-                // 生成文件名：使用时间戳和随机数
-                const fileName = `${bucketName}_${Date.now()}_${Math.floor(Math.random() * 1000)}.${file.name.split('.').pop()}`;
-                
-                // 先检查存储桶是否存在，如果不存在则创建
-                try {
-                    await createStorageBucketIfNotExists(bucketName);
-                } catch (error) {
-                    console.warn('创建存储桶失败:', error);
-                    // 继续尝试上传，可能存储桶已经存在
-                }
-                
-                // 上传到Supabase存储
-                const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                        'Content-Type': file.type
-                    },
-                    body: file
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`上传失败: ${errorText}`);
-                }
-                
-                // 获取公共URL
-                const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
-                
-                return imageUrl;
-            } catch (error) {
-                console.error('上传图片失败:', error);
-                showAlert('上传图片失败: ' + error.message, 'danger');
-                return null;
-            } finally {
-                showLoading(false);
             }
         }
         

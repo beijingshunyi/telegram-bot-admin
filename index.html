@@ -857,6 +857,45 @@
                     <div class="col-md-12 mb-4">
                         <div class="card">
                             <div class="card-header">
+                                <h5>定时任务操作</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <button class="btn btn-primary w-100" onclick="triggerRandomTeacher()">
+                                            <i class="bi bi-arrow-repeat me-1"></i> 手动触发随机发送老师信息
+                                        </button>
+                                        <p class="text-muted mt-2">此操作会立即触发一次随机发送老师信息到所有群组和频道</p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <button class="btn btn-success w-100" onclick="triggerScheduledMessages()">
+                                            <i class="bi bi-clock-history me-1"></i> 手动触发定时发送消息
+                                        </button>
+                                        <p class="text-muted mt-2">此操作会立即触发所有到期的定时发送消息任务</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <button class="btn btn-warning w-100" onclick="triggerLotteryCheck()">
+                                            <i class="bi bi-gift me-1"></i> 手动触发抽奖开奖检查
+                                        </button>
+                                        <p class="text-muted mt-2">此操作会立即检查所有到期的抽奖活动并进行开奖</p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <button class="btn btn-info w-100" onclick="resetMessageCounter()">
+                                            <i class="bi bi-arrow-counterclockwise me-1"></i> 重置消息计数器
+                                        </button>
+                                        <p class="text-muted mt-2">此操作会重置机器人的消息频率计数器</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <div class="card">
+                            <div class="card-header">
                                 <h5>系统信息</h5>
                             </div>
                             <div class="card-body">
@@ -2935,6 +2974,159 @@
                 document.getElementById('dbStatus').className = 'badge bg-danger';
                 document.getElementById('dbLastCheck').textContent = new Date().toLocaleString();
                 showAlert('数据库连接失败: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+        
+        // 手动触发随机发送老师信息
+        function triggerRandomTeacher() {
+            if (!confirm('确定要立即触发随机发送老师信息吗？')) return;
+            showLoading(true);
+            
+            // 调用触发随机发送老师信息的API
+            fetch(`${API_BASE_URL}/send-random-teacher`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text().then(text => {
+                        showAlert('随机发送老师信息触发成功: ' + text, 'success');
+                    });
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text || '触发失败');
+                    });
+                }
+            })
+            .catch(error => {
+                showAlert('触发随机发送老师信息失败: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+        
+        // 手动触发定时发送消息
+        function triggerScheduledMessages() {
+            if (!confirm('确定要立即触发定时发送消息吗？')) return;
+            showLoading(true);
+            
+            // 调用触发定时发送消息的API
+            fetch(`${API_BASE_URL}/send-scheduled-messages`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text().then(text => {
+                        showAlert('定时发送消息触发成功: ' + text, 'success');
+                    });
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text || '触发失败');
+                    });
+                }
+            })
+            .catch(error => {
+                showAlert('触发定时发送消息失败: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+        
+        // 手动触发抽奖开奖检查
+        function triggerLotteryCheck() {
+            if (!confirm('确定要立即触发抽奖开奖检查吗？')) return;
+            showLoading(true);
+            
+            // 调用触发抽奖开奖检查的API
+            fetch(`${API_BASE_URL}/check-lottery`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text().then(text => {
+                        showAlert('抽奖开奖检查触发成功: ' + text, 'success');
+                    });
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text || '触发失败');
+                    });
+                }
+            })
+            .catch(error => {
+                showAlert('触发抽奖开奖检查失败: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+        
+        // 手动触发抽奖开奖检查（另一种方式）
+        function triggerLotteryCheckManual() {
+            if (!confirm('确定要立即触发抽奖开奖检查吗？')) return;
+            showLoading(true);
+            
+            // 调用手动触发抽奖开奖检查的API
+            fetch(`${API_BASE_URL}/manual-check-lottery`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text().then(text => {
+                        showAlert('抽奖开奖检查触发成功: ' + text, 'success');
+                    });
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text || '触发失败');
+                    });
+                }
+            })
+            .catch(error => {
+                showAlert('触发抽奖开奖检查失败: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+        
+        // 重置消息计数器
+        function resetMessageCounter() {
+            if (!confirm('确定要重置消息计数器吗？')) return;
+            showLoading(true);
+            
+            // 调用重置消息计数器的API
+            fetch(`${API_BASE_URL}/reset-counter`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    showAlert('消息计数器重置成功', 'success');
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text || '重置失败');
+                    });
+                }
+            })
+            .catch(error => {
+                showAlert('重置消息计数器失败: ' + error.message, 'danger');
             })
             .finally(() => {
                 showLoading(false);

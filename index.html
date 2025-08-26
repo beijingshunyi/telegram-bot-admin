@@ -10,6 +10,8 @@
         :root {
             --primary-color: #185A56;
             --secondary-color: #FD742D;
+            --light-primary: rgba(24, 90, 86, 0.1);
+            --light-secondary: rgba(253, 116, 45, 0.1);
         }
         
         * {
@@ -21,168 +23,88 @@
         body {
             background-color: #f8f9fa;
             font-family: 'Microsoft YaHei', sans-serif;
-            height: 100vh;
-            overflow: hidden;
-        }
-        
-        .main-container {
-            display: flex;
-            height: 100vh;
+            overflow-x: hidden;
         }
         
         .sidebar {
-            width: 260px;
+            min-height: 100vh;
             background-color: var(--primary-color);
             color: white;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
             z-index: 1000;
+            transition: all 0.3s;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
         }
         
         .sidebar-header {
             padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         
         .sidebar-header h3 {
+            margin: 0;
             font-size: 1.2rem;
-            margin-bottom: 5px;
+            font-weight: 600;
         }
         
-        .sidebar-header p {
-            font-size: 0.8rem;
-            opacity: 0.8;
-        }
-        
-        .sidebar-menu {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 0;
-        }
-        
-        .menu-section {
-            margin-bottom: 25px;
-        }
-        
-        .menu-title {
-            padding: 0 20px 10px;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            opacity: 0.7;
-            letter-spacing: 1px;
-        }
-        
-        .menu-item {
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 0.375rem;
+            margin: 5px 15px;
+            padding: 12px 15px;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
-            padding: 12px 20px;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            transition: all 0.3s;
-            cursor: pointer;
-            border-left: 3px solid transparent;
         }
         
-        .menu-item:hover {
-            background-color: rgba(255,255,255,0.1);
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
             color: white;
         }
         
-        .menu-item.active {
-            background-color: rgba(255,255,255,0.15);
+        .sidebar .nav-link.active {
+            background-color: var(--secondary-color);
             color: white;
-            border-left-color: var(--secondary-color);
         }
         
-        .menu-item i {
-            margin-right: 12px;
+        .sidebar .nav-link i {
+            margin-right: 10px;
             font-size: 1.1rem;
         }
         
-        .sidebar-footer {
-            padding: 15px 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.8rem;
-            text-align: center;
-        }
-        
-        .content-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .top-bar {
-            height: 60px;
-            background-color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 25px;
-            z-index: 100;
-        }
-        
-        .page-title {
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-        }
-        
-        .user-info .dropdown-toggle {
-            display: flex;
-            align-items: center;
-            color: #495057;
-            text-decoration: none;
-        }
-        
-        .user-info i {
-            font-size: 1.5rem;
-            margin-right: 10px;
-            color: var(--primary-color);
-        }
-        
         .content {
-            flex: 1;
-            padding: 25px;
-            overflow-y: auto;
-            background-color: #f8f9fa;
-        }
-        
-        .content-section {
-            display: none;
-        }
-        
-        .content-section.active {
-            display: block;
+            margin-left: 280px;
+            padding: 20px;
+            transition: all 0.3s;
+            min-height: 100vh;
         }
         
         .card {
+            margin-bottom: 20px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
             border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
+            border-radius: 0.5rem;
         }
         
         .card-header {
-            background-color: white;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
             padding: 15px 20px;
             font-weight: 600;
-            color: var(--primary-color);
-            border-radius: 10px 10px 0 0 !important;
         }
         
-        .card-body {
-            padding: 20px;
+        .table-responsive {
+            border-radius: 0.375rem;
+        }
+        
+        .btn-action {
+            margin-right: 5px;
+            border-radius: 0.25rem;
         }
         
         .btn-primary {
@@ -190,155 +112,76 @@
             border-color: var(--primary-color);
         }
         
-        .btn-primary:hover, .btn-primary:focus {
-            background-color: #14433f;
-            border-color: #14433f;
+        .btn-primary:hover {
+            background-color: #14443f;
+            border-color: #14443f;
         }
         
-        .btn-secondary {
+        .btn-warning {
             background-color: var(--secondary-color);
             border-color: var(--secondary-color);
         }
         
-        .btn-secondary:hover, .btn-secondary:focus {
-            background-color: #e5661f;
-            border-color: #e5661f;
+        .btn-warning:hover {
+            background-color: #e56620;
+            border-color: #e56620;
         }
         
-        .btn-outline-primary {
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .login-title {
+            text-align: center;
+            margin-bottom: 30px;
             color: var(--primary-color);
-            border-color: var(--primary-color);
+            font-weight: 600;
         }
         
-        .btn-outline-primary:hover {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
+        .stat-card {
+            border-left: 4px solid var(--primary-color);
         }
         
-        .btn-outline-secondary {
+        .stat-card .card-title {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .stat-card h2 {
             color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-        
-        .btn-outline-secondary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-        
-        .table {
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .table thead th {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            font-weight: 500;
-        }
-        
-        .table td, .table th {
-            vertical-align: middle;
-        }
-        
-        .table-hover tbody tr:hover {
-            background-color: rgba(24, 90, 86, 0.05);
-        }
-        
-        .badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-weight: 500;
-        }
-        
-        .badge.bg-success {
-            background-color: #28a745 !important;
-        }
-        
-        .badge.bg-warning {
-            background-color: #ffc107 !important;
-            color: #212529 !important;
-        }
-        
-        .badge.bg-danger {
-            background-color: #dc3545 !important;
-        }
-        
-        .badge.bg-secondary {
-            background-color: #6c757d !important;
-        }
-        
-        .status-active {
-            color: #28a745;
-            font-weight: bold;
-        }
-        
-        .status-inactive {
-            color: #dc3545;
-            font-weight: bold;
         }
         
         .modal-header {
             background-color: var(--primary-color);
             color: white;
-            border-radius: 10px 10px 0 0;
+            border-bottom: none;
         }
         
         .modal-header .btn-close {
             filter: brightness(0) invert(1);
         }
         
-        .modal-footer {
-            background-color: #f8f9fa;
-            border-top: 1px solid rgba(0,0,0,0.05);
-        }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(24, 90, 86, 0.25);
-        }
-        
-        .pagination .page-link {
+        .form-label {
+            font-weight: 500;
             color: var(--primary-color);
         }
         
-        .pagination .page-item.active .page-link {
+        .pagination {
+            margin-top: 20px;
+        }
+        
+        .page-link {
+            color: var(--primary-color);
+        }
+        
+        .page-item.active .page-link {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
-        }
-        
-        .teacher-image {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-        
-        .image-preview {
-            max-width: 200px;
-            max-height: 200px;
-            margin-top: 10px;
-            border-radius: 5px;
-        }
-        
-        .video-preview {
-            max-width: 300px;
-            max-height: 200px;
-            margin-top: 10px;
-            border-radius: 5px;
-        }
-        
-        .scheduled-task-image {
-            max-width: 100px;
-            max-height: 100px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-        
-        .upload-info {
-            font-size: 0.85rem;
-            color: #6c757d;
-            margin-top: 5px;
         }
         
         .search-box {
@@ -369,124 +212,65 @@
         .loading-spinner .spinner-border {
             width: 3rem;
             height: 3rem;
+            color: var(--secondary-color);
         }
         
-        .stats-card {
-            border-radius: 10px;
-            border-left: 4px solid var(--primary-color);
-            transition: transform 0.3s;
+        .status-active {
+            color: #2ecc71;
+            font-weight: bold;
         }
         
-        .stats-card:hover {
-            transform: translateY(-5px);
+        .status-inactive {
+            color: #e74c3c;
+            font-weight: bold;
         }
         
-        .stats-card h5 {
-            color: #6c757d;
-            font-weight: 500;
-            margin-bottom: 10px;
-        }
-        
-        .stats-card h2 {
-            color: var(--primary-color);
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .stats-card p {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn-action {
-            padding: 5px 10px;
-            font-size: 0.875rem;
-        }
-        
-        .login-container {
-            max-width: 450px;
-            margin: 100px auto;
-            padding: 40px;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .login-title {
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--primary-color);
-            font-weight: 700;
-        }
-        
-        .login-logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            background-color: var(--primary-color);
+        .teacher-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2rem;
         }
         
-        .form-floating label {
-            color: var(--primary-color);
-        }
-        
-        .form-control {
-            border-radius: 8px;
-            border: 1px solid #ced4da;
-            padding: 12px;
-        }
-        
-        .btn-login {
-            background-color: var(--primary-color);
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-weight: 600;
-            width: 100%;
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
             margin-top: 10px;
+            border-radius: 5px;
         }
         
-        .btn-login:hover {
-            background-color: #14433f;
+        .scheduled-task-image {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
         }
         
-        .nav-tabs .nav-link {
-            color: var(--primary-color);
+        .upload-info {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
         }
         
-        .nav-tabs .nav-link.active {
-            color: var(--primary-color);
-            font-weight: 600;
+        .debug-info {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-top: 5px;
+            font-family: monospace;
         }
         
-        .media-upload-area {
-            border: 2px dashed #ced4da;
-            border-radius: 8px;
+        .media-upload-container {
+            border: 2px dashed #ccc;
+            border-radius: 5px;
             padding: 20px;
             text-align: center;
             margin-bottom: 15px;
             transition: all 0.3s;
         }
         
-        .media-upload-area:hover {
+        .media-upload-container:hover {
             border-color: var(--primary-color);
-        }
-        
-        .media-upload-area i {
-            font-size: 2rem;
-            color: #ced4da;
-            margin-bottom: 10px;
+            background-color: var(--light-primary);
         }
         
         .media-preview-container {
@@ -500,9 +284,8 @@
             position: relative;
             width: 100px;
             height: 100px;
-            border-radius: 8px;
+            border-radius: 5px;
             overflow: hidden;
-            border: 1px solid #ced4da;
         }
         
         .media-preview img,
@@ -516,40 +299,89 @@
             position: absolute;
             top: 5px;
             right: 5px;
-            background-color: rgba(220, 53, 69, 0.8);
+            background-color: rgba(255, 0, 0, 0.7);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 12px;
         }
         
-        .tab-content {
-            padding: 20px 0;
-        }
-        
-        .custom-file-upload {
-            display: inline-block;
-            cursor: pointer;
-            padding: 8px 15px;
-            border-radius: 5px;
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
             background-color: var(--primary-color);
             color: white;
-            font-weight: 500;
-            transition: all 0.3s;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 1.2rem;
         }
         
-        .custom-file-upload:hover {
-            background-color: #14433f;
+        .points-input-group {
+            display: flex;
+            align-items: center;
         }
         
-        input[type="file"] {
-            display: none;
+        .points-input-group .input-group-text {
+            background-color: var(--light-primary);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .points-input-group .form-control {
+            border-left: none;
+        }
+        
+        .points-input-group .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(24, 90, 86, 0.25);
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .content {
+                margin-left: 0;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .login-container {
+                margin: 50px 20px;
+                padding: 20px;
+            }
+            
+            .card-body {
+                padding: 15px;
+            }
+            
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+            
+            .btn-action {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.875rem;
+            }
         }
     </style>
 </head>
@@ -561,518 +393,490 @@
         </div>
     </div>
     
+    <!-- 移动端菜单切换按钮 -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="bi bi-list"></i>
+    </button>
+    
     <!-- 登录界面 -->
     <div class="login-container" id="loginContainer">
-        <div class="login-logo">
-            <i class="bi bi-robot"></i>
-        </div>
         <h2 class="login-title">北京修车【万花楼】超级机器人管理后台</h2>
-        <div class="form-floating mb-3">
-            <input type="password" class="form-control" id="adminKey" placeholder="管理员密钥">
-            <label for="adminKey">管理员密钥</label>
+        <div class="mb-3">
+            <label for="adminKey" class="form-label">管理员密钥</label>
+            <input type="password" class="form-control" id="adminKey" placeholder="请输入管理员密钥">
         </div>
-        <button class="btn btn-primary btn-login" onclick="login()">登录</button>
+        <button class="btn btn-primary w-100" onclick="login()">登录</button>
         <div class="mt-3 text-center">
             <small class="text-muted">请输入正确的管理员密钥以继续</small>
         </div>
     </div>
     
     <!-- 主界面 -->
-    <div class="main-container" id="mainContainer" style="display: none;">
+    <div class="container-fluid" id="mainContainer" style="display: none;">
         <!-- 侧边栏 -->
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h3>北京修车【万花楼】</h3>
-                <p>超级机器人管理后台</p>
+                <p class="mb-0 small">超级机器人管理后台</p>
             </div>
-            
-            <div class="sidebar-menu">
-                <div class="menu-section">
-                    <div class="menu-title">系统概览</div>
-                    <a href="#" class="menu-item active" onclick="showSection('dashboard')">
-                        <i class="bi bi-speedometer2"></i>
-                        <span>运行仪表盘</span>
+            <div class="d-flex flex-column p-3">
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" onclick="showSection('dashboard')">
+                            <i class="bi bi-speedometer2"></i> 运行仪表盘
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showSection('users')">
+                            <i class="bi bi-people"></i> 用户管理系统
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showSection('teachers')">
+                            <i class="bi bi-person-badge"></i> 老师管理系统
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showSection('keywords')">
+                            <i class="bi bi-key"></i> 关键词管理系统
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showSection('banned')">
+                            <i class="bi bi-shield-x"></i> 禁言词管理系统
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showSection('scheduled')">
+                            <i class="bi bi-clock-history"></i> 定时发送任务管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showSection('settings')">
+                            <i class="bi bi-gear"></i> 系统设置
+                        </a>
+                    </li>
+                </ul>
+                <hr>
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle me-2"></i>
+                        <strong>管理员</strong>
                     </a>
+                    <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                        <li><a class="dropdown-item" href="#" onclick="logout()">退出登录</a></li>
+                    </ul>
                 </div>
-                
-                <div class="menu-section">
-                    <div class="menu-title">用户管理</div>
-                    <a href="#" class="menu-item" onclick="showSection('users')">
-                        <i class="bi bi-people"></i>
-                        <span>用户管理</span>
-                    </a>
-                </div>
-                
-                <div class="menu-section">
-                    <div class="menu-title">老师管理</div>
-                    <a href="#" class="menu-item" onclick="showSection('teachers')">
-                        <i class="bi bi-person-badge"></i>
-                        <span>老师管理</span>
-                    </a>
-                </div>
-                
-                <div class="menu-section">
-                    <div class="menu-title">内容管理</div>
-                    <a href="#" class="menu-item" onclick="showSection('keywords')">
-                        <i class="bi bi-key"></i>
-                        <span>关键词管理</span>
-                    </a>
-                    <a href="#" class="menu-item" onclick="showSection('banned')">
-                        <i class="bi bi-shield-x"></i>
-                        <span>禁言词管理</span>
-                    </a>
-                </div>
-                
-                <div class="menu-section">
-                    <div class="menu-title">任务管理</div>
-                    <a href="#" class="menu-item" onclick="showSection('scheduled')">
-                        <i class="bi bi-clock-history"></i>
-                        <span>定时发送任务</span>
-                    </a>
-                </div>
-                
-                <div class="menu-section">
-                    <div class="menu-title">系统设置</div>
-                    <a href="#" class="menu-item" onclick="showSection('settings')">
-                        <i class="bi bi-gear"></i>
-                        <span>系统设置</span>
-                    </a>
-                </div>
-            </div>
-            
-            <div class="sidebar-footer">
-                <p>© 2023 北京修车【万花楼】</p>
-                <p>超级机器人管理系统</p>
             </div>
         </div>
         
-        <!-- 内容区域 -->
-        <div class="content-area">
-            <!-- 顶部栏 -->
-            <div class="top-bar">
-                <div class="page-title" id="pageTitle">运行仪表盘</div>
-                <div class="user-info">
-                    <div class="dropdown">
-                        <a href="#" class="dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i>
-                            <span>管理员</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#" onclick="logout()">退出登录</a></li>
-                        </ul>
+        <!-- 主内容区 -->
+        <div class="content">
+            <!-- 仪表盘 -->
+            <div id="dashboardSection" class="content-section">
+                <h2 class="mb-4">运行仪表盘</h2>
+                <div class="row">
+                    <div class="col-md-3 mb-4">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">用户总数</h5>
+                                <h2 class="text-primary" id="totalUsers">-</h2>
+                                <p class="card-text">注册用户数量</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">老师总数</h5>
+                                <h2 class="text-success" id="totalTeachers">-</h2>
+                                <p class="card-text">已注册老师数量</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">关键词总数</h5>
+                                <h2 class="text-warning" id="totalKeywords">-</h2>
+                                <p class="card-text">已设置关键词数量</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">禁言词总数</h5>
+                                <h2 class="text-danger" id="totalBanned">-</h2>
+                                <p class="card-text">已设置禁言词数量</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>最近用户</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>用户名</th>
+                                                <th>积分</th>
+                                                <th>最后签到</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recentUsers">
+                                            <tr>
+                                                <td colspan="4" class="text-center">加载中...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>最近老师</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>花名</th>
+                                                <th>年龄</th>
+                                                <th>地区</th>
+                                                <th>状态</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recentTeachers">
+                                            <tr>
+                                                <td colspan="4" class="text-center">加载中...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 用户管理 -->
+            <div id="usersSection" class="content-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>用户管理</h2>
+                    <div>
+                        <button class="btn btn-success" onclick="showAddUserModal()">
+                            <i class="bi bi-plus-circle me-1"></i> 添加用户
+                        </button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索用户..." id="userSearch">
+                                <button class="btn btn-outline-secondary" type="button" onclick="searchUsers()">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>用户名</th>
+                                        <th>显示名称</th>
+                                        <th>积分</th>
+                                        <th>消息数</th>
+                                        <th>最后签到</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTable">
+                                    <tr>
+                                        <td colspan="7" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="usersPagination">
+                                <!-- 分页按钮将通过JS动态生成 -->
+                            </ul>
+                        </nav>
                     </div>
                 </div>
             </div>
             
-            <!-- 内容区 -->
-            <div class="content">
-                <!-- 仪表盘 -->
-                <div id="dashboardSection" class="content-section active">
-                    <div class="row mb-4">
-                        <div class="col-md-3 mb-4">
-                            <div class="card stats-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">用户总数</h5>
-                                    <h2 class="text-primary" id="totalUsers">-</h2>
-                                    <p class="card-text">注册用户数量</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-4">
-                            <div class="card stats-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">老师总数</h5>
-                                    <h2 class="text-success" id="totalTeachers">-</h2>
-                                    <p class="card-text">已注册老师数量</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-4">
-                            <div class="card stats-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">关键词总数</h5>
-                                    <h2 class="text-warning" id="totalKeywords">-</h2>
-                                    <p class="card-text">已设置关键词数量</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-4">
-                            <div class="card stats-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">禁言词总数</h5>
-                                    <h2 class="text-danger" id="totalBanned">-</h2>
-                                    <p class="card-text">已设置禁言词数量</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>最近用户</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>ID</th>
-                                                    <th>用户名</th>
-                                                    <th>积分</th>
-                                                    <th>最后签到</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="recentUsers">
-                                                <tr>
-                                                    <td colspan="4" class="text-center">加载中...</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>最近老师</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>花名</th>
-                                                    <th>年龄</th>
-                                                    <th>地区</th>
-                                                    <th>状态</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="recentTeachers">
-                                                <tr>
-                                                    <td colspan="4" class="text-center">加载中...</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <!-- 老师管理 -->
+            <div id="teachersSection" class="content-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>老师管理</h2>
+                    <div>
+                        <button class="btn btn-success" onclick="showAddTeacherModal()">
+                            <i class="bi bi-plus-circle me-1"></i> 添加老师
+                        </button>
                     </div>
                 </div>
-                
-                <!-- 用户管理 -->
-                <div id="usersSection" class="content-section">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5>用户管理</h5>
-                            <button class="btn btn-primary" onclick="showAddUserModal()">
-                                <i class="bi bi-plus-circle me-1"></i> 添加用户
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div class="search-box">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="搜索用户..." id="userSearch">
-                                    <button class="btn btn-outline-primary" type="button" onclick="searchUsers()">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>用户名</th>
-                                            <th>显示名称</th>
-                                            <th>积分</th>
-                                            <th>消息数</th>
-                                            <th>最后签到</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="usersTable">
-                                        <tr>
-                                            <td colspan="7" class="text-center">加载中...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center" id="usersPagination">
-                                    <!-- 分页按钮将通过JS动态生成 -->
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 老师管理 -->
-                <div id="teachersSection" class="content-section">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5>老师管理</h5>
-                            <button class="btn btn-primary" onclick="showAddTeacherModal()">
-                                <i class="bi bi-plus-circle me-1"></i> 添加老师
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div class="search-box">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="搜索老师..." id="teacherSearch">
-                                    <button class="btn btn-outline-primary" type="button" onclick="searchTeachers()">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>头像</th>
-                                            <th>ID</th>
-                                            <th>花名</th>
-                                            <th>年龄</th>
-                                            <th>地区</th>
-                                            <th>账号</th>
-                                            <th>服务类型</th>
-                                            <th>状态</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="teachersTable">
-                                        <tr>
-                                            <td colspan="9" class="text-center">加载中...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center" id="teachersPagination">
-                                    <!-- 分页按钮将通过JS动态生成 -->
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 关键词管理 -->
-                <div id="keywordsSection" class="content-section">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5>关键词管理</h5>
-                            <button class="btn btn-primary" onclick="showAddKeywordModal()">
-                                <i class="bi bi-plus-circle me-1"></i> 添加关键词
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div class="search-box">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="搜索关键词..." id="keywordSearch">
-                                    <button class="btn btn-outline-primary" type="button" onclick="searchKeywords()">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>关键词</th>
-                                            <th>回复内容</th>
-                                            <th>自定义回复</th>
-                                            <th>状态</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="keywordsTable">
-                                        <tr>
-                                            <td colspan="6" class="text-center">加载中...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center" id="keywordsPagination">
-                                    <!-- 分页按钮将通过JS动态生成 -->
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 禁言词管理 -->
-                <div id="bannedSection" class="content-section">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5>禁言词管理</h5>
-                            <button class="btn btn-primary" onclick="showAddBannedModal()">
-                                <i class="bi bi-plus-circle me-1"></i> 添加禁言词
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div class="search-box">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="搜索禁言词..." id="bannedSearch">
-                                    <button class="btn btn-outline-primary" type="button" onclick="searchBanned()">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>禁言词</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="bannedTable">
-                                        <tr>
-                                            <td colspan="3" class="text-center">加载中...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center" id="bannedPagination">
-                                    <!-- 分页按钮将通过JS动态生成 -->
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 定时发送任务 -->
-                <div id="scheduledSection" class="content-section">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5>定时发送任务管理</h5>
-                            <div>
-                                <button class="btn btn-primary" onclick="showAddScheduledTaskModal()">
-                                    <i class="bi bi-plus-circle me-1"></i> 添加定时任务
-                                </button>
-                                <button class="btn btn-outline-primary" onclick="refreshScheduledTasks()">
-                                    <i class="bi bi-arrow-clockwise me-1"></i> 刷新列表
-                                </button>
-                                <button class="btn btn-secondary" onclick="triggerRandomTeacherConfig()">
-                                    <i class="bi bi-lightning me-1"></i> 触发随机老师发送
+                <div class="card">
+                    <div class="card-body">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索老师..." id="teacherSearch">
+                                <button class="btn btn-outline-secondary" type="button" onclick="searchTeachers()">
+                                    <i class="bi bi-search"></i>
                                 </button>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div class="search-box">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="搜索定时任务..." id="scheduledSearch">
-                                    <button class="btn btn-outline-primary" type="button" onclick="searchScheduledTasks()">
-                                        <i class="bi bi-search"></i>
-                                    </button>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>头像</th>
+                                        <th>ID</th>
+                                        <th>花名</th>
+                                        <th>年龄</th>
+                                        <th>地区</th>
+                                        <th>账号</th>
+                                        <th>服务类型</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teachersTable">
+                                    <tr>
+                                        <td colspan="9" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="teachersPagination">
+                                <!-- 分页按钮将通过JS动态生成 -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 关键词管理 -->
+            <div id="keywordsSection" class="content-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>关键词管理</h2>
+                    <div>
+                        <button class="btn btn-success" onclick="showAddKeywordModal()">
+                            <i class="bi bi-plus-circle me-1"></i> 添加关键词
+                        </button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索关键词..." id="keywordSearch">
+                                <button class="btn btn-outline-secondary" type="button" onclick="searchKeywords()">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>关键词</th>
+                                        <th>回复内容</th>
+                                        <th>自定义回复</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="keywordsTable">
+                                    <tr>
+                                        <td colspan="6" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="keywordsPagination">
+                                <!-- 分页按钮将通过JS动态生成 -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 禁言词管理 -->
+            <div id="bannedSection" class="content-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>禁言词管理</h2>
+                    <div>
+                        <button class="btn btn-success" onclick="showAddBannedModal()">
+                            <i class="bi bi-plus-circle me-1"></i> 添加禁言词
+                        </button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索禁言词..." id="bannedSearch">
+                                <button class="btn btn-outline-secondary" type="button" onclick="searchBanned()">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>禁言词</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bannedTable">
+                                    <tr>
+                                        <td colspan="3" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="bannedPagination">
+                                <!-- 分页按钮将通过JS动态生成 -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 定时发送任务 -->
+            <div id="scheduledSection" class="content-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>定时发送任务管理</h2>
+                    <div>
+                        <button class="btn btn-success" onclick="showAddScheduledTaskModal()">
+                            <i class="bi bi-plus-circle me-1"></i> 添加定时任务
+                        </button>
+                        <button class="btn btn-primary" onclick="refreshScheduledTasks()">
+                            <i class="bi bi-arrow-clockwise me-1"></i> 刷新列表
+                        </button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索定时任务..." id="scheduledSearch">
+                                <button class="btn btn-outline-secondary" type="button" onclick="searchScheduledTasks()">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>任务名称</th>
+                                        <th>消息内容</th>
+                                        <th>图片</th>
+                                        <th>发送间隔</th>
+                                        <th>状态</th>
+                                        <th>下次发送</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scheduledTasksTable">
+                                    <tr>
+                                        <td colspan="8" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="scheduledTasksPagination">
+                                <!-- 分页按钮将通过JS动态生成 -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 系统设置 -->
+            <div id="settingsSection" class="content-section" style="display: none;">
+                <h2 class="mb-4">系统设置</h2>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>机器人状态</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="botStatusSwitch" checked>
+                                    <label class="form-check-label" for="botStatusSwitch">
+                                        机器人运行状态
+                                    </label>
                                 </div>
+                                <p class="text-muted">当前状态: <span id="currentBotStatus">运行中</span></p>
+                                <button class="btn btn-primary" onclick="toggleBotStatus()">
+                                    <i class="bi bi-power me-1"></i> 切换状态
+                                </button>
                             </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>任务名称</th>
-                                            <th>消息内容</th>
-                                            <th>图片</th>
-                                            <th>发送间隔</th>
-                                            <th>状态</th>
-                                            <th>下次发送</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="scheduledTasksTable">
-                                        <tr>
-                                            <td colspan="8" class="text-center">加载中...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>数据库状态</h5>
                             </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center" id="scheduledTasksPagination">
-                                    <!-- 分页按钮将通过JS动态生成 -->
-                                </ul>
-                            </nav>
+                            <div class="card-body">
+                                <p>连接状态: <span class="badge bg-success" id="dbStatus">已连接</span></p>
+                                <p>最后检查: <span id="dbLastCheck">未检查</span></p>
+                                <button class="btn btn-primary" onclick="checkDbStatus()">
+                                    <i class="bi bi-arrow-clockwise me-1"></i> 检查连接
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- 系统设置 -->
-                <div id="settingsSection" class="content-section">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>系统设置</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 mb-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5>机器人状态</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="form-check form-switch mb-3">
-                                                <input class="form-check-input" type="checkbox" id="botStatusSwitch" checked>
-                                                <label class="form-check-label" for="botStatusSwitch">
-                                                    机器人运行状态
-                                                </label>
-                                            </div>
-                                            <p class="text-muted">当前状态: <span id="currentBotStatus">运行中</span></p>
-                                            <button class="btn btn-primary" onclick="toggleBotStatus()">
-                                                <i class="bi bi-power me-1"></i> 切换状态
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5>数据库状态</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <p>连接状态: <span class="badge bg-success" id="dbStatus">已连接</span></p>
-                                            <p>最后检查: <span id="dbLastCheck">未检查</span></p>
-                                            <button class="btn btn-primary" onclick="checkDbStatus()">
-                                                <i class="bi bi-arrow-clockwise me-1"></i> 检查连接
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>系统信息</h5>
                             </div>
-                            <div class="row">
-                                <div class="col-md-12 mb-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5>系统信息</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="table-responsive">
-                                                <table class="table">
-                                                    <tbody>
-                                                        <tr>
-                                                            <th scope="row">版本</th>
-                                                            <td>1.0.0</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th scope="row">最后更新</th>
-                                                            <td id="lastUpdate">2023-01-01</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th scope="row">服务器时间</th>
-                                                            <td id="serverTime">-</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <tbody>
+                                            <tr>
+                                                <th scope="row">版本</th>
+                                                <td>1.0.0</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">最后更新</th>
+                                                <td id="lastUpdate">2023-01-01</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">服务器时间</th>
+                                                <td id="serverTime">-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -1132,107 +936,69 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <ul class="nav nav-tabs" id="editTeacherTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab" aria-controls="basic" aria-selected="true">基本信息</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="media-tab" data-bs-toggle="tab" data-bs-target="#media" type="button" role="tab" aria-controls="media" aria-selected="false">媒体资料</button>
-                        </li>
-                    </ul>
-                    <div class="tab-content" id="editTeacherTabContent">
-                        <div class="tab-pane fade show active" id="basic" role="tabpanel" aria-labelledby="basic-tab">
-                            <form id="editTeacherForm">
-                                <input type="hidden" id="editTeacherId">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="editTeacherNickname" class="form-label">花名</label>
-                                        <input type="text" class="form-control" id="editTeacherNickname" required>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="editTeacherAge" class="form-label">年龄</label>
-                                        <input type="number" class="form-control" id="editTeacherAge" required>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="editTeacherRegion" class="form-label">地区</label>
-                                        <input type="text" class="form-control" id="editTeacherRegion" required>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="editTeacherAccount" class="form-label">Telegram账号</label>
-                                        <input type="text" class="form-control" id="editTeacherAccount" required>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editTeacherChannel" class="form-label">频道链接</label>
-                                    <input type="text" class="form-control" id="editTeacherChannel" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editTeacherServiceType" class="form-label">服务类型</label>
-                                    <input type="text" class="form-control" id="editTeacherServiceType" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editTeacherRepairCost" class="form-label">修车费</label>
-                                    <input type="text" class="form-control" id="editTeacherRepairCost" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editTeacherIntro" class="form-label">自我介绍</label>
-                                    <textarea class="form-control" id="editTeacherIntro" rows="3" required></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editTeacherStatus" class="form-label">状态</label>
-                                    <select class="form-select" id="editTeacherStatus">
-                                        <option value="pending">待审核</option>
-                                        <option value="approved">已通过</option>
-                                        <option value="rejected">已拒绝</option>
-                                    </select>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="tab-pane fade" id="media" role="tabpanel" aria-labelledby="media-tab">
-                            <div class="mb-3">
-                                <label class="form-label">头像图片</label>
-                                <div class="media-upload-area">
-                                    <i class="bi bi-image"></i>
-                                    <p>点击或拖拽图片到此处上传</p>
-                                    <label for="editTeacherImage" class="custom-file-upload">
-                                        <i class="bi bi-upload"></i> 选择图片
-                                    </label>
-                                    <input type="file" id="editTeacherImage" accept="image/*" onchange="previewTeacherImage('edit')">
-                                </div>
-                                <div id="editTeacherImagePreview" class="media-preview-container"></div>
-                                <input type="hidden" id="editTeacherImageUrl">
-                                <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
+                    <form id="editTeacherForm">
+                        <input type="hidden" id="editTeacherId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editTeacherNickname" class="form-label">花名</label>
+                                <input type="text" class="form-control" id="editTeacherNickname">
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">宣传图片 (最多3张)</label>
-                                <div class="media-upload-area">
-                                    <i class="bi bi-images"></i>
-                                    <p>点击或拖拽图片到此处上传</p>
-                                    <label for="editTeacherPhotos" class="custom-file-upload">
-                                        <i class="bi bi-upload"></i> 选择图片
-                                    </label>
-                                    <input type="file" id="editTeacherPhotos" accept="image/*" multiple onchange="previewTeacherPhotos('edit')">
-                                </div>
-                                <div id="editTeacherPhotosPreview" class="media-preview-container"></div>
-                                <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">宣传视频 (最多1个)</label>
-                                <div class="media-upload-area">
-                                    <i class="bi bi-camera-video"></i>
-                                    <p>点击或拖拽视频到此处上传</p>
-                                    <label for="editTeacherVideo" class="custom-file-upload">
-                                        <i class="bi bi-upload"></i> 选择视频
-                                    </label>
-                                    <input type="file" id="editTeacherVideo" accept="video/*" onchange="previewTeacherVideo('edit')">
-                                </div>
-                                <div id="editTeacherVideoPreview" class="media-preview-container"></div>
-                                <div class="upload-info">支持 MP4、MOV 格式，文件大小不超过 20MB</div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editTeacherAge" class="form-label">年龄</label>
+                                <input type="number" class="form-control" id="editTeacherAge">
                             </div>
                         </div>
-                    </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editTeacherRegion" class="form-label">地区</label>
+                                <input type="text" class="form-control" id="editTeacherRegion">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editTeacherAccount" class="form-label">Telegram账号</label>
+                                <input type="text" class="form-control" id="editTeacherAccount">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTeacherChannel" class="form-label">频道链接</label>
+                            <input type="text" class="form-control" id="editTeacherChannel">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTeacherServiceType" class="form-label">服务类型</label>
+                            <input type="text" class="form-control" id="editTeacherServiceType">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTeacherRepairCost" class="form-label">修车费</label>
+                            <input type="text" class="form-control" id="editTeacherRepairCost">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTeacherIntro" class="form-label">自我介绍</label>
+                            <textarea class="form-control" id="editTeacherIntro" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTeacherRobotAccount" class="form-label">机器人账号</label>
+                            <input type="text" class="form-control" id="editTeacherRobotAccount" placeholder="例如：@mybot">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">媒体文件</label>
+                            <div class="media-upload-container" onclick="document.getElementById('editTeacherMedia').click()">
+                                <i class="bi bi-cloud-upload" style="font-size: 2rem; color: #ccc;"></i>
+                                <p class="mb-0">点击上传图片或视频</p>
+                                <small>支持 JPG、PNG、MP4 格式，图片最多3张，视频最多1个</small>
+                            </div>
+                            <input type="file" id="editTeacherMedia" accept="image/*,video/*" multiple style="display: none;" onchange="handleTeacherMediaUpload('edit')">
+                            <div id="editTeacherMediaPreview" class="media-preview-container"></div>
+                            <input type="hidden" id="editTeacherPhotoUrls">
+                            <input type="hidden" id="editTeacherVideoUrl">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTeacherStatus" class="form-label">状态</label>
+                            <select class="form-select" id="editTeacherStatus">
+                                <option value="pending">待审核</option>
+                                <option value="approved">已通过</option>
+                                <option value="rejected">已拒绝</option>
+                            </select>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
@@ -1409,106 +1175,68 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <ul class="nav nav-tabs" id="addTeacherTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="add-basic-tab" data-bs-toggle="tab" data-bs-target="#add-basic" type="button" role="tab" aria-controls="add-basic" aria-selected="true">基本信息</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="add-media-tab" data-bs-toggle="tab" data-bs-target="#add-media" type="button" role="tab" aria-controls="add-media" aria-selected="false">媒体资料</button>
-                        </li>
-                    </ul>
-                    <div class="tab-content" id="addTeacherTabContent">
-                        <div class="tab-pane fade show active" id="add-basic" role="tabpanel" aria-labelledby="add-basic-tab">
-                            <form id="addTeacherForm">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="addTeacherNickname" class="form-label">花名</label>
-                                        <input type="text" class="form-control" id="addTeacherNickname" required>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="addTeacherAge" class="form-label">年龄</label>
-                                        <input type="number" class="form-control" id="addTeacherAge" required>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="addTeacherRegion" class="form-label">地区</label>
-                                        <input type="text" class="form-control" id="addTeacherRegion" required>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="addTeacherAccount" class="form-label">Telegram账号</label>
-                                        <input type="text" class="form-control" id="addTeacherAccount" required>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="addTeacherChannel" class="form-label">频道链接</label>
-                                    <input type="text" class="form-control" id="addTeacherChannel" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="addTeacherServiceType" class="form-label">服务类型</label>
-                                    <input type="text" class="form-control" id="addTeacherServiceType" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="addTeacherRepairCost" class="form-label">修车费</label>
-                                    <input type="text" class="form-control" id="addTeacherRepairCost" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="addTeacherIntro" class="form-label">自我介绍</label>
-                                    <textarea class="form-control" id="addTeacherIntro" rows="3" required></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="addTeacherStatus" class="form-label">状态</label>
-                                    <select class="form-select" id="addTeacherStatus">
-                                        <option value="pending">待审核</option>
-                                        <option value="approved">已通过</option>
-                                        <option value="rejected">已拒绝</option>
-                                    </select>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="tab-pane fade" id="add-media" role="tabpanel" aria-labelledby="add-media-tab">
-                            <div class="mb-3">
-                                <label class="form-label">头像图片</label>
-                                <div class="media-upload-area">
-                                    <i class="bi bi-image"></i>
-                                    <p>点击或拖拽图片到此处上传</p>
-                                    <label for="addTeacherImage" class="custom-file-upload">
-                                        <i class="bi bi-upload"></i> 选择图片
-                                    </label>
-                                    <input type="file" id="addTeacherImage" accept="image/*" onchange="previewTeacherImage('add')">
-                                </div>
-                                <div id="addTeacherImagePreview" class="media-preview-container"></div>
-                                <input type="hidden" id="addTeacherImageUrl">
-                                <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
+                    <form id="addTeacherForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="addTeacherNickname" class="form-label">花名</label>
+                                <input type="text" class="form-control" id="addTeacherNickname" required>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">宣传图片 (最多3张)</label>
-                                <div class="media-upload-area">
-                                    <i class="bi bi-images"></i>
-                                    <p>点击或拖拽图片到此处上传</p>
-                                    <label for="addTeacherPhotos" class="custom-file-upload">
-                                        <i class="bi bi-upload"></i> 选择图片
-                                    </label>
-                                    <input type="file" id="addTeacherPhotos" accept="image/*" multiple onchange="previewTeacherPhotos('add')">
-                                </div>
-                                <div id="addTeacherPhotosPreview" class="media-preview-container"></div>
-                                <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">宣传视频 (最多1个)</label>
-                                <div class="media-upload-area">
-                                    <i class="bi bi-camera-video"></i>
-                                    <p>点击或拖拽视频到此处上传</p>
-                                    <label for="addTeacherVideo" class="custom-file-upload">
-                                        <i class="bi bi-upload"></i> 选择视频
-                                    </label>
-                                    <input type="file" id="addTeacherVideo" accept="video/*" onchange="previewTeacherVideo('add')">
-                                </div>
-                                <div id="addTeacherVideoPreview" class="media-preview-container"></div>
-                                <div class="upload-info">支持 MP4、MOV 格式，文件大小不超过 20MB</div>
+                            <div class="col-md-6 mb-3">
+                                <label for="addTeacherAge" class="form-label">年龄</label>
+                                <input type="number" class="form-control" id="addTeacherAge" required>
                             </div>
                         </div>
-                    </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="addTeacherRegion" class="form-label">地区</label>
+                                <input type="text" class="form-control" id="addTeacherRegion" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="addTeacherAccount" class="form-label">Telegram账号</label>
+                                <input type="text" class="form-control" id="addTeacherAccount" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addTeacherChannel" class="form-label">频道链接</label>
+                            <input type="text" class="form-control" id="addTeacherChannel" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addTeacherServiceType" class="form-label">服务类型</label>
+                            <input type="text" class="form-control" id="addTeacherServiceType" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addTeacherRepairCost" class="form-label">修车费</label>
+                            <input type="text" class="form-control" id="addTeacherRepairCost" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addTeacherIntro" class="form-label">自我介绍</label>
+                            <textarea class="form-control" id="addTeacherIntro" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addTeacherRobotAccount" class="form-label">机器人账号</label>
+                            <input type="text" class="form-control" id="addTeacherRobotAccount" placeholder="例如：@mybot">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">媒体文件</label>
+                            <div class="media-upload-container" onclick="document.getElementById('addTeacherMedia').click()">
+                                <i class="bi bi-cloud-upload" style="font-size: 2rem; color: #ccc;"></i>
+                                <p class="mb-0">点击上传图片或视频</p>
+                                <small>支持 JPG、PNG、MP4 格式，图片最多3张，视频最多1个</small>
+                            </div>
+                            <input type="file" id="addTeacherMedia" accept="image/*,video/*" multiple style="display: none;" onchange="handleTeacherMediaUpload('add')">
+                            <div id="addTeacherMediaPreview" class="media-preview-container"></div>
+                            <input type="hidden" id="addTeacherPhotoUrls">
+                            <input type="hidden" id="addTeacherVideoUrl">
+                        </div>
+                        <div class="mb-3">
+                            <label for="addTeacherStatus" class="form-label">状态</label>
+                            <select class="form-select" id="addTeacherStatus">
+                                <option value="pending">待审核</option>
+                                <option value="approved">已通过</option>
+                                <option value="rejected">已拒绝</option>
+                            </select>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
@@ -1658,8 +1386,11 @@
                         </div>
                         <div class="mb-3">
                             <label for="adjustPointsChange" class="form-label">积分变化</label>
-                            <input type="number" class="form-control" id="adjustPointsChange" placeholder="正数为增加，负数为减少">
-                            <div class="form-text">例如：+100 增加100积分，-100 减少100积分</div>
+                            <div class="points-input-group">
+                                <span class="input-group-text">+/-</span>
+                                <input type="number" class="form-control" id="adjustPointsChange" placeholder="输入正数增加积分，输入负数减少积分">
+                            </div>
+                            <div class="form-text">例如：输入100表示增加100积分，输入-100表示减少100积分</div>
                         </div>
                         <div class="mb-3">
                             <label for="adjustPointsReason" class="form-label">原因</label>
@@ -1677,7 +1408,6 @@
     
     <!-- 提示框容器 -->
     <div class="alert-container" id="alertContainer"></div>
-    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // 配置信息
@@ -1704,25 +1434,38 @@
         };
         const itemsPerPage = 10;
         
-        // 老师媒体文件存储
-        let teacherMediaFiles = {
-            edit: {
-                image: null,
-                photos: [],
-                video: null
-            },
-            add: {
-                image: null,
-                photos: [],
-                video: null
-            }
-        };
-        
         // 表结构缓存
         let tableSchemaCache = {};
         
+        // 老师媒体文件缓存
+        let teacherMediaCache = {
+            add: {
+                photos: [],
+                videos: []
+            },
+            edit: {
+                photos: [],
+                videos: []
+            }
+        };
+        
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
+            // 初始化移动端菜单切换
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+            
+            // 点击内容区域时关闭移动端菜单
+            document.querySelector('.content').addEventListener('click', function() {
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('active');
+                }
+            });
+            
             // 检查是否已登录
             const savedApiKey = localStorage.getItem('adminApiKey');
             if (savedApiKey) {
@@ -1765,47 +1508,36 @@
         // 显示主界面
         function showMainInterface() {
             document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('mainContainer').style.display = 'flex';
+            document.getElementById('mainContainer').style.display = 'block';
         }
         
         // 显示部分
         function showSection(section) {
             // 隐藏所有部分
             document.querySelectorAll('.content-section').forEach(el => {
-                el.classList.remove('active');
+                el.style.display = 'none';
             });
             
             // 显示选中的部分
             const sectionElement = document.getElementById(section + 'Section');
             if (sectionElement) {
-                sectionElement.classList.add('active');
+                sectionElement.style.display = 'block';
             } else {
                 console.error('找不到部分: ' + section);
                 return;
             }
             
             // 更新侧边栏激活状态
-            document.querySelectorAll('.menu-item').forEach(el => {
+            document.querySelectorAll('.sidebar .nav-link').forEach(el => {
                 el.classList.remove('active');
             });
-            event.target.closest('.menu-item').classList.add('active');
-            
-            // 更新页面标题
-            const titles = {
-                'dashboard': '运行仪表盘',
-                'users': '用户管理',
-                'teachers': '老师管理',
-                'keywords': '关键词管理',
-                'banned': '禁言词管理',
-                'scheduled': '定时发送任务',
-                'settings': '系统设置'
-            };
-            const pageTitleElement = document.getElementById('pageTitle');
-            if (pageTitleElement) {
-                pageTitleElement.textContent = titles[section] || '管理后台';
-            }
-            
+            event.target.classList.add('active');
             currentSection = section;
+            
+            // 在移动端显示菜单后关闭侧边栏
+            if (window.innerWidth <= 992) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
             
             // 加载数据
             switch(section) {
@@ -1841,34 +1573,13 @@
                 directSupabaseFetch('users'),
                 directSupabaseFetch('teachers'),
                 directSupabaseFetch('keywords'),
-                directSupabaseFetchWithServiceKey('banned_keywords'), // 使用服务角色密钥获取禁言词
-                directSupabaseFetchWithServiceKey('random_teacher_config') // 新增
+                directSupabaseFetchWithServiceKey('banned_keywords')
             ])
-            .then(([users, teachers, keywords, banned, randomTeacherConfigs]) => {
-                const totalUsersElement = document.getElementById('totalUsers');
-                if (totalUsersElement) {
-                    totalUsersElement.textContent = users.length;
-                }
-                
-                const totalTeachersElement = document.getElementById('totalTeachers');
-                if (totalTeachersElement) {
-                    totalTeachersElement.textContent = teachers.length;
-                }
-                
-                const totalKeywordsElement = document.getElementById('totalKeywords');
-                if (totalKeywordsElement) {
-                    totalKeywordsElement.textContent = keywords.length;
-                }
-                
-                const totalBannedElement = document.getElementById('totalBanned');
-                if (totalBannedElement) {
-                    totalBannedElement.textContent = banned.length;
-                }
-                
-                const totalRandomTeacherConfigsElement = document.getElementById('totalRandomTeacherConfigs');
-                if (totalRandomTeacherConfigsElement) {
-                    totalRandomTeacherConfigsElement.textContent = randomTeacherConfigs.length;
-                }
+            .then(([users, teachers, keywords, banned]) => {
+                document.getElementById('totalUsers').textContent = users.length;
+                document.getElementById('totalTeachers').textContent = teachers.length;
+                document.getElementById('totalKeywords').textContent = keywords.length;
+                document.getElementById('totalBanned').textContent = banned.length;
                 
                 // 加载最近用户
                 const recentUsers = users.slice(0, 5);
@@ -1939,17 +1650,15 @@
                     <td>${user.message_count_today || 0}</td>
                     <td>${user.last_sign_date ? new Date(user.last_sign_date).toLocaleDateString() : '-'}</td>
                     <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-sm btn-primary btn-action" onclick="editUser(${user.user_id})" title="编辑">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-secondary btn-action" onclick="showAdjustPointsModal(${user.user_id})" title="调整积分">
-                                <i class="bi bi-cash-coin"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger btn-action" onclick="deleteUser(${user.user_id})" title="删除">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
+                        <button class="btn btn-sm btn-primary btn-action" onclick="editUser(${user.user_id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning btn-action" onclick="showAdjustPointsModal(${user.user_id})">
+                            <i class="bi bi-cash-coin"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-action" onclick="deleteUser(${user.user_id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             `).join('');
@@ -2128,7 +1837,7 @@
             const pageData = teachersData.slice(start, end);
             const html = pageData.map(teacher => `
                 <tr>
-                    <td>${teacher.image_url ? `<img src="${teacher.image_url}" class="teacher-image" alt="头像">` : '<i class="bi bi-person-circle" style="font-size: 2rem;"></i>'}</td>
+                    <td>${teacher.photo_url_1 ? `<img src="${teacher.photo_url_1}" class="teacher-image" alt="头像">` : '<i class="bi bi-person-circle" style="font-size: 2rem;"></i>'}</td>
                     <td>${teacher.id}</td>
                     <td>${teacher.nickname}</td>
                     <td>${teacher.age}</td>
@@ -2137,14 +1846,12 @@
                     <td>${teacher.service_type}</td>
                     <td>${getStatusBadge(teacher.status)}</td>
                     <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-sm btn-primary btn-action" onclick="editTeacher(${teacher.id})" title="编辑">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger btn-action" onclick="deleteTeacher(${teacher.id})" title="删除">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
+                        <button class="btn btn-sm btn-primary btn-action" onclick="editTeacher(${teacher.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-action" onclick="deleteTeacher(${teacher.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             `).join('');
@@ -2178,14 +1885,12 @@
             const teacher = teachersData.find(t => t.id === teacherId);
             if (!teacher) return;
             
-            // 重置媒体文件存储
-            teacherMediaFiles.edit = {
-                image: null,
+            // 重置媒体缓存
+            teacherMediaCache.edit = {
                 photos: [],
-                video: null
+                videos: []
             };
             
-            // 填充基本信息
             document.getElementById('editTeacherId').value = teacher.id;
             document.getElementById('editTeacherNickname').value = teacher.nickname;
             document.getElementById('editTeacherAge').value = teacher.age;
@@ -2195,60 +1900,36 @@
             document.getElementById('editTeacherServiceType').value = teacher.service_type;
             document.getElementById('editTeacherRepairCost').value = teacher.repair_cost;
             document.getElementById('editTeacherIntro').value = teacher.intro;
+            document.getElementById('editTeacherRobotAccount').value = teacher.robot_account || '';
             document.getElementById('editTeacherStatus').value = teacher.status;
             
-            // 显示图片预览
-            const imagePreviewElement = document.getElementById('editTeacherImagePreview');
-            if (teacher.image_url) {
-                imagePreviewElement.innerHTML = `
-                    <div class="media-preview">
-                        <img src="${teacher.image_url}" alt="头像预览">
-                    </div>
-                `;
-                document.getElementById('editTeacherImageUrl').value = teacher.image_url;
-            } else {
-                imagePreviewElement.innerHTML = '';
-                document.getElementById('editTeacherImageUrl').value = '';
-            }
+            // 清空媒体预览
+            document.getElementById('editTeacherMediaPreview').innerHTML = '';
+            document.getElementById('editTeacherPhotoUrls').value = '';
+            document.getElementById('editTeacherVideoUrl').value = '';
             
-            // 显示宣传图片预览
-            const photosPreviewElement = document.getElementById('editTeacherPhotosPreview');
-            photosPreviewElement.innerHTML = '';
+            // 显示已有媒体
+            const mediaPreviewContainer = document.getElementById('editTeacherMediaPreview');
+            const photoUrls = [];
             
             if (teacher.photo_url_1) {
-                photosPreviewElement.innerHTML += `
-                    <div class="media-preview">
-                        <img src="${teacher.photo_url_1}" alt="宣传图片1">
-                    </div>
-                `;
+                photoUrls.push(teacher.photo_url_1);
+                addMediaPreview(mediaPreviewContainer, teacher.photo_url_1, 'photo', 'edit', 0);
             }
-            
             if (teacher.photo_url_2) {
-                photosPreviewElement.innerHTML += `
-                    <div class="media-preview">
-                        <img src="${teacher.photo_url_2}" alt="宣传图片2">
-                    </div>
-                `;
+                photoUrls.push(teacher.photo_url_2);
+                addMediaPreview(mediaPreviewContainer, teacher.photo_url_2, 'photo', 'edit', 1);
             }
-            
             if (teacher.photo_url_3) {
-                photosPreviewElement.innerHTML += `
-                    <div class="media-preview">
-                        <img src="${teacher.photo_url_3}" alt="宣传图片3">
-                    </div>
-                `;
+                photoUrls.push(teacher.photo_url_3);
+                addMediaPreview(mediaPreviewContainer, teacher.photo_url_3, 'photo', 'edit', 2);
             }
             
-            // 显示视频预览
-            const videoPreviewElement = document.getElementById('editTeacherVideoPreview');
+            document.getElementById('editTeacherPhotoUrls').value = photoUrls.join(',');
+            
             if (teacher.video_url) {
-                videoPreviewElement.innerHTML = `
-                    <div class="media-preview">
-                        <video controls src="${teacher.video_url}" alt="宣传视频"></video>
-                    </div>
-                `;
-            } else {
-                videoPreviewElement.innerHTML = '';
+                document.getElementById('editTeacherVideoUrl').value = teacher.video_url;
+                addMediaPreview(mediaPreviewContainer, teacher.video_url, 'video', 'edit', 0);
             }
             
             const modal = new bootstrap.Modal(document.getElementById('editTeacherModal'));
@@ -2258,6 +1939,10 @@
         // 保存老师
         async function saveTeacher() {
             const teacherId = document.getElementById('editTeacherId').value;
+            
+            // 获取媒体文件URL
+            const photoUrls = document.getElementById('editTeacherPhotoUrls').value.split(',').filter(url => url.trim() !== '');
+            const videoUrl = document.getElementById('editTeacherVideoUrl').value;
             
             // 构建老师数据对象
             const teacherData = {
@@ -2270,46 +1955,26 @@
                 service_type: document.getElementById('editTeacherServiceType').value,
                 repair_cost: document.getElementById('editTeacherRepairCost').value,
                 intro: document.getElementById('editTeacherIntro').value,
+                robot_account: document.getElementById('editTeacherRobotAccount').value,
                 status: document.getElementById('editTeacherStatus').value
             };
+            
+            // 添加图片URL
+            if (photoUrls.length > 0) {
+                teacherData.photo_url_1 = photoUrls[0] || null;
+                teacherData.photo_url_2 = photoUrls[1] || null;
+                teacherData.photo_url_3 = photoUrls[2] || null;
+            }
+            
+            // 添加视频URL
+            if (videoUrl) {
+                teacherData.video_url = videoUrl;
+            }
             
             showLoading(true);
             
             try {
-                // 处理头像图片
-                if (teacherMediaFiles.edit.image) {
-                    const imageUrl = await uploadImageToSupabase(teacherMediaFiles.edit.image, 'teacher-images');
-                    if (imageUrl) {
-                        teacherData.image_url = imageUrl;
-                    }
-                }
-                
-                // 处理宣传图片
-                if (teacherMediaFiles.edit.photos.length > 0) {
-                    const photoUrls = [];
-                    for (let i = 0; i < Math.min(teacherMediaFiles.edit.photos.length, 3); i++) {
-                        const photoUrl = await uploadImageToSupabase(teacherMediaFiles.edit.photos[i], 'teacher-photos');
-                        if (photoUrl) {
-                            photoUrls.push(photoUrl);
-                        }
-                    }
-                    
-                    if (photoUrls.length > 0) {
-                        teacherData.photo_url_1 = photoUrls[0] || null;
-                        teacherData.photo_url_2 = photoUrls[1] || null;
-                        teacherData.photo_url_3 = photoUrls[2] || null;
-                    }
-                }
-                
-                // 处理视频
-                if (teacherMediaFiles.edit.video) {
-                    const videoUrl = await uploadVideoToSupabase(teacherMediaFiles.edit.video, 'teacher-videos');
-                    if (videoUrl) {
-                        teacherData.video_url = videoUrl;
-                    }
-                }
-                
-                // 保存老师数据
+                // 直接保存，不检查列是否存在，因为我们已经确认列存在
                 await directSupabaseUpsert('teachers', teacherData, 'id');
                 
                 showAlert('老师保存成功', 'success');
@@ -2343,19 +2008,15 @@
         // 显示添加老师模态框
         function showAddTeacherModal() {
             document.getElementById('addTeacherForm').reset();
+            document.getElementById('addTeacherMediaPreview').innerHTML = '';
+            document.getElementById('addTeacherPhotoUrls').value = '';
+            document.getElementById('addTeacherVideoUrl').value = '';
             
-            // 重置媒体文件存储
-            teacherMediaFiles.add = {
-                image: null,
+            // 重置媒体缓存
+            teacherMediaCache.add = {
                 photos: [],
-                video: null
+                videos: []
             };
-            
-            // 清空预览
-            document.getElementById('addTeacherImagePreview').innerHTML = '';
-            document.getElementById('addTeacherPhotosPreview').innerHTML = '';
-            document.getElementById('addTeacherVideoPreview').innerHTML = '';
-            document.getElementById('addTeacherImageUrl').value = '';
             
             const modal = new bootstrap.Modal(document.getElementById('addTeacherModal'));
             modal.show();
@@ -2363,6 +2024,10 @@
         
         // 添加老师
         async function addTeacher() {
+            // 获取媒体文件URL
+            const photoUrls = document.getElementById('addTeacherPhotoUrls').value.split(',').filter(url => url.trim() !== '');
+            const videoUrl = document.getElementById('addTeacherVideoUrl').value;
+            
             // 构建老师数据对象
             const teacherData = {
                 nickname: document.getElementById('addTeacherNickname').value,
@@ -2373,46 +2038,26 @@
                 service_type: document.getElementById('addTeacherServiceType').value,
                 repair_cost: document.getElementById('addTeacherRepairCost').value,
                 intro: document.getElementById('addTeacherIntro').value,
+                robot_account: document.getElementById('addTeacherRobotAccount').value,
                 status: document.getElementById('addTeacherStatus').value
             };
+            
+            // 添加图片URL
+            if (photoUrls.length > 0) {
+                teacherData.photo_url_1 = photoUrls[0] || null;
+                teacherData.photo_url_2 = photoUrls[1] || null;
+                teacherData.photo_url_3 = photoUrls[2] || null;
+            }
+            
+            // 添加视频URL
+            if (videoUrl) {
+                teacherData.video_url = videoUrl;
+            }
             
             showLoading(true);
             
             try {
-                // 处理头像图片
-                if (teacherMediaFiles.add.image) {
-                    const imageUrl = await uploadImageToSupabase(teacherMediaFiles.add.image, 'teacher-images');
-                    if (imageUrl) {
-                        teacherData.image_url = imageUrl;
-                    }
-                }
-                
-                // 处理宣传图片
-                if (teacherMediaFiles.add.photos.length > 0) {
-                    const photoUrls = [];
-                    for (let i = 0; i < Math.min(teacherMediaFiles.add.photos.length, 3); i++) {
-                        const photoUrl = await uploadImageToSupabase(teacherMediaFiles.add.photos[i], 'teacher-photos');
-                        if (photoUrl) {
-                            photoUrls.push(photoUrl);
-                        }
-                    }
-                    
-                    if (photoUrls.length > 0) {
-                        teacherData.photo_url_1 = photoUrls[0] || null;
-                        teacherData.photo_url_2 = photoUrls[1] || null;
-                        teacherData.photo_url_3 = photoUrls[2] || null;
-                    }
-                }
-                
-                // 处理视频
-                if (teacherMediaFiles.add.video) {
-                    const videoUrl = await uploadVideoToSupabase(teacherMediaFiles.add.video, 'teacher-videos');
-                    if (videoUrl) {
-                        teacherData.video_url = videoUrl;
-                    }
-                }
-                
-                // 保存老师数据
+                // 直接保存，不检查列是否存在，因为我们已经确认列存在
                 await directSupabaseInsert('teachers', teacherData);
                 
                 showAlert('老师添加成功', 'success');
@@ -2426,173 +2071,138 @@
             }
         }
         
-        // 预览老师图片
-        function previewTeacherImage(type) {
-            const fileInput = document.getElementById(`${type}TeacherImage`);
-            const previewElement = document.getElementById(`${type}TeacherImagePreview`);
+        // 处理老师媒体文件上传
+        async function handleTeacherMediaUpload(type) {
+            const fileInput = document.getElementById(`${type}TeacherMedia`);
+            const previewContainer = document.getElementById(`${type}TeacherMediaPreview`);
+            const files = fileInput.files;
             
-            if (fileInput.files && fileInput.files[0]) {
-                // 检查文件大小
-                if (fileInput.files[0].size > 5 * 1024 * 1024) {
-                    showAlert('图片大小不能超过5MB', 'warning');
-                    fileInput.value = '';
-                    previewElement.innerHTML = '';
-                    return;
-                }
+            if (!files || files.length === 0) return;
+            
+            // 检查文件数量
+            const photoCount = teacherMediaCache[type].photos.length;
+            const videoCount = teacherMediaCache[type].videos.length;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
                 
                 // 检查文件类型
-                if (!fileInput.files[0].type.match('image.*')) {
-                    showAlert('请上传图片文件', 'warning');
-                    fileInput.value = '';
-                    previewElement.innerHTML = '';
-                    return;
-                }
-                
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    previewElement.innerHTML = `
-                        <div class="media-preview">
-                            <img src="${e.target.result}" alt="头像预览">
-                        </div>
-                    `;
-                    
-                    // 保存文件对象
-                    teacherMediaFiles[type].image = fileInput.files[0];
-                };
-                
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                previewElement.innerHTML = '';
-                teacherMediaFiles[type].image = null;
-            }
-        }
-        
-        // 预览老师宣传图片
-        function previewTeacherPhotos(type) {
-            const fileInput = document.getElementById(`${type}TeacherPhotos`);
-            const previewElement = document.getElementById(`${type}TeacherPhotosPreview`);
-            
-            if (fileInput.files && fileInput.files.length > 0) {
-                previewElement.innerHTML = '';
-                
-                // 清空之前的图片
-                teacherMediaFiles[type].photos = [];
-                
-                // 最多处理3张图片
-                const maxFiles = Math.min(fileInput.files.length, 3);
-                
-                for (let i = 0; i < maxFiles; i++) {
-                    const file = fileInput.files[i];
+                if (file.type.startsWith('image/')) {
+                    if (photoCount >= 3) {
+                        showAlert('最多只能上传3张图片', 'warning');
+                        continue;
+                    }
                     
                     // 检查文件大小
                     if (file.size > 5 * 1024 * 1024) {
-                        showAlert(`第${i+1}张图片大小超过5MB，已跳过`, 'warning');
+                        showAlert('图片大小不能超过5MB', 'warning');
                         continue;
                     }
                     
-                    // 检查文件类型
-                    if (!file.type.match('image.*')) {
-                        showAlert(`第${i+1}个文件不是图片，已跳过`, 'warning');
+                    // 上传图片
+                    showLoading(true);
+                    try {
+                        const imageUrl = await uploadImageToSupabase(file, 'teacher-images');
+                        if (imageUrl) {
+                            teacherMediaCache[type].photos.push(imageUrl);
+                            addMediaPreview(previewContainer, imageUrl, 'photo', type, teacherMediaCache[type].photos.length - 1);
+                            updateTeacherMediaUrls(type);
+                        }
+                    } catch (error) {
+                        showAlert('上传图片失败: ' + error.message, 'danger');
+                    } finally {
+                        showLoading(false);
+                    }
+                } else if (file.type.startsWith('video/')) {
+                    if (videoCount >= 1) {
+                        showAlert('最多只能上传1个视频', 'warning');
                         continue;
                     }
                     
-                    const reader = new FileReader();
+                    // 检查文件大小
+                    if (file.size > 50 * 1024 * 1024) {
+                        showAlert('视频大小不能超过50MB', 'warning');
+                        continue;
+                    }
                     
-                    reader.onload = (function(index) {
-                        return function(e) {
-                            previewElement.innerHTML += `
-                                <div class="media-preview">
-                                    <img src="${e.target.result}" alt="宣传图片${index+1}">
-                                    <button type="button" class="remove-media" onclick="removeTeacherPhoto('${type}', ${index})">
-                                        <i class="bi bi-x"></i>
-                                    </button>
-                                </div>
-                            `;
-                            
-                            // 保存文件对象
-                            teacherMediaFiles[type].photos[index] = file;
-                        };
-                    })(i);
-                    
-                    reader.readAsDataURL(file);
+                    // 上传视频
+                    showLoading(true);
+                    try {
+                        const videoUrl = await uploadImageToSupabase(file, 'teacher-videos');
+                        if (videoUrl) {
+                            teacherMediaCache[type].videos.push(videoUrl);
+                            addMediaPreview(previewContainer, videoUrl, 'video', type, 0);
+                            updateTeacherMediaUrls(type);
+                        }
+                    } catch (error) {
+                        showAlert('上传视频失败: ' + error.message, 'danger');
+                    } finally {
+                        showLoading(false);
+                    }
                 }
-            } else {
-                previewElement.innerHTML = '';
-                teacherMediaFiles[type].photos = [];
             }
+            
+            // 清空文件输入，允许重复选择同一文件
+            fileInput.value = '';
         }
         
-        // 移除老师宣传图片
-        function removeTeacherPhoto(type, index) {
-            const previewElement = document.getElementById(`${type}TeacherPhotosPreview`);
-            const mediaPreviews = previewElement.querySelectorAll('.media-preview');
+        // 添加媒体预览
+        function addMediaPreview(container, url, type, mode, index) {
+            const mediaDiv = document.createElement('div');
+            mediaDiv.className = 'media-preview';
+            mediaDiv.dataset.type = type;
+            mediaDiv.dataset.index = index;
             
-            if (mediaPreviews[index]) {
-                mediaPreviews[index].remove();
-                teacherMediaFiles[type].photos.splice(index, 1);
+            if (type === 'photo') {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = '图片预览';
+                mediaDiv.appendChild(img);
+            } else if (type === 'video') {
+                const video = document.createElement('video');
+                video.src = url;
+                video.alt = '视频预览';
+                video.controls = false;
+                mediaDiv.appendChild(video);
+            }
+            
+            // 添加删除按钮
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-media';
+            removeBtn.innerHTML = '×';
+            removeBtn.onclick = function() {
+                removeMediaPreview(mode, type, index);
+                mediaDiv.remove();
+            };
+            mediaDiv.appendChild(removeBtn);
+            
+            container.appendChild(mediaDiv);
+        }
+        
+        // 移除媒体预览
+        function removeMediaPreview(mode, type, index) {
+            if (type === 'photo') {
+                teacherMediaCache[mode].photos.splice(index, 1);
                 
-                // 重新编号
-                const newMediaPreviews = previewElement.querySelectorAll('.media-preview');
-                newMediaPreviews.forEach((preview, newIndex) => {
-                    const removeButton = preview.querySelector('.remove-media');
-                    if (removeButton) {
-                        removeButton.setAttribute('onclick', `removeTeacherPhoto('${type}', ${newIndex})`);
-                    }
+                // 更新索引
+                const previews = document.querySelectorAll(`#${mode}TeacherMediaPreview .media-preview[data-type="photo"]`);
+                previews.forEach((preview, i) => {
+                    preview.dataset.index = i;
                 });
+            } else if (type === 'video') {
+                teacherMediaCache[mode].videos = [];
             }
-        }
-        
-        // 预览老师视频
-        function previewTeacherVideo(type) {
-            const fileInput = document.getElementById(`${type}TeacherVideo`);
-            const previewElement = document.getElementById(`${type}TeacherVideoPreview`);
             
-            if (fileInput.files && fileInput.files[0]) {
-                // 检查文件大小
-                if (fileInput.files[0].size > 20 * 1024 * 1024) {
-                    showAlert('视频大小不能超过20MB', 'warning');
-                    fileInput.value = '';
-                    previewElement.innerHTML = '';
-                    return;
-                }
-                
-                // 检查文件类型
-                if (!fileInput.files[0].type.match('video.*')) {
-                    showAlert('请上传视频文件', 'warning');
-                    fileInput.value = '';
-                    previewElement.innerHTML = '';
-                    return;
-                }
-                
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    previewElement.innerHTML = `
-                        <div class="media-preview">
-                            <video controls src="${e.target.result}" alt="宣传视频"></video>
-                            <button type="button" class="remove-media" onclick="removeTeacherVideo('${type}')">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        </div>
-                    `;
-                    
-                    // 保存文件对象
-                    teacherMediaFiles[type].video = fileInput.files[0];
-                };
-                
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                previewElement.innerHTML = '';
-                teacherMediaFiles[type].video = null;
-            }
+            updateTeacherMediaUrls(mode);
         }
         
-        // 移除老师视频
-        function removeTeacherVideo(type) {
-            const previewElement = document.getElementById(`${type}TeacherVideoPreview`);
-            previewElement.innerHTML = '';
-            teacherMediaFiles[type].video = null;
+        // 更新老师媒体URL
+        function updateTeacherMediaUrls(mode) {
+            const photoUrlsInput = document.getElementById(`${mode}TeacherPhotoUrls`);
+            const videoUrlInput = document.getElementById(`${mode}TeacherVideoUrl`);
+            
+            photoUrlsInput.value = teacherMediaCache[mode].photos.join(',');
+            videoUrlInput.value = teacherMediaCache[mode].videos.length > 0 ? teacherMediaCache[mode].videos[0] : '';
         }
         
         // 加载关键词数据
@@ -2625,14 +2235,12 @@
                     <td>${keyword.reply_content || '-'}</td>
                     <td>${keyword.is_active ? '<span class="badge bg-success">启用</span>' : '<span class="badge bg-secondary">禁用</span>'}</td>
                     <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-sm btn-primary btn-action" onclick="editKeyword(${keyword.id})" title="编辑">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger btn-action" onclick="deleteKeyword(${keyword.id})" title="删除">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
+                        <button class="btn btn-sm btn-primary btn-action" onclick="editKeyword(${keyword.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-action" onclick="deleteKeyword(${keyword.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             `).join('');
@@ -2775,14 +2383,12 @@
                     <td>${banned.id}</td>
                     <td>${banned.keyword}</td>
                     <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-sm btn-primary btn-action" onclick="editBanned(${banned.id})" title="编辑">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger btn-action" onclick="deleteBanned(${banned.id})" title="删除">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
+                        <button class="btn btn-sm btn-primary btn-action" onclick="editBanned(${banned.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-action" onclick="deleteBanned(${banned.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             `).join('');
@@ -2919,17 +2525,15 @@
                     <td>${task.is_active ? '<span class="status-active">激活</span>' : '<span class="status-inactive">未激活</span>'}</td>
                     <td>${new Date(task.next_send_time).toLocaleString()}</td>
                     <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-sm btn-primary btn-action" onclick="triggerScheduledTask(${task.id})" title="立即触发">
-                                <i class="bi bi-play-circle"></i>
-                            </button>
-                            <button class="btn btn-sm btn-secondary btn-action" onclick="editScheduledTask(${task.id})" title="编辑">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger btn-action" onclick="deleteScheduledTask(${task.id})" title="删除">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
+                        <button class="btn btn-sm btn-primary btn-action" onclick="triggerScheduledTask(${task.id})" title="立即触发">
+                            <i class="bi bi-play-circle"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning btn-action" onclick="editScheduledTask(${task.id})" title="编辑">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-action" onclick="deleteScheduledTask(${task.id})" title="删除">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             `).join('');
@@ -3178,35 +2782,6 @@
             });
         }
         
-        // 手动触发随机老师发送配置
-        function triggerRandomTeacherConfig() {
-            if (!confirm('确定要立即触发随机老师发送配置吗？')) return;
-            showLoading(true);
-            
-            // 使用更简单的方法，直接发送POST请求，不处理返回的JSON
-            fetch(`${API_BASE_URL}/send-random-teacher-config`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                // 无论响应如何，都认为成功
-                showAlert('随机老师发送配置触发成功', 'success');
-                // 刷新随机老师配置数量
-                loadDashboard();
-            })
-            .catch(error => {
-                // 即使出错，也显示成功，因为可能是服务器没有返回正确的JSON
-                showAlert('随机老师发送配置触发成功', 'success');
-                // 刷新随机老师配置数量
-                loadDashboard();
-            })
-            .finally(() => {
-                showLoading(false);
-            });
-        }
-        
         // 预览定时任务图片
         function previewScheduledTaskImage(type) {
             const fileInput = document.getElementById(`${type}ScheduledTaskImage`);
@@ -3286,51 +2861,6 @@
             }
         }
         
-        // 上传视频到Supabase存储
-        async function uploadVideoToSupabase(file, bucketName) {
-            if (!file) return null;
-            
-            showLoading(true);
-            try {
-                // 生成文件名：使用时间戳和随机数
-                const fileName = `${bucketName}_${Date.now()}_${Math.floor(Math.random() * 1000)}.${file.name.split('.').pop()}`;
-                
-                // 先检查存储桶是否存在，如果不存在则创建
-                try {
-                    await createStorageBucketIfNotExists(bucketName);
-                } catch (error) {
-                    console.warn('创建存储桶失败:', error);
-                    // 继续尝试上传，可能存储桶已经存在
-                }
-                
-                // 上传到Supabase存储
-                const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                        'Content-Type': file.type
-                    },
-                    body: file
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`上传失败: ${errorText}`);
-                }
-                
-                // 获取公共URL
-                const videoUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
-                
-                return videoUrl;
-            } catch (error) {
-                console.error('上传视频失败:', error);
-                showAlert('上传视频失败: ' + error.message, 'danger');
-                return null;
-            } finally {
-                showLoading(false);
-            }
-        }
-        
         // 创建存储桶（如果不存在）
         async function createStorageBucketIfNotExists(bucketName) {
             // 检查存储桶是否存在
@@ -3372,19 +2902,10 @@
         // 加载系统设置
         function loadSettings() {
             // 更新服务器时间
-            const serverTimeElement = document.getElementById('serverTime');
-            if (serverTimeElement) {
-                serverTimeElement.textContent = new Date().toLocaleString();
-            }
+            document.getElementById('serverTime').textContent = new Date().toLocaleString();
             // 更新机器人状态
-            const currentBotStatusElement = document.getElementById('currentBotStatus');
-            if (currentBotStatusElement) {
-                currentBotStatusElement.textContent = '运行中';
-            }
-            const botStatusSwitchElement = document.getElementById('botStatusSwitch');
-            if (botStatusSwitchElement) {
-                botStatusSwitchElement.checked = true;
-            }
+            document.getElementById('currentBotStatus').textContent = '运行中';
+            document.getElementById('botStatusSwitch').checked = true;
         }
         
         // 切换机器人状态
@@ -3394,14 +2915,8 @@
             // 这里只是模拟切换状态，实际需要修改代码中的EMERGENCY_STOP变量
             // 由于Worker是无状态的，这个功能需要通过其他方式实现
             showAlert('机器人状态已切换', 'success');
-            const botStatusSwitchElement = document.getElementById('botStatusSwitch');
-            if (botStatusSwitchElement) {
-                botStatusSwitchElement.checked = !newStatus;
-            }
-            const currentBotStatusElement = document.getElementById('currentBotStatus');
-            if (currentBotStatusElement) {
-                currentBotStatusElement.textContent = newStatus ? '已停止' : '运行中';
-            }
+            document.getElementById('botStatusSwitch').checked = !newStatus;
+            document.getElementById('currentBotStatus').textContent = newStatus ? '已停止' : '运行中';
             showLoading(false);
         }
         
@@ -3410,27 +2925,15 @@
             showLoading(true);
             directSupabaseFetch('users', 'limit=1')
             .then(() => {
-                const dbStatusElement = document.getElementById('dbStatus');
-                if (dbStatusElement) {
-                    dbStatusElement.textContent = '已连接';
-                    dbStatusElement.className = 'badge bg-success';
-                }
-                const dbLastCheckElement = document.getElementById('dbLastCheck');
-                if (dbLastCheckElement) {
-                    dbLastCheckElement.textContent = new Date().toLocaleString();
-                }
+                document.getElementById('dbStatus').textContent = '已连接';
+                document.getElementById('dbStatus').className = 'badge bg-success';
+                document.getElementById('dbLastCheck').textContent = new Date().toLocaleString();
                 showAlert('数据库连接正常', 'success');
             })
             .catch(error => {
-                const dbStatusElement = document.getElementById('dbStatus');
-                if (dbStatusElement) {
-                    dbStatusElement.textContent = '连接失败';
-                    dbStatusElement.className = 'badge bg-danger';
-                }
-                const dbLastCheckElement = document.getElementById('dbLastCheck');
-                if (dbLastCheckElement) {
-                    dbLastCheckElement.textContent = new Date().toLocaleString();
-                }
+                document.getElementById('dbStatus').textContent = '连接失败';
+                document.getElementById('dbStatus').className = 'badge bg-danger';
+                document.getElementById('dbLastCheck').textContent = new Date().toLocaleString();
                 showAlert('数据库连接失败: ' + error.message, 'danger');
             })
             .finally(() => {
@@ -3608,4 +3111,60 @@
         // 直接从Supabase删除数据
         async function directSupabaseDelete(table, id) {
             const idColumn = table === 'users' ? 'user_id' : 'id';
-            const response = await fetch(`${SUP
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idColumn}=eq.${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Supabase delete错误: ${errorData.message || response.statusText}`);
+            }
+        }
+        
+        // 使用服务角色密钥删除数据
+        async function directSupabaseDeleteWithServiceKey(table, id) {
+            const idColumn = table === 'users' ? 'user_id' : 'id';
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idColumn}=eq.${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'apikey': SUPABASE_SERVICE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Supabase delete错误: ${errorData.message || response.statusText}`);
+            }
+        }
+        
+        // 显示提示
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertId = 'alert-' + Date.now();
+            const alertHtml = `
+                <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            alertContainer.insertAdjacentHTML('beforeend', alertHtml);
+            // 自动关闭
+            setTimeout(() => {
+                const alertElement = document.getElementById(alertId);
+                if (alertElement) {
+                    const bsAlert = new bootstrap.Alert(alertElement);
+                    bsAlert.close();
+                }
+            }, 5000);
+        }
+        
+        // 显示/隐藏加载动画
+        function showLoading(show) {
+            document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+        }
+    </script>
+</body>
+</html>

@@ -3,73 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>机器人后台管理系统</title>
+    <title>北京修车【万花楼】超级机器人管理后台</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
+        :root {
+            --primary-color: #185A56;
+            --secondary-color: #FD742D;
+            --light-bg: #f8f9fa;
+            --dark-text: #333;
+            --sidebar-width: 280px;
+        }
+        
         body {
-            background-color: #f8f9fa;
+            background-color: var(--light-bg);
             font-family: 'Microsoft YaHei', sans-serif;
+            color: var(--dark-text);
+            overflow-x: hidden;
         }
+        
         .sidebar {
-            min-height: 100vh;
-            background-color: #343a40;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
             color: white;
+            z-index: 1000;
+            transition: all 0.3s;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         }
+        
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-header h3 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        
         .sidebar .nav-link {
             color: rgba(255, 255, 255, 0.8);
-            border-radius: 0.375rem;
-            margin-bottom: 0.25rem;
+            padding: 12px 20px;
+            border-radius: 0;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
         }
+        
         .sidebar .nav-link:hover {
             background-color: rgba(255, 255, 255, 0.1);
             color: white;
         }
+        
         .sidebar .nav-link.active {
-            background-color: #0d6efd;
+            background-color: var(--secondary-color);
             color: white;
+            font-weight: 500;
         }
-        .content {
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
             padding: 20px;
+            transition: all 0.3s;
+            min-height: 100vh;
         }
+        
+        .page-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .page-header h1 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin: 0;
+        }
+        
         .card {
-            margin-bottom: 20px;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 25px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
         }
+        
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+            font-weight: 500;
+        }
+        
+        .stat-card {
+            border-left: 4px solid var(--secondary-color);
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card .card-body h5 {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .stat-card .card-body h2 {
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #14443f;
+            border-color: #14443f;
+        }
+        
+        .btn-success {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #e65a1b;
+            border-color: #e65a1b;
+        }
+        
         .table-responsive {
-            border-radius: 0.375rem;
+            border-radius: 10px;
+            overflow: hidden;
         }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: 500;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(24, 90, 86, 0.05);
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
         .btn-action {
-            margin-right: 5px;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.875rem;
         }
+        
         .login-container {
-            max-width: 400px;
+            max-width: 450px;
             margin: 100px auto;
-            padding: 30px;
+            padding: 40px;
             background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
+        
         .login-title {
             text-align: center;
             margin-bottom: 30px;
+            color: var(--primary-color);
+            font-weight: 600;
         }
-        .stat-card {
-            border-left: 4px solid #0d6efd;
-        }
+        
         .modal-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0;
         }
+        
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+        
         .form-label {
             font-weight: 500;
+            color: var(--primary-color);
         }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.25rem rgba(253, 116, 45, 0.25);
+        }
+        
         .pagination {
             margin-top: 20px;
         }
+        
+        .pagination .page-link {
+            color: var(--primary-color);
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
         .search-box {
             margin-bottom: 20px;
         }
+        
+        .search-box .input-group {
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .search-box .form-control {
+            border: none;
+            border-radius: 50px 0 0 50px;
+        }
+        
+        .search-box .btn {
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 0 50px 50px 0;
+        }
+        
         .alert-container {
             position: fixed;
             top: 20px;
@@ -77,6 +261,7 @@
             z-index: 1050;
             max-width: 350px;
         }
+        
         .loading-spinner {
             display: none;
             position: fixed;
@@ -89,59 +274,221 @@
             justify-content: center;
             align-items: center;
         }
+        
         .loading-spinner .spinner-border {
             width: 3rem;
             height: 3rem;
+            border-color: var(--secondary-color);
+            border-right-color: transparent;
         }
+        
         .status-active {
-            color: #2ecc71;
+            color: #28a745;
             font-weight: bold;
         }
+        
         .status-inactive {
-            color: #e74c3c;
+            color: #dc3545;
             font-weight: bold;
         }
+        
         .teacher-image {
             width: 50px;
             height: 50px;
             object-fit: cover;
             border-radius: 50%;
         }
+        
         .image-preview {
             max-width: 200px;
             max-height: 200px;
             margin-top: 10px;
             border-radius: 5px;
         }
+        
+        .video-preview {
+            max-width: 300px;
+            max-height: 300px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        
         .scheduled-task-image {
             max-width: 100px;
             max-height: 100px;
             object-fit: cover;
             border-radius: 5px;
         }
+        
         .upload-info {
             font-size: 0.85rem;
             color: #6c757d;
             margin-top: 5px;
         }
+        
         .debug-info {
             font-size: 0.75rem;
             color: #6c757d;
             margin-top: 5px;
             font-family: monospace;
         }
+        
+        .points-input-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        .points-input-group .input-group-text {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .points-input-group .form-control {
+            border-left: none;
+        }
+        
+        .media-upload-container {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .media-upload-container:hover {
+            border-color: var(--secondary-color);
+            background-color: rgba(253, 116, 45, 0.05);
+        }
+        
+        .media-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .media-preview-item {
+            position: relative;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .media-preview-item img,
+        .media-preview-item video {
+            max-width: 150px;
+            max-height: 150px;
+            display: block;
+        }
+        
+        .media-preview-item .remove-media {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(220, 53, 69, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .user-profile .user-info {
+            flex: 1;
+        }
+        
+        .user-profile .user-info h5 {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        
+        .user-profile .user-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        
+        .sidebar-footer button {
+            background-color: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .sidebar-footer button:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar-header h3,
+            .sidebar .nav-link span,
+            .user-profile .user-info,
+            .sidebar-footer {
+                display: none;
+            }
+            
+            .sidebar .nav-link {
+                justify-content: center;
+                padding: 15px 0;
+            }
+            
+            .sidebar .nav-link i {
+                margin: 0;
+                font-size: 1.5rem;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- 加载动画 -->
     <div class="loading-spinner" id="loadingSpinner">
-        <div class="spinner-border text-primary" role="status">
+        <div class="spinner-border" role="status">
             <span class="visually-hidden">加载中...</span>
         </div>
     </div>
+    
     <!-- 登录界面 -->
     <div class="login-container" id="loginContainer">
-        <h2 class="login-title">北京修车超级机器人后台管理系统</h2>
+        <div class="text-center mb-4">
+            <i class="bi bi-robot" style="font-size: 3rem; color: var(--primary-color);"></i>
+        </div>
+        <h2 class="login-title">北京修车【万花楼】超级机器人管理后台</h2>
         <div class="mb-3">
             <label for="adminKey" class="form-label">管理员密钥</label>
             <input type="password" class="form-control" id="adminKey" placeholder="请输入管理员密钥">
@@ -151,362 +498,419 @@
             <small class="text-muted">请输入正确的管理员密钥以继续</small>
         </div>
     </div>
+    
     <!-- 主界面 -->
-    <div class="container-fluid" id="mainContainer" style="display: none;">
-        <div class="row">
-            <!-- 侧边栏 -->
-            <div class="col-md-3 col-lg-2 sidebar p-0">
-                <div class="d-flex flex-column p-3">
-                    <h4 class="mb-4">北京修车超级机器人后台</h4>
-                    <ul class="nav nav-pills flex-column mb-auto">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link active" onclick="showSection('dashboard')">
-                                <i class="bi bi-speedometer2 me-2"></i> 北京修车超级机器人运行仪表盘
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link" onclick="showSection('users')">
-                                <i class="bi bi-people me-2"></i> 北京修车用户管理系统
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link" onclick="showSection('teachers')">
-                                <i class="bi bi-person-badge me-2"></i> 北京修车老师管理系统
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link" onclick="showSection('keywords')">
-                                <i class="bi bi-key me-2"></i> 北京修车关键词管理系统
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link" onclick="showSection('banned')">
-                                <i class="bi bi-shield-x me-2"></i> 北京修车禁言词管理系统
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link" onclick="showSection('scheduled')">
-                                <i class="bi bi-clock-history me-2"></i> 北京修车定时发送任务管理系统
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link" onclick="showSection('settings')">
-                                <i class="bi bi-gear me-2"></i> 北京修车系统设置
-                            </a>
-                        </li>
-                    </ul>
-                    <hr>
-                    <div class="dropdown">
-                        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle me-2"></i>
-                            <strong>管理员</strong>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
-                            <li><a class="dropdown-item" href="#" onclick="logout()">退出登录</a></li>
-                        </ul>
+    <div class="d-flex" id="mainContainer" style="display: none;">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <i class="bi bi-robot" style="font-size: 1.5rem;"></i>
+                <h3>万花楼机器人</h3>
+            </div>
+            <ul class="nav flex-column mb-auto">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" onclick="showSection('dashboard')">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>运行仪表盘</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('users')">
+                        <i class="bi bi-people"></i>
+                        <span>用户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('teachers')">
+                        <i class="bi bi-person-badge"></i>
+                        <span>老师管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('keywords')">
+                        <i class="bi bi-key"></i>
+                        <span>关键词管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('banned')">
+                        <i class="bi bi-shield-x"></i>
+                        <span>禁言词管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('scheduled')">
+                        <i class="bi bi-clock-history"></i>
+                        <span>定时任务管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('lottery')">
+                        <i class="bi bi-gift"></i>
+                        <span>抽奖管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('settings')">
+                        <i class="bi bi-gear"></i>
+                        <span>系统设置</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="user-profile">
+                <img src="https://picsum.photos/seed/admin/40/40.jpg" alt="管理员">
+                <div class="user-info">
+                    <h5>管理员</h5>
+                    <p>admin@example.com</p>
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <button onclick="logout()">
+                    <i class="bi bi-box-arrow-right"></i> 退出登录
+                </button>
+            </div>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 仪表盘 -->
+            <div id="dashboardSection" class="content-section">
+                <div class="page-header">
+                    <h1>运行仪表盘</h1>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-4">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">用户总数</h5>
+                                <h2 class="text-primary" id="totalUsers">-</h2>
+                                <p class="card-text">注册用户数量</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">老师总数</h5>
+                                <h2 class="text-success" id="totalTeachers">-</h2>
+                                <p class="card-text">已注册老师数量</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">关键词总数</h5>
+                                <h2 class="text-warning" id="totalKeywords">-</h2>
+                                <p class="card-text">已设置关键词数量</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">禁言词总数</h5>
+                                <h2 class="text-danger" id="totalBanned">-</h2>
+                                <p class="card-text">已设置禁言词数量</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>最近用户</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>用户名</th>
+                                                <th>积分</th>
+                                                <th>最后签到</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recentUsers">
+                                            <tr>
+                                                <td colspan="4" class="text-center">加载中...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>最近老师</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>花名</th>
+                                                <th>年龄</th>
+                                                <th>地区</th>
+                                                <th>状态</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recentTeachers">
+                                            <tr>
+                                                <td colspan="4" class="text-center">加载中...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>机器人状态</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="form-check form-switch me-3">
+                                                <input class="form-check-input" type="checkbox" id="botStatusSwitch" checked>
+                                                <label class="form-check-label" for="botStatusSwitch">
+                                                    机器人运行状态
+                                                </label>
+                                            </div>
+                                            <span id="currentBotStatus" class="badge bg-success">运行中</span>
+                                        </div>
+                                        <button class="btn btn-primary" onclick="toggleBotStatus()">
+                                            <i class="bi bi-power me-1"></i> 切换状态
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p>数据库连接: <span class="badge bg-success" id="dbStatus">已连接</span></p>
+                                        <p>最后检查: <span id="dbLastCheck">未检查</span></p>
+                                        <button class="btn btn-primary" onclick="checkDbStatus()">
+                                            <i class="bi bi-arrow-clockwise me-1"></i> 检查连接
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <!-- 主内容区 -->
-            <div class="col-md-9 col-lg-10 content">
-                <!-- 仪表盘 -->
-                <div id="dashboardSection" class="content-section">
-                    <h2 class="mb-4">仪表盘</h2>
-                    <div class="row">
-                        <div class="col-md-3 mb-4">
-                            <div class="card stat-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">用户总数</h5>
-                                    <h2 class="text-primary" id="totalUsers">-</h2>
-                                    <p class="card-text">注册用户数量</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-4">
-                            <div class="card stat-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">老师总数</h5>
-                                    <h2 class="text-success" id="totalTeachers">-</h2>
-                                    <p class="card-text">已注册老师数量</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-4">
-                            <div class="card stat-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">关键词总数</h5>
-                                    <h2 class="text-warning" id="totalKeywords">-</h2>
-                                    <p class="card-text">已设置关键词数量</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-4">
-                            <div class="card stat-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">禁言词总数</h5>
-                                    <h2 class="text-danger" id="totalBanned">-</h2>
-                                    <p class="card-text">已设置禁言词数量</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-4">
-                            <div class="card stat-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">随机老师配置</h5>
-                                    <h2 class="text-info" id="totalRandomTeacherConfigs">-</h2>
-                                    <p class="card-text">随机老师发送配置数量</p>
-                                </div>
-                            </div>
-                        </div>
+            
+            <!-- 用户管理 -->
+            <div id="usersSection" class="content-section" style="display: none;">
+                <div class="page-header">
+                    <h1>用户管理</h1>
+                </div>
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">用户列表</h5>
+                        <button class="btn btn-success" onclick="showAddUserModal()">
+                            <i class="bi bi-plus-circle me-1"></i> 添加用户
+                        </button>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>最近用户</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>ID</th>
-                                                    <th>用户名</th>
-                                                    <th>积分</th>
-                                                    <th>最后签到</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="recentUsers">
-                                                <tr>
-                                                    <td colspan="4" class="text-center">加载中...</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                    <div class="card-body">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索用户..." id="userSearch">
+                                <button class="btn" type="button" onclick="searchUsers()">
+                                    <i class="bi bi-search"></i>
+                                </button>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>最近老师</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>花名</th>
-                                                    <th>年龄</th>
-                                                    <th>地区</th>
-                                                    <th>状态</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="recentTeachers">
-                                                <tr>
-                                                    <td colspan="4" class="text-center">加载中...</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>用户名</th>
+                                        <th>显示名称</th>
+                                        <th>积分</th>
+                                        <th>消息数</th>
+                                        <th>最后签到</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTable">
+                                    <tr>
+                                        <td colspan="7" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="usersPagination">
+                                <!-- 分页按钮将通过JS动态生成 -->
+                            </ul>
+                        </nav>
                     </div>
                 </div>
-                <!-- 用户管理 -->
-                <div id="usersSection" class="content-section" style="display: none;">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2>用户管理</h2>
-                        <div>
-                            <button class="btn btn-success" onclick="showAddUserModal()">
-                                <i class="bi bi-plus-circle me-1"></i> 添加用户
-                            </button>
-                        </div>
+            </div>
+            
+            <!-- 老师管理 -->
+            <div id="teachersSection" class="content-section" style="display: none;">
+                <div class="page-header">
+                    <h1>老师管理</h1>
+                </div>
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">老师列表</h5>
+                        <button class="btn btn-success" onclick="showAddTeacherModal()">
+                            <i class="bi bi-plus-circle me-1"></i> 添加老师
+                        </button>
                     </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="search-box">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="搜索用户..." id="userSearch">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="searchUsers()">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                </div>
+                    <div class="card-body">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索老师..." id="teacherSearch">
+                                <button class="btn" type="button" onclick="searchTeachers()">
+                                    <i class="bi bi-search"></i>
+                                </button>
                             </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>用户名</th>
-                                            <th>显示名称</th>
-                                            <th>积分</th>
-                                            <th>消息数</th>
-                                            <th>最后签到</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="usersTable">
-                                        <tr>
-                                            <td colspan="7" class="text-center">加载中...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center" id="usersPagination">
-                                    <!-- 分页按钮将通过JS动态生成 -->
-                                </ul>
-                            </nav>
                         </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>头像</th>
+                                        <th>ID</th>
+                                        <th>花名</th>
+                                        <th>年龄</th>
+                                        <th>地区</th>
+                                        <th>账号</th>
+                                        <th>服务类型</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teachersTable">
+                                    <tr>
+                                        <td colspan="9" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="teachersPagination">
+                                <!-- 分页按钮将通过JS动态生成 -->
+                            </ul>
+                        </nav>
                     </div>
                 </div>
-                <!-- 老师管理 -->
-                <div id="teachersSection" class="content-section" style="display: none;">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2>老师管理</h2>
-                        <div>
-                            <button class="btn btn-success" onclick="showAddTeacherModal()">
-                                <i class="bi bi-plus-circle me-1"></i> 添加老师
-                            </button>
-                        </div>
+            </div>
+            
+            <!-- 关键词管理 -->
+            <div id="keywordsSection" class="content-section" style="display: none;">
+                <div class="page-header">
+                    <h1>关键词管理</h1>
+                </div>
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">关键词列表</h5>
+                        <button class="btn btn-success" onclick="showAddKeywordModal()">
+                            <i class="bi bi-plus-circle me-1"></i> 添加关键词
+                        </button>
                     </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="search-box">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="搜索老师..." id="teacherSearch">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="searchTeachers()">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                </div>
+                    <div class="card-body">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索关键词..." id="keywordSearch">
+                                <button class="btn" type="button" onclick="searchKeywords()">
+                                    <i class="bi bi-search"></i>
+                                </button>
                             </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>头像</th>
-                                            <th>ID</th>
-                                            <th>花名</th>
-                                            <th>年龄</th>
-                                            <th>地区</th>
-                                            <th>账号</th>
-                                            <th>服务类型</th>
-                                            <th>状态</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="teachersTable">
-                                        <tr>
-                                            <td colspan="9" class="text-center">加载中...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center" id="teachersPagination">
-                                    <!-- 分页按钮将通过JS动态生成 -->
-                                </ul>
-                            </nav>
                         </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>关键词</th>
+                                        <th>回复内容</th>
+                                        <th>自定义回复</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="keywordsTable">
+                                    <tr>
+                                        <td colspan="6" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="keywordsPagination">
+                                <!-- 分页按钮将通过JS动态生成 -->
+                            </ul>
+                        </nav>
                     </div>
                 </div>
-                <!-- 关键词管理 -->
-                <div id="keywordsSection" class="content-section" style="display: none;">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2>关键词管理</h2>
-                        <div>
-                            <button class="btn btn-success" onclick="showAddKeywordModal()">
-                                <i class="bi bi-plus-circle me-1"></i> 添加关键词
-                            </button>
-                        </div>
+            </div>
+            
+            <!-- 禁言词管理 -->
+            <div id="bannedSection" class="content-section" style="display: none;">
+                <div class="page-header">
+                    <h1>禁言词管理</h1>
+                </div>
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">禁言词列表</h5>
+                        <button class="btn btn-success" onclick="showAddBannedModal()">
+                            <i class="bi bi-plus-circle me-1"></i> 添加禁言词
+                        </button>
                     </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="search-box">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="搜索关键词..." id="keywordSearch">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="searchKeywords()">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                </div>
+                    <div class="card-body">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索禁言词..." id="bannedSearch">
+                                <button class="btn" type="button" onclick="searchBanned()">
+                                    <i class="bi bi-search"></i>
+                                </button>
                             </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>关键词</th>
-                                            <th>回复内容</th>
-                                            <th>自定义回复</th>
-                                            <th>状态</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="keywordsTable">
-                                        <tr>
-                                            <td colspan="6" class="text-center">加载中...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center" id="keywordsPagination">
-                                    <!-- 分页按钮将通过JS动态生成 -->
-                                </ul>
-                            </nav>
                         </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>禁言词</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bannedTable">
+                                    <tr>
+                                        <td colspan="3" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="bannedPagination">
+                                <!-- 分页按钮将通过JS动态生成 -->
+                            </ul>
+                        </nav>
                     </div>
                 </div>
-                <!-- 禁言词管理 -->
-                <div id="bannedSection" class="content-section" style="display: none;">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2>禁言词管理</h2>
-                        <div>
-                            <button class="btn btn-success" onclick="showAddBannedModal()">
-                                <i class="bi bi-plus-circle me-1"></i> 添加禁言词
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="search-box">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="搜索禁言词..." id="bannedSearch">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="searchBanned()">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>禁言词</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="bannedTable">
-                                        <tr>
-                                            <td colspan="3" class="text-center">加载中...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center" id="bannedPagination">
-                                    <!-- 分页按钮将通过JS动态生成 -->
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
+            </div>
+            
+            <!-- 定时发送任务 -->
+            <div id="scheduledSection" class="content-section" style="display: none;">
+                <div class="page-header">
+                    <h1>定时任务管理</h1>
                 </div>
-                <!-- 定时发送任务 -->
-                <div id="scheduledSection" class="content-section" style="display: none;">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2>定时发送任务管理</h2>
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">定时任务列表</h5>
                         <div>
                             <button class="btn btn-success" onclick="showAddScheduledTaskModal()">
                                 <i class="bi bi-plus-circle me-1"></i> 添加定时任务
@@ -519,108 +923,168 @@
                             </button>
                         </div>
                     </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="search-box">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="搜索定时任务..." id="scheduledSearch">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="searchScheduledTasks()">
-                                        <i class="bi bi-search"></i>
-                                    </button>
+                    <div class="card-body">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索定时任务..." id="scheduledSearch">
+                                <button class="btn" type="button" onclick="searchScheduledTasks()">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>任务名称</th>
+                                        <th>消息内容</th>
+                                        <th>图片</th>
+                                        <th>发送间隔</th>
+                                        <th>状态</th>
+                                        <th>下次发送</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scheduledTasksTable">
+                                    <tr>
+                                        <td colspan="8" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="scheduledTasksPagination">
+                                <!-- 分页按钮将通过JS动态生成 -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 抽奖管理 -->
+            <div id="lotterySection" class="content-section" style="display: none;">
+                <div class="page-header">
+                    <h1>抽奖管理</h1>
+                </div>
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">抽奖活动列表</h5>
+                        <div>
+                            <button class="btn btn-success" onclick="showAddLotteryModal()">
+                                <i class="bi bi-plus-circle me-1"></i> 添加抽奖活动
+                            </button>
+                            <button class="btn btn-primary" onclick="refreshLotteryActivities()">
+                                <i class="bi bi-arrow-clockwise me-1"></i> 刷新列表
+                            </button>
+                            <button class="btn btn-warning" onclick="manualCheckLottery()">
+                                <i class="bi bi-gift me-1"></i> 手动开奖
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索抽奖活动..." id="lotterySearch">
+                                <button class="btn" type="button" onclick="searchLotteryActivities()">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>抽奖标题</th>
+                                        <th>抽奖编号</th>
+                                        <th>奖品配置</th>
+                                        <th>所需积分</th>
+                                        <th>开奖时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lotteryActivitiesTable">
+                                    <tr>
+                                        <td colspan="8" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="lotteryActivitiesPagination">
+                                <!-- 分页按钮将通过JS动态生成 -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 系统设置 -->
+            <div id="settingsSection" class="content-section" style="display: none;">
+                <div class="page-header">
+                    <h1>系统设置</h1>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>机器人状态</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="botStatusSwitch" checked>
+                                    <label class="form-check-label" for="botStatusSwitch">
+                                        机器人运行状态
+                                    </label>
                                 </div>
+                                <p class="text-muted">当前状态: <span id="currentBotStatus">运行中</span></p>
+                                <button class="btn btn-primary" onclick="toggleBotStatus()">
+                                    <i class="bi bi-power me-1"></i> 切换状态
+                                </button>
                             </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>任务名称</th>
-                                            <th>消息内容</th>
-                                            <th>图片</th>
-                                            <th>发送间隔</th>
-                                            <th>状态</th>
-                                            <th>下次发送</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="scheduledTasksTable">
-                                        <tr>
-                                            <td colspan="8" class="text-center">加载中...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>数据库状态</h5>
                             </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center" id="scheduledTasksPagination">
-                                    <!-- 分页按钮将通过JS动态生成 -->
-                                </ul>
-                            </nav>
+                            <div class="card-body">
+                                <p>连接状态: <span class="badge bg-success" id="dbStatus">已连接</span></p>
+                                <p>最后检查: <span id="dbLastCheck">未检查</span></p>
+                                <button class="btn btn-primary" onclick="checkDbStatus()">
+                                    <i class="bi bi-arrow-clockwise me-1"></i> 检查连接
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <!-- 系统设置 -->
-                <div id="settingsSection" class="content-section" style="display: none;">
-                    <h2 class="mb-4">系统设置</h2>
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>机器人状态</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="form-check form-switch mb-3">
-                                        <input class="form-check-input" type="checkbox" id="botStatusSwitch" checked>
-                                        <label class="form-check-label" for="botStatusSwitch">
-                                            机器人运行状态
-                                        </label>
-                                    </div>
-                                    <p class="text-muted">当前状态: <span id="currentBotStatus">运行中</span></p>
-                                    <button class="btn btn-primary" onclick="toggleBotStatus()">
-                                        <i class="bi bi-power me-1"></i> 切换状态
-                                    </button>
-                                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>系统信息</h5>
                             </div>
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>数据库状态</h5>
-                                </div>
-                                <div class="card-body">
-                                    <p>连接状态: <span class="badge bg-success" id="dbStatus">已连接</span></p>
-                                    <p>最后检查: <span id="dbLastCheck">未检查</span></p>
-                                    <button class="btn btn-primary" onclick="checkDbStatus()">
-                                        <i class="bi bi-arrow-clockwise me-1"></i> 检查连接
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>系统信息</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <tbody>
-                                                <tr>
-                                                    <th scope="row">版本</th>
-                                                    <td>1.0.0</td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">最后更新</th>
-                                                    <td id="lastUpdate">2023-01-01</td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">服务器时间</th>
-                                                    <td id="serverTime">-</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <tbody>
+                                            <tr>
+                                                <th scope="row">版本</th>
+                                                <td>1.0.0</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">最后更新</th>
+                                                <td id="lastUpdate">2023-01-01</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">服务器时间</th>
+                                                <td id="serverTime">-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -629,6 +1093,7 @@
             </div>
         </div>
     </div>
+    
     <!-- 用户编辑模态框 -->
     <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -669,6 +1134,7 @@
             </div>
         </div>
     </div>
+    
     <!-- 老师编辑模态框 -->
     <div class="modal fade" id="editTeacherModal" tabindex="-1" aria-labelledby="editTeacherModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -705,6 +1171,10 @@
                             <input type="text" class="form-control" id="editTeacherChannel">
                         </div>
                         <div class="mb-3">
+                            <label for="editTeacherRobotAccount" class="form-label">机器人账号</label>
+                            <input type="text" class="form-control" id="editTeacherRobotAccount">
+                        </div>
+                        <div class="mb-3">
                             <label for="editTeacherServiceType" class="form-label">服务类型</label>
                             <input type="text" class="form-control" id="editTeacherServiceType">
                         </div>
@@ -717,11 +1187,24 @@
                             <textarea class="form-control" id="editTeacherIntro" rows="3"></textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="editTeacherImage" class="form-label">头像</label>
-                            <input type="file" class="form-control" id="editTeacherImage" accept="image/*" onchange="previewTeacherImage('edit')">
-                            <div id="editTeacherImagePreview" class="mt-2"></div>
-                            <input type="hidden" id="editTeacherImageUrl">
+                            <label class="form-label">照片</label>
+                            <div class="media-upload-container" onclick="document.getElementById('editTeacherPhotos').click()">
+                                <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: #ccc;"></i>
+                                <p>点击上传照片（最多3张）</p>
+                                <input type="file" id="editTeacherPhotos" accept="image/*" multiple style="display: none;" onchange="handleTeacherMediaUpload('edit', 'photo')">
+                            </div>
+                            <div id="editTeacherPhotosPreview" class="media-preview-container"></div>
                             <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">视频</label>
+                            <div class="media-upload-container" onclick="document.getElementById('editTeacherVideo').click()">
+                                <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: #ccc;"></i>
+                                <p>点击上传视频（最多1个）</p>
+                                <input type="file" id="editTeacherVideo" accept="video/*" style="display: none;" onchange="handleTeacherMediaUpload('edit', 'video')">
+                            </div>
+                            <div id="editTeacherVideoPreview" class="media-preview-container"></div>
+                            <div class="upload-info">支持 MP4、MOV 格式，文件大小不超过 50MB</div>
                         </div>
                         <div class="mb-3">
                             <label for="editTeacherStatus" class="form-label">状态</label>
@@ -740,6 +1223,7 @@
             </div>
         </div>
     </div>
+    
     <!-- 关键词编辑模态框 -->
     <div class="modal fade" id="editKeywordModal" tabindex="-1" aria-labelledby="editKeywordModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -779,6 +1263,7 @@
             </div>
         </div>
     </div>
+    
     <!-- 禁言词编辑模态框 -->
     <div class="modal fade" id="editBannedModal" tabindex="-1" aria-labelledby="editBannedModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -803,6 +1288,7 @@
             </div>
         </div>
     </div>
+    
     <!-- 定时任务编辑模态框 -->
     <div class="modal fade" id="editScheduledTaskModal" tabindex="-1" aria-labelledby="editScheduledTaskModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -859,6 +1345,66 @@
             </div>
         </div>
     </div>
+    
+    <!-- 抽奖活动编辑模态框 -->
+    <div class="modal fade" id="editLotteryModal" tabindex="-1" aria-labelledby="editLotteryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editLotteryModalLabel">编辑抽奖活动</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editLotteryForm">
+                        <input type="hidden" id="editLotteryId">
+                        <div class="mb-3">
+                            <label for="editLotteryTitle" class="form-label">抽奖标题</label>
+                            <input type="text" class="form-control" id="editLotteryTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryLotteryId" class="form-label">抽奖编号</label>
+                            <input type="text" class="form-control" id="editLotteryLotteryId" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryPrizeConfig" class="form-label">奖品配置</label>
+                            <input type="text" class="form-control" id="editLotteryPrizeConfig" required>
+                            <div class="form-text">格式：奖品名1:数量1;奖品名2:数量2</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryDescription" class="form-label">抽奖说明</label>
+                            <textarea class="form-control" id="editLotteryDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryPointsRequired" class="form-label">所需积分</label>
+                            <input type="number" class="form-control" id="editLotteryPointsRequired" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryEndTime" class="form-label">开奖时间</label>
+                            <input type="datetime-local" class="form-control" id="editLotteryEndTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryImageUrl" class="form-label">图片URL</label>
+                            <input type="text" class="form-control" id="editLotteryImageUrl">
+                            <div class="form-text">可选，留空则不显示图片</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryStatus" class="form-label">状态</label>
+                            <select class="form-select" id="editLotteryStatus">
+                                <option value="active">进行中</option>
+                                <option value="ended">已结束</option>
+                                <option value="cancelled">已取消</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveLottery()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- 添加用户模态框 -->
     <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -894,6 +1440,7 @@
             </div>
         </div>
     </div>
+    
     <!-- 添加老师模态框 -->
     <div class="modal fade" id="addTeacherModal" tabindex="-1" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -929,6 +1476,10 @@
                             <input type="text" class="form-control" id="addTeacherChannel" required>
                         </div>
                         <div class="mb-3">
+                            <label for="addTeacherRobotAccount" class="form-label">机器人账号</label>
+                            <input type="text" class="form-control" id="addTeacherRobotAccount">
+                        </div>
+                        <div class="mb-3">
                             <label for="addTeacherServiceType" class="form-label">服务类型</label>
                             <input type="text" class="form-control" id="addTeacherServiceType" required>
                         </div>
@@ -941,11 +1492,24 @@
                             <textarea class="form-control" id="addTeacherIntro" rows="3" required></textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="addTeacherImage" class="form-label">头像</label>
-                            <input type="file" class="form-control" id="addTeacherImage" accept="image/*" onchange="previewTeacherImage('add')">
-                            <div id="addTeacherImagePreview" class="mt-2"></div>
-                            <input type="hidden" id="addTeacherImageUrl">
+                            <label class="form-label">照片</label>
+                            <div class="media-upload-container" onclick="document.getElementById('addTeacherPhotos').click()">
+                                <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: #ccc;"></i>
+                                <p>点击上传照片（最多3张）</p>
+                                <input type="file" id="addTeacherPhotos" accept="image/*" multiple style="display: none;" onchange="handleTeacherMediaUpload('add', 'photo')">
+                            </div>
+                            <div id="addTeacherPhotosPreview" class="media-preview-container"></div>
                             <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">视频</label>
+                            <div class="media-upload-container" onclick="document.getElementById('addTeacherVideo').click()">
+                                <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: #ccc;"></i>
+                                <p>点击上传视频（最多1个）</p>
+                                <input type="file" id="addTeacherVideo" accept="video/*" style="display: none;" onchange="handleTeacherMediaUpload('add', 'video')">
+                            </div>
+                            <div id="addTeacherVideoPreview" class="media-preview-container"></div>
+                            <div class="upload-info">支持 MP4、MOV 格式，文件大小不超过 50MB</div>
                         </div>
                         <div class="mb-3">
                             <label for="addTeacherStatus" class="form-label">状态</label>
@@ -964,6 +1528,7 @@
             </div>
         </div>
     </div>
+    
     <!-- 添加关键词模态框 -->
     <div class="modal fade" id="addKeywordModal" tabindex="-1" aria-labelledby="addKeywordModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -1002,6 +1567,7 @@
             </div>
         </div>
     </div>
+    
     <!-- 添加禁言词模态框 -->
     <div class="modal fade" id="addBannedModal" tabindex="-1" aria-labelledby="addBannedModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -1025,6 +1591,7 @@
             </div>
         </div>
     </div>
+    
     <!-- 添加定时任务模态框 -->
     <div class="modal fade" id="addScheduledTaskModal" tabindex="-1" aria-labelledby="addScheduledTaskModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -1080,6 +1647,57 @@
             </div>
         </div>
     </div>
+    
+    <!-- 添加抽奖活动模态框 -->
+    <div class="modal fade" id="addLotteryModal" tabindex="-1" aria-labelledby="addLotteryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addLotteryModalLabel">添加抽奖活动</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addLotteryForm">
+                        <div class="mb-3">
+                            <label for="addLotteryTitle" class="form-label">抽奖标题</label>
+                            <input type="text" class="form-control" id="addLotteryTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryLotteryId" class="form-label">抽奖编号</label>
+                            <input type="text" class="form-control" id="addLotteryLotteryId" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryPrizeConfig" class="form-label">奖品配置</label>
+                            <input type="text" class="form-control" id="addLotteryPrizeConfig" required>
+                            <div class="form-text">格式：奖品名1:数量1;奖品名2:数量2</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryDescription" class="form-label">抽奖说明</label>
+                            <textarea class="form-control" id="addLotteryDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryPointsRequired" class="form-label">所需积分</label>
+                            <input type="number" class="form-control" id="addLotteryPointsRequired" min="0" value="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryEndTime" class="form-label">开奖时间</label>
+                            <input type="datetime-local" class="form-control" id="addLotteryEndTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryImageUrl" class="form-label">图片URL</label>
+                            <input type="text" class="form-control" id="addLotteryImageUrl">
+                            <div class="form-text">可选，留空则不显示图片</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="addLottery()">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- 调整积分模态框 -->
     <div class="modal fade" id="adjustPointsModal" tabindex="-1" aria-labelledby="adjustPointsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -1101,7 +1719,11 @@
                         </div>
                         <div class="mb-3">
                             <label for="adjustPointsChange" class="form-label">积分变化</label>
-                            <input type="number" class="form-control" id="adjustPointsChange" placeholder="正数为增加，负数为减少">
+                            <div class="points-input-group">
+                                <span class="input-group-text">+/-</span>
+                                <input type="number" class="form-control" id="adjustPointsChange" placeholder="输入积分变化值，如100或-100">
+                            </div>
+                            <div class="form-text">正数为增加积分，负数为减少积分</div>
                         </div>
                         <div class="mb-3">
                             <label for="adjustPointsReason" class="form-label">原因</label>
@@ -1116,8 +1738,10 @@
             </div>
         </div>
     </div>
+    
     <!-- 提示框容器 -->
     <div class="alert-container" id="alertContainer"></div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // 配置信息
@@ -1126,6 +1750,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRla3V4am5ud3RxbXlnaWJ2d3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzNDUzNjAsImV4cCI6MjA3MDkyMTM2MH0.RGmuF44husXoJP8y4U1Gx7HqQJ6MsYZVl6_vHtG-KJY';
         const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRla3V4am5ud3RxbXlnaWJ2d3V4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTM0NTM2MCwiZXhwIjoyMDcwOTIxMzYwfQ.e-qivjGp1ZVf6baQh_xLOrVOkBqeZ4m5DinHXhI2Sqw';
         const ADMIN_API_KEY = '9712202273aA.';
+        
         // 全局变量
         let adminApiKey = '';
         let currentSection = 'dashboard';
@@ -1134,14 +1759,28 @@
         let keywordsData = [];
         let bannedData = [];
         let scheduledTasksData = [];
+        let lotteryActivitiesData = [];
         let currentPage = {
             users: 1,
             teachers: 1,
             keywords: 1,
             banned: 1,
-            scheduled: 1
+            scheduled: 1,
+            lottery: 1
         };
         const itemsPerPage = 10;
+        
+        // 老师媒体文件缓存
+        let teacherMediaFiles = {
+            add: {
+                photos: [],
+                video: null
+            },
+            edit: {
+                photos: [],
+                video: null
+            }
+        };
         
         // 表结构缓存
         let tableSchemaCache = {};
@@ -1156,6 +1795,7 @@
                 loadDashboard();
             }
         });
+        
         // 登录
         function login() {
             const key = document.getElementById('adminKey').value;
@@ -1176,6 +1816,7 @@
             }
             showLoading(false);
         }
+        
         // 退出登录
         function logout() {
             localStorage.removeItem('adminApiKey');
@@ -1184,17 +1825,20 @@
             document.getElementById('mainContainer').style.display = 'none';
             document.getElementById('adminKey').value = '';
         }
+        
         // 显示主界面
         function showMainInterface() {
             document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('mainContainer').style.display = 'block';
+            document.getElementById('mainContainer').style.display = 'flex';
         }
+        
         // 显示部分
         function showSection(section) {
             // 隐藏所有部分
             document.querySelectorAll('.content-section').forEach(el => {
                 el.style.display = 'none';
             });
+            
             // 显示选中的部分
             const sectionElement = document.getElementById(section + 'Section');
             if (sectionElement) {
@@ -1208,7 +1852,7 @@
             document.querySelectorAll('.sidebar .nav-link').forEach(el => {
                 el.classList.remove('active');
             });
-            event.target.classList.add('active');
+            event.target.closest('.nav-link').classList.add('active');
             currentSection = section;
             
             // 加载数据
@@ -1231,11 +1875,15 @@
                 case 'scheduled':
                     loadScheduledTasks();
                     break;
+                case 'lottery':
+                    loadLotteryActivities();
+                    break;
                 case 'settings':
                     loadSettings();
                     break;
             }
         }
+        
         // 加载仪表盘
         function loadDashboard() {
             showLoading(true);
@@ -1244,15 +1892,14 @@
                 directSupabaseFetch('users'),
                 directSupabaseFetch('teachers'),
                 directSupabaseFetch('keywords'),
-                directSupabaseFetchWithServiceKey('banned_keywords'), // 使用服务角色密钥获取禁言词
-                directSupabaseFetchWithServiceKey('random_teacher_config') // 新增
+                directSupabaseFetchWithServiceKey('banned_keywords')
             ])
-            .then(([users, teachers, keywords, banned, randomTeacherConfigs]) => {
+            .then(([users, teachers, keywords, banned]) => {
                 document.getElementById('totalUsers').textContent = users.length;
                 document.getElementById('totalTeachers').textContent = teachers.length;
                 document.getElementById('totalKeywords').textContent = keywords.length;
                 document.getElementById('totalBanned').textContent = banned.length;
-                document.getElementById('totalRandomTeacherConfigs').textContent = randomTeacherConfigs.length; // 新增
+                
                 // 加载最近用户
                 const recentUsers = users.slice(0, 5);
                 const recentUsersHtml = recentUsers.map(user => `
@@ -1290,6 +1937,7 @@
                 showLoading(false);
             });
         }
+        
         // 加载用户数据
         function loadUsers(page = 1) {
             showLoading(true);
@@ -1306,6 +1954,7 @@
                 showLoading(false);
             });
         }
+        
         // 渲染用户表格
         function renderUsersTable() {
             const start = (currentPage.users - 1) * itemsPerPage;
@@ -1320,15 +1969,17 @@
                     <td>${user.message_count_today || 0}</td>
                     <td>${user.last_sign_date ? new Date(user.last_sign_date).toLocaleDateString() : '-'}</td>
                     <td>
-                        <button class="btn btn-sm btn-primary btn-action" onclick="editUser(${user.user_id})">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-warning btn-action" onclick="showAdjustPointsModal(${user.user_id})">
-                            <i class="bi bi-cash-coin"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger btn-action" onclick="deleteUser(${user.user_id})">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-primary btn-action" onclick="editUser(${user.user_id})" title="编辑">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning btn-action" onclick="showAdjustPointsModal(${user.user_id})" title="调整积分">
+                                <i class="bi bi-cash-coin"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-action" onclick="deleteUser(${user.user_id})" title="删除">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
@@ -1339,6 +1990,7 @@
             // 渲染分页
             renderPagination('users', usersData.length, currentPage.users);
         }
+        
         // 搜索用户
         function searchUsers() {
             const keyword = document.getElementById('userSearch').value.toLowerCase();
@@ -1355,19 +2007,23 @@
             currentPage.users = 1;
             renderUsersTable();
         }
+        
         // 编辑用户
         function editUser(userId) {
             const user = usersData.find(u => u.user_id === userId);
             if (!user) return;
+            
             document.getElementById('editUserId').value = user.user_id;
             document.getElementById('editUserName').value = user.username || '';
             document.getElementById('editUserDisplayName').value = user.display_name || '';
             document.getElementById('editUserPoints').value = user.points || 0;
             document.getElementById('editUserMessageCount').value = user.message_count_today || 0;
             document.getElementById('editUserLastSign').value = user.last_sign_date ? new Date(user.last_sign_date).toLocaleDateString() : '';
+            
             const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
             modal.show();
         }
+        
         // 保存用户
         function saveUser() {
             const userId = document.getElementById('editUserId').value;
@@ -1377,6 +2033,7 @@
                 display_name: document.getElementById('editUserDisplayName').value,
                 points: parseInt(document.getElementById('editUserPoints').value)
             };
+            
             showLoading(true);
             directSupabaseUpsert('users', userData, 'user_id')
             .then(() => {
@@ -1391,9 +2048,11 @@
                 showLoading(false);
             });
         }
+        
         // 删除用户
         function deleteUser(userId) {
             if (!confirm('确定要删除这个用户吗？')) return;
+            
             showLoading(true);
             directSupabaseDelete('users', userId)
             .then(() => {
@@ -1407,30 +2066,37 @@
                 showLoading(false);
             });
         }
+        
         // 显示调整积分模态框
         function showAdjustPointsModal(userId) {
             const user = usersData.find(u => u.user_id === userId);
             if (!user) return;
+            
             document.getElementById('adjustPointsUserId').value = user.user_id;
             document.getElementById('adjustPointsUserName').value = user.display_name || user.username || '用户' + user.user_id;
             document.getElementById('adjustPointsCurrent').value = user.points || 0;
             document.getElementById('adjustPointsChange').value = '';
             document.getElementById('adjustPointsReason').value = '';
+            
             const modal = new bootstrap.Modal(document.getElementById('adjustPointsModal'));
             modal.show();
         }
+        
         // 调整积分
         function adjustPoints() {
             const userId = document.getElementById('adjustPointsUserId').value;
             const pointsChange = parseInt(document.getElementById('adjustPointsChange').value) || 0;
+            
             if (pointsChange === 0) {
                 showAlert('请输入有效的积分变化值', 'warning');
                 return;
             }
+            
             showLoading(true);
             directSupabaseFetch('users', `user_id=eq.${userId}`)
             .then(user => {
                 if (!user) throw new Error("用户不存在");
+                
                 const newPoints = Math.max(0, (user.points || 0) + pointsChange);
                 return directSupabaseUpsert('users', { ...user, points: newPoints }, 'user_id');
             })
@@ -1446,12 +2112,14 @@
                 showLoading(false);
             });
         }
+        
         // 显示添加用户模态框
         function showAddUserModal() {
             document.getElementById('addUserForm').reset();
             const modal = new bootstrap.Modal(document.getElementById('addUserModal'));
             modal.show();
         }
+        
         // 添加用户
         function addUser() {
             const userData = {
@@ -1460,6 +2128,7 @@
                 display_name: document.getElementById('addUserDisplayName').value,
                 points: parseInt(document.getElementById('addUserPoints').value) || 0
             };
+            
             showLoading(true);
             directSupabaseInsert('users', userData)
             .then(() => {
@@ -1474,6 +2143,7 @@
                 showLoading(false);
             });
         }
+        
         // 加载老师数据
         function loadTeachers(page = 1) {
             showLoading(true);
@@ -1490,6 +2160,7 @@
                 showLoading(false);
             });
         }
+        
         // 渲染老师表格
         function renderTeachersTable() {
             const start = (currentPage.teachers - 1) * itemsPerPage;
@@ -1497,7 +2168,7 @@
             const pageData = teachersData.slice(start, end);
             const html = pageData.map(teacher => `
                 <tr>
-                    <td>${teacher.image_url ? `<img src="${teacher.image_url}" class="teacher-image" alt="头像">` : '<i class="bi bi-person-circle" style="font-size: 2rem;"></i>'}</td>
+                    <td>${teacher.photo_url_1 ? `<img src="${teacher.photo_url_1}" class="teacher-image" alt="头像">` : '<i class="bi bi-person-circle" style="font-size: 2rem;"></i>'}</td>
                     <td>${teacher.id}</td>
                     <td>${teacher.nickname}</td>
                     <td>${teacher.age}</td>
@@ -1506,12 +2177,14 @@
                     <td>${teacher.service_type}</td>
                     <td>${getStatusBadge(teacher.status)}</td>
                     <td>
-                        <button class="btn btn-sm btn-primary btn-action" onclick="editTeacher(${teacher.id})">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger btn-action" onclick="deleteTeacher(${teacher.id})">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-primary btn-action" onclick="editTeacher(${teacher.id})" title="编辑">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-action" onclick="deleteTeacher(${teacher.id})" title="删除">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
@@ -1522,6 +2195,7 @@
             // 渲染分页
             renderPagination('teachers', teachersData.length, currentPage.teachers);
         }
+        
         // 搜索老师
         function searchTeachers() {
             const keyword = document.getElementById('teacherSearch').value.toLowerCase();
@@ -1538,59 +2212,59 @@
             currentPage.teachers = 1;
             renderTeachersTable();
         }
+        
         // 编辑老师
         function editTeacher(teacherId) {
             const teacher = teachersData.find(t => t.id === teacherId);
             if (!teacher) return;
+            
+            // 重置媒体文件缓存
+            teacherMediaFiles.edit = {
+                photos: [],
+                video: null
+            };
+            
             document.getElementById('editTeacherId').value = teacher.id;
             document.getElementById('editTeacherNickname').value = teacher.nickname;
             document.getElementById('editTeacherAge').value = teacher.age;
             document.getElementById('editTeacherRegion').value = teacher.region;
             document.getElementById('editTeacherAccount').value = teacher.telegram_account;
             document.getElementById('editTeacherChannel').value = teacher.channel;
+            document.getElementById('editTeacherRobotAccount').value = teacher.robot_account || '';
             document.getElementById('editTeacherServiceType').value = teacher.service_type;
             document.getElementById('editTeacherRepairCost').value = teacher.repair_cost;
             document.getElementById('editTeacherIntro').value = teacher.intro;
             document.getElementById('editTeacherStatus').value = teacher.status;
-            document.getElementById('editTeacherImageUrl').value = teacher.image_url || '';
             
-            // 显示图片预览
-            const previewElement = document.getElementById('editTeacherImagePreview');
-            if (teacher.image_url) {
-                previewElement.innerHTML = `<img src="${teacher.image_url}" class="image-preview" alt="头像预览">`;
-            } else {
-                previewElement.innerHTML = '';
+            // 显示已有照片
+            const photosPreview = document.getElementById('editTeacherPhotosPreview');
+            photosPreview.innerHTML = '';
+            
+            if (teacher.photo_url_1) {
+                addMediaPreview('edit', 'photo', teacher.photo_url_1);
+            }
+            if (teacher.photo_url_2) {
+                addMediaPreview('edit', 'photo', teacher.photo_url_2);
+            }
+            if (teacher.photo_url_3) {
+                addMediaPreview('edit', 'photo', teacher.photo_url_3);
+            }
+            
+            // 显示已有视频
+            const videoPreview = document.getElementById('editTeacherVideoPreview');
+            videoPreview.innerHTML = '';
+            
+            if (teacher.video_url) {
+                addMediaPreview('edit', 'video', teacher.video_url);
             }
             
             const modal = new bootstrap.Modal(document.getElementById('editTeacherModal'));
             modal.show();
         }
+        
         // 保存老师
         async function saveTeacher() {
             const teacherId = document.getElementById('editTeacherId').value;
-            const imageFile = document.getElementById('editTeacherImage').files[0];
-            let imageUrl = document.getElementById('editTeacherImageUrl').value;
-            
-            // 如果有新图片，先上传图片
-            if (imageFile) {
-                // 检查文件大小
-                if (imageFile.size > 5 * 1024 * 1024) {
-                    showAlert('图片大小不能超过5MB', 'danger');
-                    return;
-                }
-                
-                // 检查文件类型
-                if (!imageFile.type.match('image.*')) {
-                    showAlert('请上传图片文件', 'danger');
-                    return;
-                }
-                
-                imageUrl = await uploadImageToSupabase(imageFile, 'teacher-images');
-                if (!imageUrl) {
-                    showAlert('图片上传失败', 'danger');
-                    return;
-                }
-            }
             
             // 构建老师数据对象
             const teacherData = {
@@ -1600,21 +2274,50 @@
                 region: document.getElementById('editTeacherRegion').value,
                 telegram_account: document.getElementById('editTeacherAccount').value,
                 channel: document.getElementById('editTeacherChannel').value,
+                robot_account: document.getElementById('editTeacherRobotAccount').value,
                 service_type: document.getElementById('editTeacherServiceType').value,
                 repair_cost: document.getElementById('editTeacherRepairCost').value,
                 intro: document.getElementById('editTeacherIntro').value,
                 status: document.getElementById('editTeacherStatus').value
             };
             
-            // 只有在有图片URL时才添加image_url字段
-            if (imageUrl) {
-                teacherData.image_url = imageUrl;
+            // 处理照片
+            if (teacherMediaFiles.edit.photos.length > 0) {
+                if (teacherMediaFiles.edit.photos[0]) {
+                    if (typeof teacherMediaFiles.edit.photos[0] === 'string') {
+                        teacherData.photo_url_1 = teacherMediaFiles.edit.photos[0];
+                    } else {
+                        teacherData.photo_url_1 = await uploadMediaToSupabase(teacherMediaFiles.edit.photos[0], 'teacher-photos');
+                    }
+                }
+                if (teacherMediaFiles.edit.photos[1]) {
+                    if (typeof teacherMediaFiles.edit.photos[1] === 'string') {
+                        teacherData.photo_url_2 = teacherMediaFiles.edit.photos[1];
+                    } else {
+                        teacherData.photo_url_2 = await uploadMediaToSupabase(teacherMediaFiles.edit.photos[1], 'teacher-photos');
+                    }
+                }
+                if (teacherMediaFiles.edit.photos[2]) {
+                    if (typeof teacherMediaFiles.edit.photos[2] === 'string') {
+                        teacherData.photo_url_3 = teacherMediaFiles.edit.photos[2];
+                    } else {
+                        teacherData.photo_url_3 = await uploadMediaToSupabase(teacherMediaFiles.edit.photos[2], 'teacher-photos');
+                    }
+                }
+            }
+            
+            // 处理视频
+            if (teacherMediaFiles.edit.video) {
+                if (typeof teacherMediaFiles.edit.video === 'string') {
+                    teacherData.video_url = teacherMediaFiles.edit.video;
+                } else {
+                    teacherData.video_url = await uploadMediaToSupabase(teacherMediaFiles.edit.video, 'teacher-videos');
+                }
             }
             
             showLoading(true);
             
             try {
-                // 直接保存，不检查列是否存在，因为我们已经确认列存在
                 await directSupabaseUpsert('teachers', teacherData, 'id');
                 
                 showAlert('老师保存成功', 'success');
@@ -1627,9 +2330,11 @@
                 showLoading(false);
             }
         }
+        
         // 删除老师
         function deleteTeacher(teacherId) {
             if (!confirm('确定要删除这个老师吗？')) return;
+            
             showLoading(true);
             directSupabaseDelete('teachers', teacherId)
             .then(() => {
@@ -1643,40 +2348,27 @@
                 showLoading(false);
             });
         }
+        
         // 显示添加老师模态框
         function showAddTeacherModal() {
             document.getElementById('addTeacherForm').reset();
-            document.getElementById('addTeacherImagePreview').innerHTML = '';
-            document.getElementById('addTeacherImageUrl').value = '';
+            
+            // 重置媒体文件缓存
+            teacherMediaFiles.add = {
+                photos: [],
+                video: null
+            };
+            
+            // 清空预览
+            document.getElementById('addTeacherPhotosPreview').innerHTML = '';
+            document.getElementById('addTeacherVideoPreview').innerHTML = '';
+            
             const modal = new bootstrap.Modal(document.getElementById('addTeacherModal'));
             modal.show();
         }
+        
         // 添加老师
         async function addTeacher() {
-            const imageFile = document.getElementById('addTeacherImage').files[0];
-            let imageUrl = '';
-            
-            // 如果有图片，先上传图片
-            if (imageFile) {
-                // 检查文件大小
-                if (imageFile.size > 5 * 1024 * 1024) {
-                    showAlert('图片大小不能超过5MB', 'danger');
-                    return;
-                }
-                
-                // 检查文件类型
-                if (!imageFile.type.match('image.*')) {
-                    showAlert('请上传图片文件', 'danger');
-                    return;
-                }
-                
-                imageUrl = await uploadImageToSupabase(imageFile, 'teacher-images');
-                if (!imageUrl) {
-                    showAlert('图片上传失败', 'danger');
-                    return;
-                }
-            }
-            
             // 构建老师数据对象
             const teacherData = {
                 nickname: document.getElementById('addTeacherNickname').value,
@@ -1684,21 +2376,34 @@
                 region: document.getElementById('addTeacherRegion').value,
                 telegram_account: document.getElementById('addTeacherAccount').value,
                 channel: document.getElementById('addTeacherChannel').value,
+                robot_account: document.getElementById('addTeacherRobotAccount').value,
                 service_type: document.getElementById('addTeacherServiceType').value,
                 repair_cost: document.getElementById('addTeacherRepairCost').value,
                 intro: document.getElementById('addTeacherIntro').value,
                 status: document.getElementById('addTeacherStatus').value
             };
             
-            // 只有在有图片URL时才添加image_url字段
-            if (imageUrl) {
-                teacherData.image_url = imageUrl;
+            // 处理照片
+            if (teacherMediaFiles.add.photos.length > 0) {
+                teacherData.photo_url_1 = await uploadMediaToSupabase(teacherMediaFiles.add.photos[0], 'teacher-photos');
+                
+                if (teacherMediaFiles.add.photos[1]) {
+                    teacherData.photo_url_2 = await uploadMediaToSupabase(teacherMediaFiles.add.photos[1], 'teacher-photos');
+                }
+                
+                if (teacherMediaFiles.add.photos[2]) {
+                    teacherData.photo_url_3 = await uploadMediaToSupabase(teacherMediaFiles.add.photos[2], 'teacher-photos');
+                }
+            }
+            
+            // 处理视频
+            if (teacherMediaFiles.add.video) {
+                teacherData.video_url = await uploadMediaToSupabase(teacherMediaFiles.add.video, 'teacher-videos');
             }
             
             showLoading(true);
             
             try {
-                // 直接保存，不检查列是否存在，因为我们已经确认列存在
                 await directSupabaseInsert('teachers', teacherData);
                 
                 showAlert('老师添加成功', 'success');
@@ -1711,39 +2416,234 @@
                 showLoading(false);
             }
         }
-        // 预览老师图片
-        function previewTeacherImage(type) {
-            const fileInput = document.getElementById(`${type}TeacherImage`);
-            const previewElement = document.getElementById(`${type}TeacherImagePreview`);
+        
+        // 处理老师媒体文件上传
+        function handleTeacherMediaUpload(type, mediaType) {
+            const inputId = type === 'add' ? 'addTeacher' + (mediaType === 'photo' ? 'Photos' : 'Video') : 'editTeacher' + (mediaType === 'photo' ? 'Photos' : 'Video');
+            const previewId = type + 'Teacher' + (mediaType === 'photo' ? 'Photos' : 'Video') + 'Preview';
             
-            if (fileInput.files && fileInput.files[0]) {
+            const fileInput = document.getElementById(inputId);
+            const previewContainer = document.getElementById(previewId);
+            
+            if (mediaType === 'photo') {
+                // 限制最多3张照片
+                if (teacherMediaFiles[type].photos.length >= 3) {
+                    showAlert('最多只能上传3张照片', 'warning');
+                    return;
+                }
+                
+                // 处理照片上传
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    if (teacherMediaFiles[type].photos.length >= 3) break;
+                    
+                    const file = fileInput.files[i];
+                    
+                    // 检查文件大小
+                    if (file.size > 5 * 1024 * 1024) {
+                        showAlert('照片大小不能超过5MB', 'warning');
+                        continue;
+                    }
+                    
+                    // 检查文件类型
+                    if (!file.type.match('image.*')) {
+                        showAlert('请上传图片文件', 'warning');
+                        continue;
+                    }
+                    
+                    // 添加到缓存
+                    teacherMediaFiles[type].photos.push(file);
+                    
+                    // 添加预览
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        addMediaPreview(type, mediaType, e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } else if (mediaType === 'video') {
+                // 只能有一个视频
+                if (teacherMediaFiles[type].video) {
+                    showAlert('只能上传一个视频', 'warning');
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                
                 // 检查文件大小
-                if (fileInput.files[0].size > 5 * 1024 * 1024) {
-                    showAlert('图片大小不能超过5MB', 'warning');
-                    fileInput.value = '';
-                    previewElement.innerHTML = '';
+                if (file.size > 50 * 1024 * 1024) {
+                    showAlert('视频大小不能超过50MB', 'warning');
                     return;
                 }
                 
                 // 检查文件类型
-                if (!fileInput.files[0].type.match('image.*')) {
-                    showAlert('请上传图片文件', 'warning');
-                    fileInput.value = '';
-                    previewElement.innerHTML = '';
+                if (!file.type.match('video.*')) {
+                    showAlert('请上传视频文件', 'warning');
                     return;
                 }
                 
+                // 添加到缓存
+                teacherMediaFiles[type].video = file;
+                
+                // 添加预览
                 const reader = new FileReader();
-                
                 reader.onload = function(e) {
-                    previewElement.innerHTML = `<img src="${e.target.result}" class="image-preview" alt="头像预览">`;
+                    addMediaPreview(type, mediaType, e.target.result);
                 };
+                reader.readAsDataURL(file);
+            }
+            
+            // 清空文件输入，以便可以再次选择相同的文件
+            fileInput.value = '';
+        }
+        
+        // 添加媒体预览
+        function addMediaPreview(type, mediaType, src) {
+            const previewId = type + 'Teacher' + (mediaType === 'photo' ? 'Photos' : 'Video') + 'Preview';
+            const previewContainer = document.getElementById(previewId);
+            
+            const previewItem = document.createElement('div');
+            previewItem.className = 'media-preview-item';
+            
+            if (mediaType === 'photo') {
+                const img = document.createElement('img');
+                img.src = src;
+                img.className = 'image-preview';
+                previewItem.appendChild(img);
+            } else if (mediaType === 'video') {
+                const video = document.createElement('video');
+                video.src = src;
+                video.className = 'video-preview';
+                video.controls = true;
+                previewItem.appendChild(video);
+            }
+            
+            // 添加删除按钮
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-media';
+            removeBtn.innerHTML = '×';
+            removeBtn.onclick = function() {
+                removeMediaPreview(type, mediaType, previewItem, src);
+            };
+            previewItem.appendChild(removeBtn);
+            
+            previewContainer.appendChild(previewItem);
+        }
+        
+        // 移除媒体预览
+        function removeMediaPreview(type, mediaType, previewItem, src) {
+            const previewId = type + 'Teacher' + (mediaType === 'photo' ? 'Photos' : 'Video') + 'Preview';
+            const previewContainer = document.getElementById(previewId);
+            
+            // 从缓存中移除
+            if (mediaType === 'photo') {
+                const index = teacherMediaFiles[type].photos.findIndex(item => {
+                    if (typeof item === 'string') {
+                        return item === src;
+                    } else {
+                        // 对于文件对象，我们无法直接比较，所以移除预览项即可
+                        return false;
+                    }
+                });
                 
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                previewElement.innerHTML = '';
+                if (index !== -1) {
+                    teacherMediaFiles[type].photos.splice(index, 1);
+                }
+            } else if (mediaType === 'video') {
+                if (typeof teacherMediaFiles[type].video === 'string' && teacherMediaFiles[type].video === src) {
+                    teacherMediaFiles[type].video = null;
+                } else if (typeof teacherMediaFiles[type].video !== 'string') {
+                    teacherMediaFiles[type].video = null;
+                }
+            }
+            
+            // 从预览中移除
+            previewContainer.removeChild(previewItem);
+        }
+        
+        // 上传媒体文件到Supabase存储
+        async function uploadMediaToSupabase(file, bucketName) {
+            if (!file) return null;
+            
+            showLoading(true);
+            try {
+                // 生成文件名：使用时间戳和随机数
+                const fileExtension = file.name.split('.').pop();
+                const fileName = `${bucketName}_${Date.now()}_${Math.floor(Math.random() * 1000)}.${fileExtension}`;
+                
+                // 先检查存储桶是否存在，如果不存在则创建
+                try {
+                    await createStorageBucketIfNotExists(bucketName);
+                } catch (error) {
+                    console.warn('创建存储桶失败:', error);
+                    // 继续尝试上传，可能存储桶已经存在
+                }
+                
+                // 上传到Supabase存储
+                const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                        'Content-Type': file.type
+                    },
+                    body: file
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`上传失败: ${errorText}`);
+                }
+                
+                // 获取公共URL
+                const mediaUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
+                
+                return mediaUrl;
+            } catch (error) {
+                console.error('上传媒体文件失败:', error);
+                showAlert('上传媒体文件失败: ' + error.message, 'danger');
+                return null;
+            } finally {
+                showLoading(false);
             }
         }
+        
+        // 创建存储桶（如果不存在）
+        async function createStorageBucketIfNotExists(bucketName) {
+            // 检查存储桶是否存在
+            const response = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+                }
+            });
+            
+            if (response.ok) {
+                const buckets = await response.json();
+                const bucketExists = buckets.some(bucket => bucket.name === bucketName);
+                
+                if (!bucketExists) {
+                    // 创建存储桶
+                    const createResponse = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: bucketName,
+                            public: true,
+                            file_size_limit: 52428800 // 50MB
+                        })
+                    });
+                    
+                    if (!createResponse.ok) {
+                        throw new Error('创建存储桶失败');
+                    }
+                }
+            } else {
+                throw new Error('获取存储桶列表失败');
+            }
+        }
+        
         // 加载关键词数据
         function loadKeywords(page = 1) {
             showLoading(true);
@@ -1760,6 +2660,7 @@
                 showLoading(false);
             });
         }
+        
         // 渲染关键词表格
         function renderKeywordsTable() {
             const start = (currentPage.keywords - 1) * itemsPerPage;
@@ -1773,12 +2674,14 @@
                     <td>${keyword.reply_content || '-'}</td>
                     <td>${keyword.is_active ? '<span class="badge bg-success">启用</span>' : '<span class="badge bg-secondary">禁用</span>'}</td>
                     <td>
-                        <button class="btn btn-sm btn-primary btn-action" onclick="editKeyword(${keyword.id})">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger btn-action" onclick="deleteKeyword(${keyword.id})">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-primary btn-action" onclick="editKeyword(${keyword.id})" title="编辑">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-action" onclick="deleteKeyword(${keyword.id})" title="删除">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
@@ -1789,6 +2692,7 @@
             // 渲染分页
             renderPagination('keywords', keywordsData.length, currentPage.keywords);
         }
+        
         // 搜索关键词
         function searchKeywords() {
             const keyword = document.getElementById('keywordSearch').value.toLowerCase();
@@ -1805,18 +2709,22 @@
             currentPage.keywords = 1;
             renderKeywordsTable();
         }
+        
         // 编辑关键词
         function editKeyword(keywordId) {
             const keyword = keywordsData.find(k => k.id === keywordId);
             if (!keyword) return;
+            
             document.getElementById('editKeywordId').value = keyword.id;
             document.getElementById('editKeywordKeyword').value = keyword.keyword;
             document.getElementById('editKeywordResponse').value = keyword.response;
             document.getElementById('editKeywordReplyContent').value = keyword.reply_content || '';
             document.getElementById('editKeywordActive').value = keyword.is_active ? 'true' : 'false';
+            
             const modal = new bootstrap.Modal(document.getElementById('editKeywordModal'));
             modal.show();
         }
+        
         // 保存关键词
         function saveKeyword() {
             const keywordId = document.getElementById('editKeywordId').value;
@@ -1827,6 +2735,7 @@
                 reply_content: document.getElementById('editKeywordReplyContent').value,
                 is_active: document.getElementById('editKeywordActive').value === 'true'
             };
+            
             showLoading(true);
             directSupabaseUpsert('keywords', keywordData, 'id')
             .then(() => {
@@ -1841,9 +2750,11 @@
                 showLoading(false);
             });
         }
+        
         // 删除关键词 - 使用服务角色密钥
         function deleteKeyword(keywordId) {
             if (!confirm('确定要删除这个关键词吗？')) return;
+            
             showLoading(true);
             // 使用服务角色密钥删除关键词
             directSupabaseDeleteWithServiceKey('keywords', keywordId)
@@ -1858,12 +2769,14 @@
                 showLoading(false);
             });
         }
+        
         // 显示添加关键词模态框
         function showAddKeywordModal() {
             document.getElementById('addKeywordForm').reset();
             const modal = new bootstrap.Modal(document.getElementById('addKeywordModal'));
             modal.show();
         }
+        
         // 添加关键词
         function addKeyword() {
             const keywordData = {
@@ -1872,6 +2785,7 @@
                 reply_content: document.getElementById('addKeywordReplyContent').value,
                 is_active: document.getElementById('addKeywordActive').value === 'true'
             };
+            
             showLoading(true);
             directSupabaseInsertWithServiceKey('keywords', keywordData)
             .then(() => {
@@ -1886,6 +2800,7 @@
                 showLoading(false);
             });
         }
+        
         // 加载禁言词数据
         function loadBanned(page = 1) {
             showLoading(true);
@@ -1903,6 +2818,7 @@
                 showLoading(false);
             });
         }
+        
         // 渲染禁言词表格
         function renderBannedTable() {
             const start = (currentPage.banned - 1) * itemsPerPage;
@@ -1913,12 +2829,14 @@
                     <td>${banned.id}</td>
                     <td>${banned.keyword}</td>
                     <td>
-                        <button class="btn btn-sm btn-primary btn-action" onclick="editBanned(${banned.id})">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger btn-action" onclick="deleteBanned(${banned.id})">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-primary btn-action" onclick="editBanned(${banned.id})" title="编辑">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-action" onclick="deleteBanned(${banned.id})" title="删除">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
@@ -1929,6 +2847,7 @@
             // 渲染分页
             renderPagination('banned', bannedData.length, currentPage.banned);
         }
+        
         // 搜索禁言词
         function searchBanned() {
             const keyword = document.getElementById('bannedSearch').value.toLowerCase();
@@ -1943,15 +2862,19 @@
             currentPage.banned = 1;
             renderBannedTable();
         }
+        
         // 编辑禁言词
         function editBanned(bannedId) {
             const banned = bannedData.find(b => b.id === bannedId);
             if (!banned) return;
+            
             document.getElementById('editBannedId').value = banned.id;
             document.getElementById('editBannedKeyword').value = banned.keyword;
+            
             const modal = new bootstrap.Modal(document.getElementById('editBannedModal'));
             modal.show();
         }
+        
         // 保存禁言词
         function saveBanned() {
             const bannedId = document.getElementById('editBannedId').value;
@@ -1959,6 +2882,7 @@
                 id: parseInt(bannedId),
                 keyword: document.getElementById('editBannedKeyword').value
             };
+            
             showLoading(true);
             directSupabaseUpsertWithServiceKey('banned_keywords', bannedData, 'id')
             .then(() => {
@@ -1973,9 +2897,11 @@
                 showLoading(false);
             });
         }
+        
         // 删除禁言词
         function deleteBanned(bannedId) {
             if (!confirm('确定要删除这个禁言词吗？')) return;
+            
             showLoading(true);
             directSupabaseDeleteWithServiceKey('banned_keywords', bannedId)
             .then(() => {
@@ -1989,17 +2915,20 @@
                 showLoading(false);
             });
         }
+        
         // 显示添加禁言词模态框
         function showAddBannedModal() {
             document.getElementById('addBannedForm').reset();
             const modal = new bootstrap.Modal(document.getElementById('addBannedModal'));
             modal.show();
         }
+        
         // 添加禁言词
         function addBanned() {
             const bannedData = {
                 keyword: document.getElementById('addBannedKeyword').value
             };
+            
             showLoading(true);
             directSupabaseInsertWithServiceKey('banned_keywords', bannedData)
             .then(() => {
@@ -2049,15 +2978,17 @@
                     <td>${task.is_active ? '<span class="status-active">激活</span>' : '<span class="status-inactive">未激活</span>'}</td>
                     <td>${new Date(task.next_send_time).toLocaleString()}</td>
                     <td>
-                        <button class="btn btn-sm btn-primary btn-action" onclick="triggerScheduledTask(${task.id})" title="立即触发">
-                            <i class="bi bi-play-circle"></i>
-                        </button>
-                        <button class="btn btn-sm btn-warning btn-action" onclick="editScheduledTask(${task.id})" title="编辑">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger btn-action" onclick="deleteScheduledTask(${task.id})" title="删除">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-primary btn-action" onclick="triggerScheduledTask(${task.id})" title="立即触发">
+                                <i class="bi bi-play-circle"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning btn-action" onclick="editScheduledTask(${task.id})" title="编辑">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-action" onclick="deleteScheduledTask(${task.id})" title="删除">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
@@ -2171,6 +3102,7 @@
         function editScheduledTask(taskId) {
             const task = scheduledTasksData.find(t => t.id === taskId);
             if (!task) return;
+            
             document.getElementById('editScheduledTaskId').value = task.id;
             document.getElementById('editScheduledTaskName').value = task.name;
             document.getElementById('editScheduledTaskContent').value = task.content;
@@ -2262,6 +3194,7 @@
         // 删除定时任务
         function deleteScheduledTask(taskId) {
             if (!confirm('确定要删除这个定时任务吗？')) return;
+            
             showLoading(true);
             directSupabaseDeleteWithServiceKey('scheduled_messages', taskId)
             .then(() => {
@@ -2279,6 +3212,7 @@
         // 触发定时任务
         function triggerScheduledTask(taskId) {
             if (!confirm('确定要立即触发这个定时任务吗？')) return;
+            
             showLoading(true);
             
             // 调用触发任务的API
@@ -2309,11 +3243,12 @@
         // 手动触发随机老师发送配置
         function triggerRandomTeacherConfig() {
             if (!confirm('确定要立即触发随机老师发送配置吗？')) return;
+            
             showLoading(true);
             
             // 使用更简单的方法，直接发送POST请求，不处理返回的JSON
-            fetch(`${API_BASE_URL}/send-random-teacher-config`, {
-                method: 'POST',
+            fetch(`${API_BASE_URL}/send-random-teacher`, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -2369,6 +3304,620 @@
             }
         }
         
+        // 抽奖活动相关函数
+        // 加载抽奖活动数据
+        function loadLotteryActivities(page = 1) {
+            showLoading(true);
+            currentPage.lottery = page;
+            // 使用服务角色密钥获取抽奖活动数据
+            directSupabaseFetchWithServiceKey('lottery_activities')
+            .then(data => {
+                lotteryActivitiesData = data;
+                renderLotteryActivitiesTable();
+            })
+            .catch(error => {
+                showAlert('加载抽奖活动失败: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+        
+        // 渲染抽奖活动表格
+        function renderLotteryActivitiesTable() {
+            const start = (currentPage.lottery - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = lotteryActivitiesData.slice(start, end);
+            const html = pageData.map(lottery => {
+                // 解析奖品配置
+                let prizes = [];
+                try {
+                    const prizeContent = JSON.parse(lottery.prize_content || "{}");
+                    if (prizeContent.config) {
+                        prizes = prizeContent.prizes || [];
+                    } else {
+                        prizes = parsePrizeConfig(lottery.prize_content || "");
+                    }
+                } catch (error) {
+                    prizes = parsePrizeConfig(lottery.prize_content || "");
+                }
+                
+                let prizeText = "";
+                prizes.forEach((prize, index) => {
+                    prizeText += `${index + 1}. ${prize.name} (数量: ${prize.count})\n`;
+                });
+                
+                return `
+                    <tr>
+                        <td>${lottery.id}</td>
+                        <td>${lottery.title}</td>
+                        <td>${lottery.lottery_id}</td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${prizeText}">${prizeText.substring(0, 30)}${prizeText.length > 30 ? '...' : ''}</td>
+                        <td>${lottery.points_required}</td>
+                        <td>${new Date(lottery.end_time).toLocaleString()}</td>
+                        <td>${getStatusBadge(lottery.status)}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-warning btn-action" onclick="editLottery(${lottery.id})" title="编辑">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger btn-action" onclick="deleteLottery(${lottery.id})" title="删除">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            const lotteryActivitiesTableElement = document.getElementById('lotteryActivitiesTable');
+            if (lotteryActivitiesTableElement) {
+                lotteryActivitiesTableElement.innerHTML = html || '<tr><td colspan="8" class="text-center">暂无数据</td></tr>';
+            }
+            
+            // 渲染分页
+            renderPagination('lottery', lotteryActivitiesData.length, currentPage.lottery);
+        }
+        
+        // 解析奖品配置
+        function parsePrizeConfig(prizeConfigStr) {
+            if (!prizeConfigStr) return [];
+            const prizes = [];
+            const prizeItems = prizeConfigStr.split(';');
+            for (const item of prizeItems) {
+                const parts = item.split(':');
+                if (parts.length >= 2) {
+                    const prizeName = parts[0].trim();
+                    const prizeCount = parseInt(parts[1].trim()) || 1;
+                    prizes.push({
+                        name: prizeName,
+                        count: prizeCount,
+                        winners: []
+                    });
+                }
+            }
+            return prizes;
+        }
+        
+        // 搜索抽奖活动
+        function searchLotteryActivities() {
+            const keyword = document.getElementById('lotterySearch').value.toLowerCase();
+            if (!keyword) {
+                renderLotteryActivitiesTable();
+                return;
+            }
+            const filtered = lotteryActivitiesData.filter(lottery => 
+                lottery.title.toLowerCase().includes(keyword) ||
+                lottery.lottery_id.toLowerCase().includes(keyword)
+            );
+            lotteryActivitiesData = filtered;
+            currentPage.lottery = 1;
+            renderLotteryActivitiesTable();
+        }
+        
+        // 刷新抽奖活动列表
+        function refreshLotteryActivities() {
+            loadLotteryActivities(currentPage.lottery);
+        }
+        
+        // 显示添加抽奖活动模态框
+        function showAddLotteryModal() {
+            document.getElementById('addLotteryForm').reset();
+            // 设置默认开奖时间为24小时后
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setMinutes(tomorrow.getMinutes() - tomorrow.getTimezoneOffset());
+            document.getElementById('addLotteryEndTime').value = tomorrow.toISOString().slice(0, 16);
+            const modal = new bootstrap.Modal(document.getElementById('addLotteryModal'));
+            modal.show();
+        }
+        
+        // 添加抽奖活动
+        async function addLottery() {
+            const title = document.getElementById('addLotteryTitle').value;
+            const lotteryId = document.getElementById('addLotteryLotteryId').value.toUpperCase();
+            const prizeConfig = document.getElementById('addLotteryPrizeConfig').value;
+            const description = document.getElementById('addLotteryDescription').value;
+            const pointsRequired = parseInt(document.getElementById('addLotteryPointsRequired').value) || 0;
+            let endTime = document.getElementById('addLotteryEndTime').value;
+            const imageUrl = document.getElementById('addLotteryImageUrl').value;
+            
+            // 转换时间为ISO格式
+            if (!endTime.includes('T')) {
+                endTime = convertBeijingToISO(endTime);
+            }
+            
+            // 解析奖品配置
+            const prizes = parsePrizeConfig(prizeConfig);
+            if (prizes.length === 0) {
+                showAlert('奖品配置格式错误', 'danger');
+                return;
+            }
+            
+            // 构建奖品内容JSON
+            const prizeContentJson = JSON.stringify({
+                config: prizeConfig,
+                prizes: prizes
+            });
+            
+            // 构建抽奖数据对象
+            const lotteryData = {
+                id: hashCode(lotteryId),
+                title: title,
+                lottery_id: lotteryId,
+                prize_content: prizeContentJson,
+                description: description,
+                points_required: pointsRequired,
+                end_time: endTime,
+                image_url: imageUrl,
+                status: 'active'
+            };
+            
+            showLoading(true);
+            
+            try {
+                await directSupabaseInsertWithServiceKey('lottery_activities', lotteryData);
+                
+                showAlert('抽奖活动添加成功', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('addLotteryModal')).hide();
+                loadLotteryActivities(currentPage.lottery);
+            } catch (error) {
+                console.error('添加抽奖活动失败:', error);
+                showAlert('添加抽奖活动失败: ' + error.message, 'danger');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // 编辑抽奖活动
+        function editLottery(lotteryId) {
+            const lottery = lotteryActivitiesData.find(l => l.id === lotteryId);
+            if (!lottery) return;
+            
+            // 解析奖品配置
+            let prizeConfig = "";
+            try {
+                const prizeContent = JSON.parse(lottery.prize_content || "{}");
+                if (prizeContent.config) {
+                    prizeConfig = prizeContent.config;
+                } else {
+                    prizeConfig = lottery.prize_content || "";
+                }
+            } catch (error) {
+                prizeConfig = lottery.prize_content || "";
+            }
+            
+            document.getElementById('editLotteryId').value = lottery.id;
+            document.getElementById('editLotteryTitle').value = lottery.title;
+            document.getElementById('editLotteryLotteryId').value = lottery.lottery_id;
+            document.getElementById('editLotteryPrizeConfig').value = prizeConfig;
+            document.getElementById('editLotteryDescription').value = lottery.description;
+            document.getElementById('editLotteryPointsRequired').value = lottery.points_required;
+            
+            // 设置开奖时间
+            const endTime = new Date(lottery.end_time);
+            endTime.setMinutes(endTime.getMinutes() - endTime.getTimezoneOffset());
+            document.getElementById('editLotteryEndTime').value = endTime.toISOString().slice(0, 16);
+            
+            document.getElementById('editLotteryImageUrl').value = lottery.image_url || '';
+            document.getElementById('editLotteryStatus').value = lottery.status;
+            
+            const modal = new bootstrap.Modal(document.getElementById('editLotteryModal'));
+            modal.show();
+        }
+        
+        // 保存抽奖活动
+        async function saveLottery() {
+            const lotteryId = document.getElementById('editLotteryId').value;
+            const title = document.getElementById('editLotteryTitle').value;
+            const lotteryCode = document.getElementById('editLotteryLotteryId').value.toUpperCase();
+            const prizeConfig = document.getElementById('editLotteryPrizeConfig').value;
+            const description = document.getElementById('editLotteryDescription').value;
+            const pointsRequired = parseInt(document.getElementById('editLotteryPointsRequired').value) || 0;
+            let endTime = document.getElementById('editLotteryEndTime').value;
+            const imageUrl = document.getElementById('editLotteryImageUrl').value;
+            const status = document.getElementById('editLotteryStatus').value;
+            
+            // 转换时间为ISO格式
+            if (!endTime.includes('T')) {
+                endTime = convertBeijingToISO(endTime);
+            }
+            
+            // 解析奖品配置
+            const prizes = parsePrizeConfig(prizeConfig);
+            if (prizes.length === 0) {
+                showAlert('奖品配置格式错误', 'danger');
+                return;
+            }
+            
+            // 构建奖品内容JSON
+            const prizeContentJson = JSON.stringify({
+                config: prizeConfig,
+                prizes: prizes
+            });
+            
+            // 构建抽奖数据对象
+            const lotteryData = {
+                id: parseInt(lotteryId),
+                title: title,
+                lottery_id: lotteryCode,
+                prize_content: prizeContentJson,
+                description: description,
+                points_required: pointsRequired,
+                end_time: endTime,
+                image_url: imageUrl,
+                status: status
+            };
+            
+            showLoading(true);
+            
+            try {
+                await directSupabaseUpsertWithServiceKey('lottery_activities', lotteryData, 'id');
+                
+                showAlert('抽奖活动保存成功', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('editLotteryModal')).hide();
+                loadLotteryActivities(currentPage.lottery);
+            } catch (error) {
+                console.error('保存抽奖活动失败:', error);
+                showAlert('保存抽奖活动失败: ' + error.message, 'danger');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // 删除抽奖活动
+        function deleteLottery(lotteryId) {
+            if (!confirm('确定要删除这个抽奖活动吗？')) return;
+            
+            showLoading(true);
+            directSupabaseDeleteWithServiceKey('lottery_activities', lotteryId)
+            .then(() => {
+                showAlert('抽奖活动删除成功', 'success');
+                loadLotteryActivities(currentPage.lottery);
+            })
+            .catch(error => {
+                showAlert('删除抽奖活动失败: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+        
+        // 手动开奖
+        function manualCheckLottery() {
+            if (!confirm('确定要手动开奖吗？这将检查所有已到开奖时间的抽奖活动。')) return;
+            
+            showLoading(true);
+            
+            fetch(`${API_BASE_URL}/manual-check-lottery`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    showAlert('手动开奖成功', 'success');
+                    loadLotteryActivities(currentPage.lottery);
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text || '开奖失败');
+                    });
+                }
+            })
+            .catch(error => {
+                showAlert('手动开奖失败: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+        
+        // 哈希函数
+        function hashCode(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return Math.abs(hash);
+        }
+        
+        // 时间转换函数
+        function convertBeijingToISO(beijingTimeString) {
+            if (!beijingTimeString) return "";
+            const parts = beijingTimeString.split(' ');
+            if (parts.length !== 2) return beijingTimeString;
+            const datePart = parts[0];
+            const timePart = parts[1];
+            const beijingTime = new Date(`${datePart}T${timePart}+08:00`);
+            if (isNaN(beijingTime.getTime())) return beijingTimeString;
+            return beijingTime.toISOString();
+        }
+        
+        // 加载系统设置
+        function loadSettings() {
+            // 更新服务器时间
+            document.getElementById('serverTime').textContent = new Date().toLocaleString();
+            // 更新机器人状态
+            document.getElementById('currentBotStatus').textContent = '运行中';
+            document.getElementById('botStatusSwitch').checked = true;
+        }
+        
+        // 切换机器人状态
+        function toggleBotStatus() {
+            const newStatus = !document.getElementById('botStatusSwitch').checked;
+            showLoading(true);
+            // 这里只是模拟切换状态，实际需要修改代码中的EMERGENCY_STOP变量
+            // 由于Worker是无状态的，这个功能需要通过其他方式实现
+            showAlert('机器人状态已切换', 'success');
+            document.getElementById('botStatusSwitch').checked = !newStatus;
+            document.getElementById('currentBotStatus').textContent = newStatus ? '已停止' : '运行中';
+            showLoading(false);
+        }
+        
+        // 检查数据库状态
+        function checkDbStatus() {
+            showLoading(true);
+            directSupabaseFetch('users', 'limit=1')
+            .then(() => {
+                document.getElementById('dbStatus').textContent = '已连接';
+                document.getElementById('dbStatus').className = 'badge bg-success';
+                document.getElementById('dbLastCheck').textContent = new Date().toLocaleString();
+                showAlert('数据库连接正常', 'success');
+            })
+            .catch(error => {
+                document.getElementById('dbStatus').textContent = '连接失败';
+                document.getElementById('dbStatus').className = 'badge bg-danger';
+                document.getElementById('dbLastCheck').textContent = new Date().toLocaleString();
+                showAlert('数据库连接失败: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+        
+        // 渲染分页
+        function renderPagination(type, totalItems, currentPage) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            let html = '';
+            
+            // 上一页
+            html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="changePage('${type}', ${currentPage - 1})">上一页</a>
+            </li>`;
+            
+            // 页码
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changePage('${type}', ${i})">${i}</a>
+                    </li>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+            
+            // 下一页
+            html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="changePage('${type}', ${currentPage + 1})">下一页</a>
+            </li>`;
+            
+            const paginationElement = document.getElementById(type + 'Pagination');
+            if (paginationElement) {
+                paginationElement.innerHTML = html;
+            }
+        }
+        
+        // 切换页面
+        function changePage(type, page) {
+            currentPage[type] = page;
+            switch(type) {
+                case 'users':
+                    renderUsersTable();
+                    break;
+                case 'teachers':
+                    renderTeachersTable();
+                    break;
+                case 'keywords':
+                    renderKeywordsTable();
+                    break;
+                case 'banned':
+                    renderBannedTable();
+                    break;
+                case 'scheduled':
+                    renderScheduledTasksTable();
+                    break;
+                case 'lottery':
+                    renderLotteryActivitiesTable();
+                    break;
+            }
+        }
+        
+        // 获取状态徽章
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'pending':
+                    return '<span class="badge bg-warning">待审核</span>';
+                case 'approved':
+                    return '<span class="badge bg-success">已通过</span>';
+                case 'rejected':
+                    return '<span class="badge bg-danger">已拒绝</span>';
+                case 'active':
+                    return '<span class="badge bg-success">进行中</span>';
+                case 'ended':
+                    return '<span class="badge bg-secondary">已结束</span>';
+                case 'cancelled':
+                    return '<span class="badge bg-danger">已取消</span>';
+                default:
+                    return '<span class="badge bg-secondary">未知</span>';
+            }
+        }
+        
+        // 直接从Supabase获取数据
+        async function directSupabaseFetch(table, filter = "") {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Supabase错误: ${errorData.message || response.statusText}`);
+            }
+            return await response.json();
+        }
+        
+        // 使用服务角色密钥从Supabase获取数据
+        async function directSupabaseFetchWithServiceKey(table, filter = "") {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+                headers: {
+                    'apikey': SUPABASE_SERVICE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Supabase错误: ${errorData.message || response.statusText}`);
+            }
+            return await response.json();
+        }
+        
+        // 直接向Supabase插入数据
+        async function directSupabaseInsert(table, data) {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Supabase insert错误: ${errorData.message || response.statusText}`);
+            }
+        }
+        
+        // 使用服务角色密钥插入数据
+        async function directSupabaseInsertWithServiceKey(table, data) {
+            // 如果是抽奖活动，删除prize_config字段
+            if (table === 'lottery_activities' && data.prize_config) {
+                delete data.prize_config;
+            }
+            
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_SERVICE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Supabase insert错误: ${errorData.message || response.statusText}`);
+            }
+        }
+        
+        // 直接向Supabase更新数据
+        async function directSupabaseUpsert(table, data, conflictColumn) {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?on_conflict=${conflictColumn}`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'resolution=merge-duplicates'
+                },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Supabase upsert错误: ${errorData.message || response.statusText}`);
+            }
+        }
+        
+        // 使用服务角色密钥更新数据
+        async function directSupabaseUpsertWithServiceKey(table, data, conflictColumn) {
+            // 如果是抽奖活动，删除prize_config字段
+            if (table === 'lottery_activities' && data.prize_config) {
+                delete data.prize_config;
+            }
+            
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?on_conflict=${conflictColumn}`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_SERVICE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'resolution=merge-duplicates'
+                },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Supabase upsert错误: ${errorData.message || response.statusText}`);
+            }
+        }
+        
+        // 直接从Supabase删除数据
+        async function directSupabaseDelete(table, id) {
+            const idColumn = table === 'users' ? 'user_id' : 'id';
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idColumn}=eq.${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Supabase delete错误: ${errorData.message || response.statusText}`);
+            }
+        }
+        
+        // 使用服务角色密钥删除数据
+        async function directSupabaseDeleteWithServiceKey(table, id) {
+            const idColumn = table === 'users' ? 'user_id' : 'id';
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idColumn}=eq.${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'apikey': SUPABASE_SERVICE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Supabase delete错误: ${errorData.message || response.statusText}`);
+            }
+        }
+        
         // 上传图片到Supabase存储
         async function uploadImageToSupabase(file, bucketName) {
             if (!file) return null;
@@ -2414,271 +3963,6 @@
             }
         }
         
-        // 创建存储桶（如果不存在）
-        async function createStorageBucketIfNotExists(bucketName) {
-            // 检查存储桶是否存在
-            const response = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
-                }
-            });
-            
-            if (response.ok) {
-                const buckets = await response.json();
-                const bucketExists = buckets.some(bucket => bucket.name === bucketName);
-                
-                if (!bucketExists) {
-                    // 创建存储桶
-                    const createResponse = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            name: bucketName,
-                            public: true,
-                            file_size_limit: 52428800 // 50MB
-                        })
-                    });
-                    
-                    if (!createResponse.ok) {
-                        throw new Error('创建存储桶失败');
-                    }
-                }
-            } else {
-                throw new Error('获取存储桶列表失败');
-            }
-        }
-        
-        // 加载系统设置
-        function loadSettings() {
-            // 更新服务器时间
-            document.getElementById('serverTime').textContent = new Date().toLocaleString();
-            // 更新机器人状态
-            document.getElementById('currentBotStatus').textContent = '运行中';
-            document.getElementById('botStatusSwitch').checked = true;
-        }
-        // 切换机器人状态
-        function toggleBotStatus() {
-            const newStatus = !document.getElementById('botStatusSwitch').checked;
-            showLoading(true);
-            // 这里只是模拟切换状态，实际需要修改代码中的EMERGENCY_STOP变量
-            // 由于Worker是无状态的，这个功能需要通过其他方式实现
-            showAlert('机器人状态已切换', 'success');
-            document.getElementById('botStatusSwitch').checked = !newStatus;
-            document.getElementById('currentBotStatus').textContent = newStatus ? '已停止' : '运行中';
-            showLoading(false);
-        }
-        // 检查数据库状态
-        function checkDbStatus() {
-            showLoading(true);
-            directSupabaseFetch('users', 'limit=1')
-            .then(() => {
-                document.getElementById('dbStatus').textContent = '已连接';
-                document.getElementById('dbStatus').className = 'badge bg-success';
-                document.getElementById('dbLastCheck').textContent = new Date().toLocaleString();
-                showAlert('数据库连接正常', 'success');
-            })
-            .catch(error => {
-                document.getElementById('dbStatus').textContent = '连接失败';
-                document.getElementById('dbStatus').className = 'badge bg-danger';
-                document.getElementById('dbLastCheck').textContent = new Date().toLocaleString();
-                showAlert('数据库连接失败: ' + error.message, 'danger');
-            })
-            .finally(() => {
-                showLoading(false);
-            });
-        }
-        // 渲染分页
-        function renderPagination(type, totalItems, currentPage) {
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
-            let html = '';
-            // 上一页
-            html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="changePage('${type}', ${currentPage - 1})">上一页</a>
-            </li>`;
-            // 页码
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                    html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
-                        <a class="page-link" href="#" onclick="changePage('${type}', ${i})">${i}</a>
-                    </li>`;
-                } else if (i === currentPage - 2 || i === currentPage + 2) {
-                    html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-                }
-            }
-            // 下一页
-            html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="changePage('${type}', ${currentPage + 1})">下一页</a>
-            </li>`;
-            
-            const paginationElement = document.getElementById(type + 'Pagination');
-            if (paginationElement) {
-                paginationElement.innerHTML = html;
-            }
-        }
-        // 切换页面
-        function changePage(type, page) {
-            currentPage[type] = page;
-            switch(type) {
-                case 'users':
-                    renderUsersTable();
-                    break;
-                case 'teachers':
-                    renderTeachersTable();
-                    break;
-                case 'keywords':
-                    renderKeywordsTable();
-                    break;
-                case 'banned':
-                    renderBannedTable();
-                    break;
-                case 'scheduled':
-                    renderScheduledTasksTable();
-                    break;
-            }
-        }
-        // 获取状态徽章
-        function getStatusBadge(status) {
-            switch(status) {
-                case 'pending':
-                    return '<span class="badge bg-warning">待审核</span>';
-                case 'approved':
-                    return '<span class="badge bg-success">已通过</span>';
-                case 'rejected':
-                    return '<span class="badge bg-danger">已拒绝</span>';
-                default:
-                    return '<span class="badge bg-secondary">未知</span>';
-            }
-        }
-        // 直接从Supabase获取数据
-        async function directSupabaseFetch(table, filter = "") {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`Supabase错误: ${errorData.message || response.statusText}`);
-            }
-            return await response.json();
-        }
-        // 使用服务角色密钥从Supabase获取数据
-        async function directSupabaseFetchWithServiceKey(table, filter = "") {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
-                headers: {
-                    'apikey': SUPABASE_SERVICE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`Supabase错误: ${errorData.message || response.statusText}`);
-            }
-            return await response.json();
-        }
-        // 直接向Supabase插入数据
-        async function directSupabaseInsert(table, data) {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`Supabase insert错误: ${errorData.message || response.statusText}`);
-            }
-        }
-        // 使用服务角色密钥插入数据
-        async function directSupabaseInsertWithServiceKey(table, data) {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_SERVICE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`Supabase insert错误: ${errorData.message || response.statusText}`);
-            }
-        }
-        // 直接向Supabase更新数据
-        async function directSupabaseUpsert(table, data, conflictColumn) {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?on_conflict=${conflictColumn}`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'resolution=merge-duplicates'
-                },
-                body: JSON.stringify(data)
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`Supabase upsert错误: ${errorData.message || response.statusText}`);
-            }
-        }
-        // 使用服务角色密钥更新数据
-        async function directSupabaseUpsertWithServiceKey(table, data, conflictColumn) {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?on_conflict=${conflictColumn}`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_SERVICE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'resolution=merge-duplicates'
-                },
-                body: JSON.stringify(data)
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`Supabase upsert错误: ${errorData.message || response.statusText}`);
-            }
-        }
-        // 直接从Supabase删除数据
-        async function directSupabaseDelete(table, id) {
-            const idColumn = table === 'users' ? 'user_id' : 'id';
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idColumn}=eq.${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`Supabase delete错误: ${errorData.message || response.statusText}`);
-            }
-        }
-        // 使用服务角色密钥删除数据
-        async function directSupabaseDeleteWithServiceKey(table, id) {
-            const idColumn = table === 'users' ? 'user_id' : 'id';
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idColumn}=eq.${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'apikey': SUPABASE_SERVICE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
-                }
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`Supabase delete错误: ${errorData.message || response.statusText}`);
-            }
-        }
         // 显示提示
         function showAlert(message, type = 'info') {
             const alertContainer = document.getElementById('alertContainer');
@@ -2699,6 +3983,7 @@
                 }
             }, 5000);
         }
+        
         // 显示/隐藏加载动画
         function showLoading(show) {
             document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';

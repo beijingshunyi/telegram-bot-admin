@@ -1800,7 +1800,10 @@
                 'scheduled': '定时发送任务',
                 'settings': '系统设置'
             };
-            document.getElementById('pageTitle').textContent = titles[section] || '管理后台';
+            const pageTitleElement = document.getElementById('pageTitle');
+            if (pageTitleElement) {
+                pageTitleElement.textContent = titles[section] || '管理后台';
+            }
             
             currentSection = section;
             
@@ -1842,11 +1845,30 @@
                 directSupabaseFetchWithServiceKey('random_teacher_config') // 新增
             ])
             .then(([users, teachers, keywords, banned, randomTeacherConfigs]) => {
-                document.getElementById('totalUsers').textContent = users.length;
-                document.getElementById('totalTeachers').textContent = teachers.length;
-                document.getElementById('totalKeywords').textContent = keywords.length;
-                document.getElementById('totalBanned').textContent = banned.length;
-                document.getElementById('totalRandomTeacherConfigs').textContent = randomTeacherConfigs.length; // 新增
+                const totalUsersElement = document.getElementById('totalUsers');
+                if (totalUsersElement) {
+                    totalUsersElement.textContent = users.length;
+                }
+                
+                const totalTeachersElement = document.getElementById('totalTeachers');
+                if (totalTeachersElement) {
+                    totalTeachersElement.textContent = teachers.length;
+                }
+                
+                const totalKeywordsElement = document.getElementById('totalKeywords');
+                if (totalKeywordsElement) {
+                    totalKeywordsElement.textContent = keywords.length;
+                }
+                
+                const totalBannedElement = document.getElementById('totalBanned');
+                if (totalBannedElement) {
+                    totalBannedElement.textContent = banned.length;
+                }
+                
+                const totalRandomTeacherConfigsElement = document.getElementById('totalRandomTeacherConfigs');
+                if (totalRandomTeacherConfigsElement) {
+                    totalRandomTeacherConfigsElement.textContent = randomTeacherConfigs.length;
+                }
                 
                 // 加载最近用户
                 const recentUsers = users.slice(0, 5);
@@ -3350,10 +3372,19 @@
         // 加载系统设置
         function loadSettings() {
             // 更新服务器时间
-            document.getElementById('serverTime').textContent = new Date().toLocaleString();
+            const serverTimeElement = document.getElementById('serverTime');
+            if (serverTimeElement) {
+                serverTimeElement.textContent = new Date().toLocaleString();
+            }
             // 更新机器人状态
-            document.getElementById('currentBotStatus').textContent = '运行中';
-            document.getElementById('botStatusSwitch').checked = true;
+            const currentBotStatusElement = document.getElementById('currentBotStatus');
+            if (currentBotStatusElement) {
+                currentBotStatusElement.textContent = '运行中';
+            }
+            const botStatusSwitchElement = document.getElementById('botStatusSwitch');
+            if (botStatusSwitchElement) {
+                botStatusSwitchElement.checked = true;
+            }
         }
         
         // 切换机器人状态
@@ -3363,8 +3394,14 @@
             // 这里只是模拟切换状态，实际需要修改代码中的EMERGENCY_STOP变量
             // 由于Worker是无状态的，这个功能需要通过其他方式实现
             showAlert('机器人状态已切换', 'success');
-            document.getElementById('botStatusSwitch').checked = !newStatus;
-            document.getElementById('currentBotStatus').textContent = newStatus ? '已停止' : '运行中';
+            const botStatusSwitchElement = document.getElementById('botStatusSwitch');
+            if (botStatusSwitchElement) {
+                botStatusSwitchElement.checked = !newStatus;
+            }
+            const currentBotStatusElement = document.getElementById('currentBotStatus');
+            if (currentBotStatusElement) {
+                currentBotStatusElement.textContent = newStatus ? '已停止' : '运行中';
+            }
             showLoading(false);
         }
         
@@ -3373,15 +3410,27 @@
             showLoading(true);
             directSupabaseFetch('users', 'limit=1')
             .then(() => {
-                document.getElementById('dbStatus').textContent = '已连接';
-                document.getElementById('dbStatus').className = 'badge bg-success';
-                document.getElementById('dbLastCheck').textContent = new Date().toLocaleString();
+                const dbStatusElement = document.getElementById('dbStatus');
+                if (dbStatusElement) {
+                    dbStatusElement.textContent = '已连接';
+                    dbStatusElement.className = 'badge bg-success';
+                }
+                const dbLastCheckElement = document.getElementById('dbLastCheck');
+                if (dbLastCheckElement) {
+                    dbLastCheckElement.textContent = new Date().toLocaleString();
+                }
                 showAlert('数据库连接正常', 'success');
             })
             .catch(error => {
-                document.getElementById('dbStatus').textContent = '连接失败';
-                document.getElementById('dbStatus').className = 'badge bg-danger';
-                document.getElementById('dbLastCheck').textContent = new Date().toLocaleString();
+                const dbStatusElement = document.getElementById('dbStatus');
+                if (dbStatusElement) {
+                    dbStatusElement.textContent = '连接失败';
+                    dbStatusElement.className = 'badge bg-danger';
+                }
+                const dbLastCheckElement = document.getElementById('dbLastCheck');
+                if (dbLastCheckElement) {
+                    dbLastCheckElement.textContent = new Date().toLocaleString();
+                }
                 showAlert('数据库连接失败: ' + error.message, 'danger');
             })
             .finally(() => {
@@ -3559,60 +3608,4 @@
         // 直接从Supabase删除数据
         async function directSupabaseDelete(table, id) {
             const idColumn = table === 'users' ? 'user_id' : 'id';
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idColumn}=eq.${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`Supabase delete错误: ${errorData.message || response.statusText}`);
-            }
-        }
-        
-        // 使用服务角色密钥删除数据
-        async function directSupabaseDeleteWithServiceKey(table, id) {
-            const idColumn = table === 'users' ? 'user_id' : 'id';
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idColumn}=eq.${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'apikey': SUPABASE_SERVICE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
-                }
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`Supabase delete错误: ${errorData.message || response.statusText}`);
-            }
-        }
-        
-        // 显示提示
-        function showAlert(message, type = 'info') {
-            const alertContainer = document.getElementById('alertContainer');
-            const alertId = 'alert-' + Date.now();
-            const alertHtml = `
-                <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            `;
-            alertContainer.insertAdjacentHTML('beforeend', alertHtml);
-            // 自动关闭
-            setTimeout(() => {
-                const alertElement = document.getElementById(alertId);
-                if (alertElement) {
-                    const bsAlert = new bootstrap.Alert(alertElement);
-                    bsAlert.close();
-                }
-            }, 5000);
-        }
-        
-        // 显示/隐藏加载动画
-        function showLoading(show) {
-            document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
-        }
-    </script>
-</body>
-</html>
+            const response = await fetch(`${SUP

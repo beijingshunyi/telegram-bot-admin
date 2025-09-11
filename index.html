@@ -8,10 +8,23 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --primary-color: #185A56;
-            --secondary-color: #FD742D;
-            --light-primary: rgba(24, 90, 86, 0.1);
-            --light-secondary: rgba(253, 116, 45, 0.1);
+            --primary-color: #007AFF;
+            --secondary-color: #FF3B30;
+            --success-color: #34C759;
+            --warning-color: #FF9500;
+            --info-color: #5AC8FA;
+            --light-primary: rgba(0, 122, 255, 0.1);
+            --light-secondary: rgba(255, 59, 48, 0.1);
+            --light-success: rgba(52, 199, 89, 0.1);
+            --light-warning: rgba(255, 149, 0, 0.1);
+            --light-info: rgba(90, 200, 250, 0.1);
+            --dark-bg: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-primary: #000000;
+            --text-secondary: #8E8E93;
+            --border-color: #E5E5EA;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
         
         * {
@@ -21,27 +34,29 @@
         }
         
         body {
-            background-color: #f8f9fa;
-            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: var(--dark-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-primary);
             overflow-x: hidden;
         }
         
         .sidebar {
             min-height: 100vh;
-            background-color: var(--primary-color);
-            color: white;
+            background-color: var(--card-bg);
+            color: var(--text-primary);
             position: fixed;
             top: 0;
             left: 0;
             width: 280px;
             z-index: 1000;
-            transition: all 0.3s;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            border-right: 1px solid var(--border-color);
         }
         
         .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
             text-align: center;
         }
         
@@ -49,91 +64,175 @@
             margin: 0;
             font-size: 1.2rem;
             font-weight: 600;
+            color: var(--primary-color);
         }
         
         .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            border-radius: 0.375rem;
+            color: var(--text-secondary);
+            border-radius: 12px;
             margin: 5px 15px;
             padding: 12px 15px;
-            transition: all 0.3s;
+            transition: var(--transition);
             display: flex;
             align-items: center;
+            font-weight: 500;
         }
         
         .sidebar .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
+            background-color: var(--light-primary);
+            color: var(--primary-color);
         }
         
         .sidebar .nav-link.active {
-            background-color: var(--secondary-color);
+            background-color: var(--primary-color);
             color: white;
         }
         
         .sidebar .nav-link i {
-            margin-right: 10px;
+            margin-right: 12px;
             font-size: 1.1rem;
         }
         
         .content {
             margin-left: 280px;
-            padding: 20px;
-            transition: all 0.3s;
+            padding: 24px;
+            transition: var(--transition);
             min-height: 100vh;
         }
         
         .card {
-            margin-bottom: 20px;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
             border: none;
-            border-radius: 0.5rem;
+            border-radius: 16px;
+            background-color: var(--card-bg);
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
         }
         
         .card-header {
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 0.5rem 0.5rem 0 0 !important;
-            padding: 15px 20px;
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border-radius: 16px 16px 0 0 !important;
+            padding: 20px 24px;
             font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
         }
         
         .table-responsive {
-            border-radius: 0.375rem;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .table tbody tr {
+            transition: var(--transition);
+        }
+        
+        .table tbody tr:hover {
+            background-color: var(--light-primary);
         }
         
         .btn-action {
-            margin-right: 5px;
-            border-radius: 0.25rem;
+            margin-right: 6px;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.875rem;
+            transition: var(--transition);
+        }
+        
+        .btn {
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: var(--transition);
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
         
         .btn-primary {
             background-color: var(--primary-color);
-            border-color: var(--primary-color);
+            color: white;
         }
         
         .btn-primary:hover {
-            background-color: #14443f;
-            border-color: #14443f;
+            background-color: #0051D5;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #248A3D;
         }
         
         .btn-warning {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
+            background-color: var(--warning-color);
+            color: white;
         }
         
         .btn-warning:hover {
-            background-color: #e56620;
-            border-color: #e56620;
+            background-color: #CC7A00;
+        }
+        
+        .btn-danger {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #D70015;
+        }
+        
+        .btn-info {
+            background-color: var(--info-color);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background-color: #1A8FCC;
+        }
+        
+        .btn-outline-primary {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
         }
         
         .login-container {
-            max-width: 400px;
+            max-width: 420px;
             margin: 100px auto;
-            padding: 30px;
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
         
         .login-title {
@@ -145,30 +244,55 @@
         
         .stat-card {
             border-left: 4px solid var(--primary-color);
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
         
         .stat-card .card-title {
-            color: var(--primary-color);
-            font-weight: 600;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .stat-card h2 {
-            color: var(--secondary-color);
+            color: var(--primary-color);
+            font-weight: 700;
         }
         
         .modal-header {
-            background-color: var(--primary-color);
-            color: white;
-            border-bottom: none;
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 16px 16px 0 0 !important;
         }
         
-        .modal-header .btn-close {
-            filter: brightness(0) invert(1);
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 122, 255, 0.25);
         }
         
         .form-label {
             font-weight: 500;
-            color: var(--primary-color);
+            color: var(--text-primary);
+            margin-bottom: 8px;
         }
         
         .pagination {
@@ -177,6 +301,9 @@
         
         .page-link {
             color: var(--primary-color);
+            border-radius: 8px;
+            margin: 0 3px;
+            border: 1px solid var(--border-color);
         }
         
         .page-item.active .page-link {
@@ -196,6 +323,12 @@
             max-width: 350px;
         }
         
+        .alert {
+            border-radius: 12px;
+            border: none;
+            box-shadow: var(--shadow);
+        }
+        
         .loading-spinner {
             display: none;
             position: fixed;
@@ -203,7 +336,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.4);
             z-index: 9999;
             justify-content: center;
             align-items: center;
@@ -212,17 +345,17 @@
         .loading-spinner .spinner-border {
             width: 3rem;
             height: 3rem;
-            color: var(--secondary-color);
+            color: var(--primary-color);
         }
         
         .status-active {
-            color: #2ecc71;
-            font-weight: bold;
+            color: var(--success-color);
+            font-weight: 600;
         }
         
         .status-inactive {
-            color: #e74c3c;
-            font-weight: bold;
+            color: var(--secondary-color);
+            font-weight: 600;
         }
         
         .teacher-image {
@@ -236,36 +369,37 @@
             max-width: 200px;
             max-height: 200px;
             margin-top: 10px;
-            border-radius: 5px;
+            border-radius: 8px;
         }
         
         .scheduled-task-image {
             max-width: 100px;
             max-height: 100px;
             object-fit: cover;
-            border-radius: 5px;
+            border-radius: 8px;
         }
         
         .upload-info {
             font-size: 0.85rem;
-            color: #6c757d;
+            color: var(--text-secondary);
             margin-top: 5px;
         }
         
         .debug-info {
             font-size: 0.75rem;
-            color: #6c757d;
+            color: var(--text-secondary);
             margin-top: 5px;
             font-family: monospace;
         }
         
         .media-upload-container {
-            border: 2px dashed #ccc;
-            border-radius: 5px;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
             padding: 20px;
             text-align: center;
             margin-bottom: 15px;
-            transition: all 0.3s;
+            transition: var(--transition);
+            cursor: pointer;
         }
         
         .media-upload-container:hover {
@@ -284,8 +418,9 @@
             position: relative;
             width: 100px;
             height: 100px;
-            border-radius: 5px;
+            border-radius: 8px;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
         .media-preview img,
@@ -299,7 +434,7 @@
             position: absolute;
             top: 5px;
             right: 5px;
-            background-color: rgba(255, 0, 0, 0.7);
+            background-color: var(--secondary-color);
             color: white;
             border: none;
             border-radius: 50%;
@@ -321,7 +456,7 @@
             background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             padding: 8px 12px;
             font-size: 1.2rem;
         }
@@ -335,15 +470,27 @@
             background-color: var(--light-primary);
             color: var(--primary-color);
             border-color: var(--primary-color);
+            border-radius: 10px 0 0 10px;
         }
         
         .points-input-group .form-control {
             border-left: none;
+            border-radius: 0 10px 10px 0;
         }
         
         .points-input-group .form-control:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(24, 90, 86, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(0, 122, 255, 0.25);
+        }
+        
+        .footer {
+            margin-left: 280px;
+            padding: 20px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--card-bg);
         }
         
         @media (max-width: 992px) {
@@ -356,6 +503,10 @@
             }
             
             .content {
+                margin-left: 0;
+            }
+            
+            .footer {
                 margin-left: 0;
             }
             
@@ -400,6 +551,9 @@
     
     <!-- 登录界面 -->
     <div class="login-container" id="loginContainer">
+        <div class="text-center mb-4">
+            <i class="bi bi-robot" style="font-size: 4rem; color: var(--primary-color);"></i>
+        </div>
         <h2 class="login-title">北京修车【万花楼】超级机器人管理后台</h2>
         <div class="mb-3">
             <label for="adminKey" class="form-label">管理员密钥</label>
@@ -452,6 +606,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showSection('lottery')">
+                            <i class="bi bi-gift"></i> 抽奖活动管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="#" class="nav-link" onclick="showSection('settings')">
                             <i class="bi bi-gear"></i> 系统设置
                         </a>
@@ -459,7 +618,7 @@
                 </ul>
                 <hr>
                 <div class="dropdown">
-                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle me-2"></i>
                         <strong>管理员</strong>
                     </a>
@@ -584,7 +743,7 @@
                         <div class="search-box">
                             <div class="input-group">
                                 <input type="text" class="form-control" placeholder="搜索用户..." id="userSearch">
-                                <button class="btn btn-outline-secondary" type="button" onclick="searchUsers()">
+                                <button class="btn btn-outline-primary" type="button" onclick="searchUsers()">
                                     <i class="bi bi-search"></i>
                                 </button>
                             </div>
@@ -633,7 +792,7 @@
                         <div class="search-box">
                             <div class="input-group">
                                 <input type="text" class="form-control" placeholder="搜索老师..." id="teacherSearch">
-                                <button class="btn btn-outline-secondary" type="button" onclick="searchTeachers()">
+                                <button class="btn btn-outline-primary" type="button" onclick="searchTeachers()">
                                     <i class="bi bi-search"></i>
                                 </button>
                             </div>
@@ -684,7 +843,7 @@
                         <div class="search-box">
                             <div class="input-group">
                                 <input type="text" class="form-control" placeholder="搜索关键词..." id="keywordSearch">
-                                <button class="btn btn-outline-secondary" type="button" onclick="searchKeywords()">
+                                <button class="btn btn-outline-primary" type="button" onclick="searchKeywords()">
                                     <i class="bi bi-search"></i>
                                 </button>
                             </div>
@@ -732,7 +891,7 @@
                         <div class="search-box">
                             <div class="input-group">
                                 <input type="text" class="form-control" placeholder="搜索禁言词..." id="bannedSearch">
-                                <button class="btn btn-outline-secondary" type="button" onclick="searchBanned()">
+                                <button class="btn btn-outline-primary" type="button" onclick="searchBanned()">
                                     <i class="bi bi-search"></i>
                                 </button>
                             </div>
@@ -780,7 +939,7 @@
                         <div class="search-box">
                             <div class="input-group">
                                 <input type="text" class="form-control" placeholder="搜索定时任务..." id="scheduledSearch">
-                                <button class="btn btn-outline-secondary" type="button" onclick="searchScheduledTasks()">
+                                <button class="btn btn-outline-primary" type="button" onclick="searchScheduledTasks()">
                                     <i class="bi bi-search"></i>
                                 </button>
                             </div>
@@ -808,6 +967,59 @@
                         </div>
                         <nav aria-label="Page navigation">
                             <ul class="pagination justify-content-center" id="scheduledTasksPagination">
+                                <!-- 分页按钮将通过JS动态生成 -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 抽奖活动管理 -->
+            <div id="lotterySection" class="content-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>抽奖活动管理</h2>
+                    <div>
+                        <button class="btn btn-success" onclick="showAddLotteryModal()">
+                            <i class="bi bi-plus-circle me-1"></i> 创建抽奖活动
+                        </button>
+                        <button class="btn btn-primary" onclick="refreshLotteryActivities()">
+                            <i class="bi bi-arrow-clockwise me-1"></i> 刷新列表
+                        </button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索抽奖活动..." id="lotterySearch">
+                                <button class="btn btn-outline-primary" type="button" onclick="searchLotteryActivities()">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>活动名称</th>
+                                        <th>抽奖编号</th>
+                                        <th>奖品配置</th>
+                                        <th>所需积分</th>
+                                        <th>开奖时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lotteryActivitiesTable">
+                                    <tr>
+                                        <td colspan="8" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="lotteryActivitiesPagination">
                                 <!-- 分页按钮将通过JS动态生成 -->
                             </ul>
                         </nav>
@@ -925,6 +1137,12 @@
         </div>
     </div>
     
+    <!-- 底部版权信息 -->
+    <div class="footer" id="footer" style="display: none;">
+        <p>北京修车【万花楼】超级机器人控制后台；由 @bjxc010 开发</p>
+        <p>© 2025 北京修车 -【万花楼】 版权所有</p>
+    </div>
+    
     <!-- 用户编辑模态框 -->
     <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -1020,7 +1238,7 @@
                         <div class="mb-3">
                             <label class="form-label">媒体文件</label>
                             <div class="media-upload-container" onclick="document.getElementById('editTeacherMedia').click()">
-                                <i class="bi bi-cloud-upload" style="font-size: 2rem; color: #ccc;"></i>
+                                <i class="bi bi-cloud-upload" style="font-size: 2rem; color: var(--text-secondary);"></i>
                                 <p class="mb-0">点击上传图片或视频</p>
                                 <small>支持 JPG、PNG、MP4 格式，图片最多3张，视频最多1个</small>
                             </div>
@@ -1169,6 +1387,67 @@
         </div>
     </div>
     
+    <!-- 抽奖活动编辑模态框 -->
+    <div class="modal fade" id="editLotteryModal" tabindex="-1" aria-labelledby="editLotteryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editLotteryModalLabel">编辑抽奖活动</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editLotteryForm">
+                        <input type="hidden" id="editLotteryId">
+                        <div class="mb-3">
+                            <label for="editLotteryTitle" class="form-label">活动名称</label>
+                            <input type="text" class="form-control" id="editLotteryTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryId" class="form-label">抽奖编号</label>
+                            <input type="text" class="form-control" id="editLotteryCode" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryPrizeConfig" class="form-label">奖品配置</label>
+                            <textarea class="form-control" id="editLotteryPrizeConfig" rows="3" required></textarea>
+                            <div class="form-text">格式：奖品名1:数量1;奖品名2:数量2</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryDescription" class="form-label">抽奖说明</label>
+                            <textarea class="form-control" id="editLotteryDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryPointsRequired" class="form-label">所需积分</label>
+                            <input type="number" class="form-control" id="editLotteryPointsRequired" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryEndTime" class="form-label">开奖时间</label>
+                            <input type="datetime-local" class="form-control" id="editLotteryEndTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryImage" class="form-label">活动图片</label>
+                            <input type="file" class="form-control" id="editLotteryImage" accept="image/*" onchange="previewLotteryImage('edit')">
+                            <div id="editLotteryImagePreview" class="mt-2"></div>
+                            <input type="hidden" id="editLotteryImageUrl">
+                            <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLotteryStatus" class="form-label">状态</label>
+                            <select class="form-select" id="editLotteryStatus">
+                                <option value="active">进行中</option>
+                                <option value="ended">已结束</option>
+                                <option value="cancelled">已取消</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveLottery()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- 添加用户模态框 -->
     <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -1258,7 +1537,7 @@
                         <div class="mb-3">
                             <label class="form-label">媒体文件</label>
                             <div class="media-upload-container" onclick="document.getElementById('addTeacherMedia').click()">
-                                <i class="bi bi-cloud-upload" style="font-size: 2rem; color: #ccc;"></i>
+                                <i class="bi bi-cloud-upload" style="font-size: 2rem; color: var(--text-secondary);"></i>
                                 <p class="mb-0">点击上传图片或视频</p>
                                 <small>支持 JPG、PNG、MP4 格式，图片最多3张，视频最多1个</small>
                             </div>
@@ -1404,6 +1683,66 @@
         </div>
     </div>
     
+    <!-- 添加抽奖活动模态框 -->
+    <div class="modal fade" id="addLotteryModal" tabindex="-1" aria-labelledby="addLotteryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addLotteryModalLabel">创建抽奖活动</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addLotteryForm">
+                        <div class="mb-3">
+                            <label for="addLotteryTitle" class="form-label">活动名称</label>
+                            <input type="text" class="form-control" id="addLotteryTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryId" class="form-label">抽奖编号</label>
+                            <input type="text" class="form-control" id="addLotteryCode" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryPrizeConfig" class="form-label">奖品配置</label>
+                            <textarea class="form-control" id="addLotteryPrizeConfig" rows="3" required></textarea>
+                            <div class="form-text">格式：奖品名1:数量1;奖品名2:数量2</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryDescription" class="form-label">抽奖说明</label>
+                            <textarea class="form-control" id="addLotteryDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryPointsRequired" class="form-label">所需积分</label>
+                            <input type="number" class="form-control" id="addLotteryPointsRequired" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryEndTime" class="form-label">开奖时间</label>
+                            <input type="datetime-local" class="form-control" id="addLotteryEndTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryImage" class="form-label">活动图片</label>
+                            <input type="file" class="form-control" id="addLotteryImage" accept="image/*" onchange="previewLotteryImage('add')">
+                            <div id="addLotteryImagePreview" class="mt-2"></div>
+                            <input type="hidden" id="addLotteryImageUrl">
+                            <div class="upload-info">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLotteryStatus" class="form-label">状态</label>
+                            <select class="form-select" id="addLotteryStatus">
+                                <option value="active" selected>进行中</option>
+                                <option value="ended">已结束</option>
+                                <option value="cancelled">已取消</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="addLottery()">创建</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- 调整积分模态框 -->
     <div class="modal fade" id="adjustPointsModal" tabindex="-1" aria-labelledby="adjustPointsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -1464,12 +1803,14 @@
         let keywordsData = [];
         let bannedData = [];
         let scheduledTasksData = [];
+        let lotteryActivitiesData = [];
         let currentPage = {
             users: 1,
             teachers: 1,
             keywords: 1,
             banned: 1,
-            scheduled: 1
+            scheduled: 1,
+            lottery: 1
         };
         const itemsPerPage = 10;
         
@@ -1541,6 +1882,7 @@
             adminApiKey = '';
             document.getElementById('loginContainer').style.display = 'block';
             document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('footer').style.display = 'none';
             document.getElementById('adminKey').value = '';
         }
         
@@ -1548,6 +1890,7 @@
         function showMainInterface() {
             document.getElementById('loginContainer').style.display = 'none';
             document.getElementById('mainContainer').style.display = 'block';
+            document.getElementById('footer').style.display = 'block';
         }
         
         // 显示部分
@@ -1597,6 +1940,9 @@
                     break;
                 case 'scheduled':
                     loadScheduledTasks();
+                    break;
+                case 'lottery':
+                    loadLotteryActivities();
                     break;
                 case 'settings':
                     loadSettings();
@@ -2855,87 +3201,357 @@
             }
         }
         
-        // 上传图片到Supabase存储
-        async function uploadImageToSupabase(file, bucketName) {
-            if (!file) return null;
+        // 抽奖活动管理相关函数
+        // 加载抽奖活动数据
+        function loadLotteryActivities(page = 1) {
+            showLoading(true);
+            currentPage.lottery = page;
+            // 使用服务角色密钥获取抽奖活动数据
+            directSupabaseFetchWithServiceKey('lottery_activities')
+            .then(data => {
+                lotteryActivitiesData = data;
+                renderLotteryActivitiesTable();
+            })
+            .catch(error => {
+                showAlert('加载抽奖活动失败: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+        
+        // 渲染抽奖活动表格
+        function renderLotteryActivitiesTable() {
+            const start = (currentPage.lottery - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = lotteryActivitiesData.slice(start, end);
+            const html = pageData.map(lottery => {
+                let prizeConfig = '';
+                try {
+                    const prizeContent = JSON.parse(lottery.prize_content || "{}");
+                    if (prizeContent.config) {
+                        prizeConfig = prizeContent.config;
+                    } else {
+                        prizeConfig = lottery.prize_content || "";
+                    }
+                } catch (error) {
+                    prizeConfig = lottery.prize_content || "";
+                }
+                
+                return `
+                    <tr>
+                        <td>${lottery.id}</td>
+                        <td>${lottery.title}</td>
+                        <td>${lottery.lottery_id}</td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${prizeConfig}">${prizeConfig}</td>
+                        <td>${lottery.points_required}</td>
+                        <td>${new Date(lottery.end_time).toLocaleString()}</td>
+                        <td>${lottery.status === 'active' ? '<span class="status-active">进行中</span>' : lottery.status === 'ended' ? '<span class="status-inactive">已结束</span>' : '<span class="badge bg-secondary">已取消</span>'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary btn-action" onclick="editLottery(${lottery.id})" title="编辑">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-action" onclick="deleteLottery(${lottery.id})" title="删除">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            const lotteryActivitiesTableElement = document.getElementById('lotteryActivitiesTable');
+            if (lotteryActivitiesTableElement) {
+                lotteryActivitiesTableElement.innerHTML = html || '<tr><td colspan="8" class="text-center">暂无数据</td></tr>';
+            } else {
+                console.error('找不到抽奖活动表格元素: lotteryActivitiesTable');
+            }
+            
+            // 渲染分页
+            renderPagination('lottery', lotteryActivitiesData.length, currentPage.lottery);
+        }
+        
+        // 搜索抽奖活动
+        function searchLotteryActivities() {
+            const keyword = document.getElementById('lotterySearch').value.toLowerCase();
+            if (!keyword) {
+                renderLotteryActivitiesTable();
+                return;
+            }
+            const filtered = lotteryActivitiesData.filter(lottery => 
+                lottery.title.toLowerCase().includes(keyword) ||
+                lottery.lottery_id.toLowerCase().includes(keyword)
+            );
+            lotteryActivitiesData = filtered;
+            currentPage.lottery = 1;
+            renderLotteryActivitiesTable();
+        }
+        
+        // 刷新抽奖活动列表
+        function refreshLotteryActivities() {
+            loadLotteryActivities(currentPage.lottery);
+        }
+        
+        // 显示添加抽奖活动模态框
+        function showAddLotteryModal() {
+            document.getElementById('addLotteryForm').reset();
+            document.getElementById('addLotteryImagePreview').innerHTML = '';
+            document.getElementById('addLotteryImageUrl').value = '';
+            // 设置默认开奖时间为当前时间+24小时
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setMinutes(tomorrow.getMinutes() - tomorrow.getTimezoneOffset());
+            document.getElementById('addLotteryEndTime').value = tomorrow.toISOString().slice(0, 16);
+            const modal = new bootstrap.Modal(document.getElementById('addLotteryModal'));
+            modal.show();
+        }
+        
+        // 添加抽奖活动
+        async function addLottery() {
+            const imageFile = document.getElementById('addLotteryImage').files[0];
+            let imageUrl = '';
+            
+            // 如果有图片，先上传图片
+            if (imageFile) {
+                // 检查文件大小
+                if (imageFile.size > 5 * 1024 * 1024) {
+                    showAlert('图片大小不能超过5MB', 'danger');
+                    return;
+                }
+                
+                // 检查文件类型
+                if (!imageFile.type.match('image.*')) {
+                    showAlert('请上传图片文件', 'danger');
+                    return;
+                }
+                
+                imageUrl = await uploadImageToSupabase(imageFile, 'lottery-images');
+                if (!imageUrl) {
+                    showAlert('图片上传失败', 'danger');
+                    return;
+                }
+            }
+            
+            const endTime = document.getElementById('addLotteryEndTime').value;
+            const prizeConfig = document.getElementById('addLotteryPrizeConfig').value;
+            
+            // 构建抽奖活动数据对象
+            const lotteryData = {
+                title: document.getElementById('addLotteryTitle').value,
+                lottery_id: document.getElementById('addLotteryCode').value,
+                prize_content: JSON.stringify({
+                    config: prizeConfig,
+                    prizes: parsePrizeConfig(prizeConfig)
+                }),
+                description: document.getElementById('addLotteryDescription').value,
+                points_required: parseInt(document.getElementById('addLotteryPointsRequired').value),
+                end_time: endTime ? new Date(endTime).toISOString() : new Date().toISOString(),
+                status: document.getElementById('addLotteryStatus').value
+            };
+            
+            // 只有在有图片URL时才添加image_url字段
+            if (imageUrl) {
+                lotteryData.image_url = imageUrl;
+            }
             
             showLoading(true);
+            
             try {
-                // 生成文件名：使用时间戳和随机数
-                const fileName = `${bucketName}_${Date.now()}_${Math.floor(Math.random() * 1000)}.${file.name.split('.').pop()}`;
+                // 直接保存，不检查列是否存在，因为我们已经确认列存在
+                await directSupabaseInsertWithServiceKey('lottery_activities', lotteryData);
                 
-                // 先检查存储桶是否存在，如果不存在则创建
-                try {
-                    await createStorageBucketIfNotExists(bucketName);
-                } catch (error) {
-                    console.warn('创建存储桶失败:', error);
-                    // 继续尝试上传，可能存储桶已经存在
-                }
-                
-                // 上传到Supabase存储
-                const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                        'Content-Type': file.type
-                    },
-                    body: file
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`上传失败: ${errorText}`);
-                }
-                
-                // 获取公共URL
-                const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
-                
-                return imageUrl;
+                showAlert('抽奖活动创建成功', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('addLotteryModal')).hide();
+                loadLotteryActivities(currentPage.lottery);
             } catch (error) {
-                console.error('上传图片失败:', error);
-                showAlert('上传图片失败: ' + error.message, 'danger');
-                return null;
+                console.error('添加抽奖活动失败:', error);
+                showAlert('添加抽奖活动失败: ' + error.message, 'danger');
             } finally {
                 showLoading(false);
             }
         }
         
-        // 创建存储桶（如果不存在）
-        async function createStorageBucketIfNotExists(bucketName) {
-            // 检查存储桶是否存在
-            const response = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
-                }
-            });
+        // 编辑抽奖活动
+        function editLottery(lotteryId) {
+            const lottery = lotteryActivitiesData.find(l => l.id === lotteryId);
+            if (!lottery) return;
             
-            if (response.ok) {
-                const buckets = await response.json();
-                const bucketExists = buckets.some(bucket => bucket.name === bucketName);
-                
-                if (!bucketExists) {
-                    // 创建存储桶
-                    const createResponse = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            name: bucketName,
-                            public: true,
-                            file_size_limit: 52428800 // 50MB
-                        })
-                    });
-                    
-                    if (!createResponse.ok) {
-                        throw new Error('创建存储桶失败');
-                    }
+            document.getElementById('editLotteryId').value = lottery.id;
+            document.getElementById('editLotteryTitle').value = lottery.title;
+            document.getElementById('editLotteryCode').value = lottery.lottery_id;
+            document.getElementById('editLotteryImageUrl').value = lottery.image_url || '';
+            
+            // 解析奖品配置
+            let prizeConfig = '';
+            try {
+                const prizeContent = JSON.parse(lottery.prize_content || "{}");
+                if (prizeContent.config) {
+                    prizeConfig = prizeContent.config;
+                } else {
+                    prizeConfig = lottery.prize_content || "";
                 }
-            } else {
-                throw new Error('获取存储桶列表失败');
+            } catch (error) {
+                prizeConfig = lottery.prize_content || "";
             }
+            
+            document.getElementById('editLotteryPrizeConfig').value = prizeConfig;
+            document.getElementById('editLotteryDescription').value = lottery.description;
+            document.getElementById('editLotteryPointsRequired').value = lottery.points_required;
+            
+            // 设置开奖时间
+            const endTime = new Date(lottery.end_time);
+            endTime.setMinutes(endTime.getMinutes() - endTime.getTimezoneOffset());
+            document.getElementById('editLotteryEndTime').value = endTime.toISOString().slice(0, 16);
+            
+            document.getElementById('editLotteryStatus').value = lottery.status;
+            
+            // 显示图片预览
+            const previewElement = document.getElementById('editLotteryImagePreview');
+            if (lottery.image_url) {
+                previewElement.innerHTML = `<img src="${lottery.image_url}" class="image-preview" alt="图片预览">`;
+            } else {
+                previewElement.innerHTML = '';
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('editLotteryModal'));
+            modal.show();
+        }
+        
+        // 保存抽奖活动
+        async function saveLottery() {
+            const lotteryId = document.getElementById('editLotteryId').value;
+            const imageFile = document.getElementById('editLotteryImage').files[0];
+            let imageUrl = document.getElementById('editLotteryImageUrl').value;
+            
+            // 如果有新图片，先上传图片
+            if (imageFile) {
+                // 检查文件大小
+                if (imageFile.size > 5 * 1024 * 1024) {
+                    showAlert('图片大小不能超过5MB', 'danger');
+                    return;
+                }
+                
+                // 检查文件类型
+                if (!imageFile.type.match('image.*')) {
+                    showAlert('请上传图片文件', 'danger');
+                    return;
+                }
+                
+                imageUrl = await uploadImageToSupabase(imageFile, 'lottery-images');
+                if (!imageUrl) {
+                    showAlert('图片上传失败', 'danger');
+                    return;
+                }
+            }
+            
+            const endTime = document.getElementById('editLotteryEndTime').value;
+            const prizeConfig = document.getElementById('editLotteryPrizeConfig').value;
+            
+            // 构建抽奖活动数据对象
+            const lotteryData = {
+                id: parseInt(lotteryId),
+                title: document.getElementById('editLotteryTitle').value,
+                lottery_id: document.getElementById('editLotteryCode').value,
+                prize_content: JSON.stringify({
+                    config: prizeConfig,
+                    prizes: parsePrizeConfig(prizeConfig)
+                }),
+                description: document.getElementById('editLotteryDescription').value,
+                points_required: parseInt(document.getElementById('editLotteryPointsRequired').value),
+                end_time: endTime ? new Date(endTime).toISOString() : new Date().toISOString(),
+                status: document.getElementById('editLotteryStatus').value
+            };
+            
+            // 只有在有图片URL时才添加image_url字段
+            if (imageUrl) {
+                lotteryData.image_url = imageUrl;
+            }
+            
+            showLoading(true);
+            
+            try {
+                // 直接保存，不检查列是否存在，因为我们已经确认列存在
+                await directSupabaseUpsertWithServiceKey('lottery_activities', lotteryData, 'id');
+                
+                showAlert('抽奖活动保存成功', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('editLotteryModal')).hide();
+                loadLotteryActivities(currentPage.lottery);
+            } catch (error) {
+                console.error('保存抽奖活动失败:', error);
+                showAlert('保存抽奖活动失败: ' + error.message, 'danger');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // 删除抽奖活动
+        function deleteLottery(lotteryId) {
+            if (!confirm('确定要删除这个抽奖活动吗？')) return;
+            showLoading(true);
+            directSupabaseDeleteWithServiceKey('lottery_activities', lotteryId)
+            .then(() => {
+                showAlert('抽奖活动删除成功', 'success');
+                loadLotteryActivities(currentPage.lottery);
+            })
+            .catch(error => {
+                showAlert('删除抽奖活动失败: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+        
+        // 预览抽奖活动图片
+        function previewLotteryImage(type) {
+            const fileInput = document.getElementById(`${type}LotteryImage`);
+            const previewElement = document.getElementById(`${type}LotteryImagePreview`);
+            
+            if (fileInput.files && fileInput.files[0]) {
+                // 检查文件大小
+                if (fileInput.files[0].size > 5 * 1024 * 1024) {
+                    showAlert('图片大小不能超过5MB', 'warning');
+                    fileInput.value = '';
+                    previewElement.innerHTML = '';
+                    return;
+                }
+                
+                // 检查文件类型
+                if (!fileInput.files[0].type.match('image.*')) {
+                    showAlert('请上传图片文件', 'warning');
+                    fileInput.value = '';
+                    previewElement.innerHTML = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewElement.innerHTML = `<img src="${e.target.result}" class="image-preview" alt="图片预览">`;
+                };
+                
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                previewElement.innerHTML = '';
+            }
+        }
+        
+        // 解析奖品配置
+        function parsePrizeConfig(prizeConfigStr) {
+            if (!prizeConfigStr) return [];
+            const prizes = [];
+            const prizeItems = prizeConfigStr.split(';');
+            for (const item of prizeItems) {
+                const parts = item.split(':');
+                if (parts.length >= 2) {
+                    const prizeName = parts[0].trim();
+                    const prizeCount = parseInt(parts[1].trim()) || 1;
+                    prizes.push({
+                        name: prizeName,
+                        count: prizeCount,
+                        winners: []
+                    });
+                }
+            }
+            return prizes;
         }
         
         // 加载系统设置
@@ -3181,6 +3797,9 @@
                 case 'scheduled':
                     renderScheduledTasksTable();
                     break;
+                case 'lottery':
+                    renderLotteryActivitiesTable();
+                    break;
             }
         }
         
@@ -3329,6 +3948,89 @@
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(`Supabase delete错误: ${errorData.message || response.statusText}`);
+            }
+        }
+        
+        // 上传图片到Supabase存储
+        async function uploadImageToSupabase(file, bucketName) {
+            if (!file) return null;
+            
+            showLoading(true);
+            try {
+                // 生成文件名：使用时间戳和随机数
+                const fileName = `${bucketName}_${Date.now()}_${Math.floor(Math.random() * 1000)}.${file.name.split('.').pop()}`;
+                
+                // 先检查存储桶是否存在，如果不存在则创建
+                try {
+                    await createStorageBucketIfNotExists(bucketName);
+                } catch (error) {
+                    console.warn('创建存储桶失败:', error);
+                    // 继续尝试上传，可能存储桶已经存在
+                }
+                
+                // 上传到Supabase存储
+                const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                        'Content-Type': file.type
+                    },
+                    body: file
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`上传失败: ${errorText}`);
+                }
+                
+                // 获取公共URL
+                const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
+                
+                return imageUrl;
+            } catch (error) {
+                console.error('上传图片失败:', error);
+                showAlert('上传图片失败: ' + error.message, 'danger');
+                return null;
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // 创建存储桶（如果不存在）
+        async function createStorageBucketIfNotExists(bucketName) {
+            // 检查存储桶是否存在
+            const response = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+                }
+            });
+            
+            if (response.ok) {
+                const buckets = await response.json();
+                const bucketExists = buckets.some(bucket => bucket.name === bucketName);
+                
+                if (!bucketExists) {
+                    // 创建存储桶
+                    const createResponse = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: bucketName,
+                            public: true,
+                            file_size_limit: 52428800 // 50MB
+                        })
+                    });
+                    
+                    if (!createResponse.ok) {
+                        throw new Error('创建存储桶失败');
+                    }
+                }
+            } else {
+                throw new Error('获取存储桶列表失败');
             }
         }
         

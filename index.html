@@ -533,6 +533,48 @@
                 padding: 0.25rem 0.5rem;
                 font-size: 0.875rem;
             }
+            
+            .stat-card h2 {
+                font-size: 1.5rem;
+            }
+            
+            .card-header h5 {
+                font-size: 1rem;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-width: 280px;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .modal-dialog {
+                margin: 15px;
+            }
+            
+            .modal-content {
+                border-radius: 12px;
+            }
+            
+            .modal-header {
+                padding: 15px;
+            }
+            
+            .modal-body {
+                padding: 15px;
+            }
+            
+            .modal-footer {
+                padding: 15px;
+            }
         }
     </style>
 </head>
@@ -3336,6 +3378,7 @@
             
             // 构建抽奖活动数据对象
             const lotteryData = {
+                id: hashCode(document.getElementById('addLotteryCode').value),
                 title: document.getElementById('addLotteryTitle').value,
                 lottery_id: document.getElementById('addLotteryCode').value,
                 prize_content: JSON.stringify({
@@ -4058,6 +4101,16 @@
         // 显示/隐藏加载动画
         function showLoading(show) {
             document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+        }
+        
+        // 哈希函数 - 从worker.js复制
+        function hashCode(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return Math.abs(hash);
         }
     </script>
 </body>
